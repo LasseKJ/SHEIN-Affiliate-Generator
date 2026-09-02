@@ -10,7 +10,7 @@ export default function Home() {
 
   async function generate() {
     setLoading(true);
-    setMessage("Vælger 9 produkter og downloader billeder...");
+    setMessage("Selecting products...");
     setGroups([]);
 
     try {
@@ -38,7 +38,7 @@ export default function Home() {
 
       const selectedGroups = data.groups || [];
 
-      setGroups(selectedGroups);
+      setMessage("Downloading 9 product images...");
 
       const zip = new JSZip();
 
@@ -65,7 +65,7 @@ export default function Home() {
                 : "jpg";
 
             const fileName =
-              `gruppe-${group.number}-produkt-${index + 1}-${product.code}.${extension}`;
+              `group-${group.number}-product-${index + 1}-${product.code}.${extension}`;
 
             zip.file(fileName, imageBlob);
 
@@ -85,9 +85,7 @@ export default function Home() {
         );
       }
 
-      setMessage(
-        `9 produkter valgt. ${downloadedImages} af 9 billeder er hentet. Opretter download...`
-      );
+      setMessage("Preparing download...");
 
       const zipBlob = await zip.generateAsync({
         type: "blob"
@@ -100,7 +98,8 @@ export default function Home() {
         document.createElement("a");
 
       link.href = downloadUrl;
-      link.download = "shein-products-9-images.zip";
+      link.download =
+        "shein-affiliate-9-products.zip";
 
       document.body.appendChild(link);
       link.click();
@@ -108,14 +107,16 @@ export default function Home() {
 
       URL.revokeObjectURL(downloadUrl);
 
+      setGroups(selectedGroups);
+
       setMessage(
-        `Færdig. ${downloadedImages} billeder er downloadet i én ZIP fil.`
+        `Complete, ${downloadedImages} images downloaded.`
       );
     } catch (error) {
       console.error("Generate error:", error);
 
       setMessage(
-        `Fejl: ${error.message}`
+        `Error, ${error.message}`
       );
     } finally {
       setLoading(false);
@@ -126,10 +127,10 @@ export default function Home() {
     try {
       await navigator.clipboard.writeText(prompt);
 
-      setMessage("Prompt kopieret.");
+      setMessage("Prompt copied to clipboard.");
     } catch {
       setMessage(
-        "Kunne ikke kopiere prompten automatisk."
+        "Could not copy the prompt automatically."
       );
     }
   }
@@ -138,70 +139,153 @@ export default function Home() {
     <main className="page">
       <div className="container">
 
-        <div className="badge">
-          SHEIN AFFILIATE TOOL
-        </div>
+        <header className="header">
 
-        <h1>
-          SHEIN Affiliate Generator
-        </h1>
-
-        <p className="subtitle">
-          Generer 9 produkter og 3 færdige prompts.
-        </p>
-
-        <button
-          onClick={generate}
-          disabled={loading}
-        >
-          {loading
-            ? "GENERATING..."
-            : "GENERATE"}
-        </button>
-
-        {message && (
-          <div className="message">
-            {message}
+          <div className="brand">
+            SHEIN
+            <span>AFFILIATE TOOL</span>
           </div>
-        )}
+
+          <div className="online">
+            <span className="online-dot"></span>
+            ONLINE
+          </div>
+
+        </header>
+
+        <section className="hero">
+
+          <div className="eyebrow">
+            CONTENT GENERATOR
+          </div>
+
+          <h1>
+            SHEIN Affiliate
+            <br />
+            <span>Generator</span>
+          </h1>
+
+          <p>
+            Select 9 products, download the images,
+            and create 3 ready to use prompts.
+          </p>
+
+          <button
+            className={`generate-button ${
+              loading ? "loading" : ""
+            }`}
+            onClick={generate}
+            disabled={loading}
+          >
+            <span>
+              {loading
+                ? "GENERATING..."
+                : "GENERATE"}
+            </span>
+
+            <span className="button-arrow">
+              →
+            </span>
+          </button>
+
+          {message && (
+            <div className="message">
+              <span className="message-dot"></span>
+              {message}
+            </div>
+          )}
+
+        </section>
 
         {groups.length > 0 && (
-          <div className="groups">
+          <section className="results">
 
-            {groups.map((group) => (
-              <div
-                className="group"
-                key={group.number}
-              >
+            <div className="results-header">
+
+              <div>
+                <div className="section-label">
+                  GENERATED CONTENT
+                </div>
 
                 <h2>
-                  Gruppe {group.number}
+                  Your 3 prompts
                 </h2>
-
-                <button
-                  onClick={() =>
-                    copyPrompt(group.prompt)
-                  }
-                >
-                  COPY PROMPT
-                </button>
-
-                <textarea
-                  value={group.prompt}
-                  readOnly
-                  rows={20}
-                />
-
               </div>
-            ))}
 
-          </div>
+              <div className="count">
+                <strong>09</strong>
+                PRODUCTS
+              </div>
+
+            </div>
+
+            <div className="groups">
+
+              {groups.map((group) => (
+                <article
+                  className="group"
+                  key={group.number}
+                >
+
+                  <div className="group-top">
+
+                    <div>
+                      <div className="group-label">
+                        GROUP 0{group.number}
+                      </div>
+
+                      <div className="product-count">
+                        3 PRODUCTS
+                      </div>
+                    </div>
+
+                    <div className="group-number">
+                      0{group.number}
+                    </div>
+
+                  </div>
+
+                  <div className="prompt-wrapper">
+
+                    <textarea
+                      value={group.prompt}
+                      readOnly
+                    />
+
+                  </div>
+
+                  <button
+                    className="copy-button"
+                    onClick={() =>
+                      copyPrompt(group.prompt)
+                    }
+                  >
+                    <span>
+                      COPY PROMPT
+                    </span>
+
+                    <span className="copy-icon">
+                      ⧉
+                    </span>
+                  </button>
+
+                </article>
+              ))}
+
+            </div>
+
+          </section>
         )}
 
-        <div className="status">
-          <span className="dot"></span>
-          System ready
-        </div>
+        <footer>
+          <span>
+            SHEIN AFFILIATE GENERATOR
+          </span>
+
+          <span>
+            9 PRODUCTS · 3 PROMPTS
+          </span>
+        </footer>
 
       </div>
     </main>
