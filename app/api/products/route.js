@@ -1,40 +1,34 @@
-const COVER_TEMPLATE_URL = process.env.TEMPLATE_COVER_URL;
-const IMAGE_TEMPLATE_URL = process.env.TEMPLATE_IMAGE_URL;
+import { NextResponse } from "next/server";
+import { getProducts } from "../../../lib/googleSheets";
+import { getTemplateSet } from "../../../lib/templates";
 
-export const COVER_TEMPLATE = {
-  url: COVER_TEMPLATE_URL,
-  productSlots: [1, 2, 3]
-};
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export const IMAGE_TEMPLATE = {
-  url: IMAGE_TEMPLATE_URL,
-  productSlots: [1, 2, 3]
-};
+export async function GET() {
+  try {
+    const products = await getProducts();
 
-export function getTemplateSet(products) {
-  if (!products || products.length !== 9) {
-    throw new Error("Der skal bruges præcis 9 produkter.");
-  }
+    const templates = getTemplateSet(products);
 
-  return {
-    cover: {
-      templateUrl: COVER_TEMPLATE_URL,
-      products: products.slice(0, 3)
-    },
+    return NextResponse.json({
+      success: true,
+      products,
+      templates
+    });
+  } catch (error) {
+    console.error("Generation setup error:", error);
 
-    images: [
+    return NextResponse.json(
       {
-        templateUrl: IMAGE_TEMPLATE_URL,
-        products: products.slice(0, 3)
+        success: false,
+        error:
+          error.message ||
+          "Kunne ikke hente produkter eller oprette templates."
       },
       {
-        templateUrl: IMAGE_TEMPLATE_URL,
-        products: products.slice(3, 6)
-      },
-      {
-        templateUrl: IMAGE_TEMPLATE_URL,
-        products: products.slice(6, 9)
+        status: 500
       }
-    ]
-  };
+    );
+  }
 }
