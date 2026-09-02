@@ -10,10 +10,30 @@ export async function POST() {
     const products = await getProducts();
 
     if (!products || products.length !== 9) {
-      throw new Error("Der blev ikke valgt præcis 9 produkter.");
+      throw new Error(
+        "Der blev ikke valgt præcis 9 produkter."
+      );
     }
 
     const prompts = createPromptSet(products);
+
+    const coverTemplateUrl =
+      process.env.TEMPLATE_COVER_URL;
+
+    const imageTemplateUrl =
+      process.env.TEMPLATE_IMAGE_URL;
+
+    if (!coverTemplateUrl) {
+      throw new Error(
+        "TEMPLATE_COVER_URL mangler i Environment Variables."
+      );
+    }
+
+    if (!imageTemplateUrl) {
+      throw new Error(
+        "TEMPLATE_IMAGE_URL mangler i Environment Variables."
+      );
+    }
 
     const groups = [
       products.slice(0, 3),
@@ -23,6 +43,11 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
+
+      templates: {
+        cover: coverTemplateUrl,
+        image: imageTemplateUrl
+      },
 
       groups: groups.map((group, index) => ({
         number: index + 1,
