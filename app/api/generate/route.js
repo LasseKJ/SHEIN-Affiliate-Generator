@@ -26,6 +26,7 @@ export async function POST() {
 
       groups: groups.map((group, index) => ({
         number: index + 1,
+
         prompt: prompts[index],
 
         products: group.map((product) => ({
@@ -46,7 +47,7 @@ export async function POST() {
         success: false,
         error:
           error.message ||
-          "Kunne ikke generere prompts."
+          "Kunne ikke generere produkter og prompts."
       },
       {
         status: 500
