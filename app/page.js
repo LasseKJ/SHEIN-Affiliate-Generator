@@ -15,7 +15,19 @@ export default function Home() {
     try {
       const response = await fetch("/api/products");
 
-      const data = await response.json();
+      const responseText = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `API returnerede ikke gyldig JSON. Status: ${response.status}. Svar: ${
+            responseText || "Tomt svar"
+          }`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Der opstod en fejl.");
@@ -24,7 +36,9 @@ export default function Home() {
       setProducts(data.products || []);
 
       setMessage(
-        `Google Sheet forbindelse virker. ${data.products?.length || 0} produkter blev hentet.`
+        `Google Sheet forbindelse virker. ${
+          data.products?.length || 0
+        } produkter blev hentet.`
       );
     } catch (error) {
       setMessage(`Fejl: ${error.message}`);
