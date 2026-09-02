@@ -1,106 +1,51 @@
-"use client";
+import { NextResponse } from "next/server";
+import { getProducts } from "../../../lib/googleSheets";
+import { generateImages } from "../../../lib/imageGenerator";
 
-import { useState } from "react";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export default function Home() {
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState([]);
+export async function POST() {
+  try {
+    const products = await getProducts();
 
-  async function generate() {
-    setLoading(true);
-    setMessage("Henter produkter fra Google Sheet...");
-    setProducts([]);
-
-    try {
-      const response = await fetch("/api/products");
-
-      const responseText = await response.text();
-
-      let data;
-
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        throw new Error(
-          `API returnerede ikke gyldig JSON. Status: ${response.status}. Svar: ${
-            responseText || "Tomt svar"
-          }`
-        );
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || "Der opstod en fejl.");
-      }
-
-      setProducts(data.products || []);
-
-      setMessage(
-        `Google Sheet forbindelse virker. ${
-          data.products?.length || 0
-        } produkter blev hentet.`
-      );
-    } catch (error) {
-      setMessage(`Fejl: ${error.message}`);
-    } finally {
-      setLoading(false);
+    if (!products || products.length !== 9) {
+      throw new Error("Der blev ikke valgt præcis 9 produkter.");
     }
+
+    const images = await generateImages(products);
+
+    return new NextResponse(
+      JSON.stringify({
+        success: true,
+        products,
+        images: {
+          cover: images.cover.toString("base64"),
+          image1: images.image1.toString("base64"),
+          image2: images.image2.toString("base64"),
+          image3: images.image3.toString("base64")
+        }
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  } catch (error) {
+    console.error("Image generation error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error.message ||
+          "Kunne ikke generere billeder."
+      },
+      {
+        status: 500
+      }
+    );
   }
-
-  return (
-    <main className="page">
-      <div className="container">
-        <div className="badge">SHEIN AFFILIATE TOOL</div>
-
-        <h1>SHEIN Affiliate Generator</h1>
-
-        <p className="subtitle">
-          Generer affiliate content automatisk fra dine produkter.
-        </p>
-
-        <button onClick={generate} disabled={loading}>
-          {loading ? "LOADING..." : "GENERATE"}
-        </button>
-
-        {message && (
-          <div className="message">
-            {message}
-          </div>
-        )}
-
-        {products.length > 0 && (
-          <div className="products">
-            <h2>Produkter hentet</h2>
-
-            {products.map((product, index) => (
-              <div className="product" key={index}>
-                <strong>{product["Product Name"]}</strong>
-
-                <div>
-                  Produkt ID: {product["Product ID"]}
-                </div>
-
-                <div>
-                  Kategori: {product["Category"]}
-                </div>
-
-                <div>
-                  Produktkode: {product["Product Code"]}
-                </div>
-
-                <div>
-                  Pris: {product["Price"]} {product["Currency"]}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="status">
-          <span className="dot"></span>
-          System ready
-        </div>
-      </div>
-    </main>
-  );
 }
