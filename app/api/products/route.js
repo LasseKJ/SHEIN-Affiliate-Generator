@@ -1,26 +1,40 @@
+const COVER_TEMPLATE_URL = process.env.TEMPLATE_COVER_URL;
+const IMAGE_TEMPLATE_URL = process.env.TEMPLATE_IMAGE_URL;
 
-import { NextResponse } from "next/server";
-import { getProducts } from "../../../lib/googleSheets";
+export const COVER_TEMPLATE = {
+  url: COVER_TEMPLATE_URL,
+  productSlots: [1, 2, 3]
+};
 
-export async function GET() {
-  try {
-    const products = await getProducts();
+export const IMAGE_TEMPLATE = {
+  url: IMAGE_TEMPLATE_URL,
+  productSlots: [1, 2, 3]
+};
 
-    return NextResponse.json({
-      success: true,
-      products
-    });
-  } catch (error) {
-    console.error("Google Sheets error:", error);
+export function getTemplateSet(products) {
+  if (!products || products.length !== 9) {
+    throw new Error("Der skal bruges præcis 9 produkter.");
+  }
 
-    return NextResponse.json(
+  return {
+    cover: {
+      templateUrl: COVER_TEMPLATE_URL,
+      products: products.slice(0, 3)
+    },
+
+    images: [
       {
-        success: false,
-        error: error.message || "Kunne ikke hente produkter fra Google Sheet."
+        templateUrl: IMAGE_TEMPLATE_URL,
+        products: products.slice(0, 3)
       },
       {
-        status: 500
+        templateUrl: IMAGE_TEMPLATE_URL,
+        products: products.slice(3, 6)
+      },
+      {
+        templateUrl: IMAGE_TEMPLATE_URL,
+        products: products.slice(6, 9)
       }
-    );
-  }
+    ]
+  };
 }
