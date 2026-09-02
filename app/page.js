@@ -1,293 +1,82 @@
-"use client";
+import { NextResponse } from "next/server";
+import { getProducts } from "../../../lib/googleSheets";
+import { createPromptSet } from "../../../lib/promptTemplate";
 
-import { useState } from "react";
-import JSZip from "jszip";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export default function Home() {
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [groups, setGroups] = useState([]);
+export async function POST() {
+  try {
+    const products = await getProducts();
 
-  async function generate() {
-    setLoading(true);
-    setMessage("Selecting products...");
-    setGroups([]);
-
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST"
-      });
-
-      const responseText = await response.text();
-
-      let data;
-
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        throw new Error(
-          `API returnerede ikke gyldig JSON. Status: ${response.status}.`
-        );
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Der opstod en fejl."
-        );
-      }
-
-      const selectedGroups = data.groups || [];
-
-      setMessage("Downloading 9 product images...");
-
-      const zip = new JSZip();
-
-      let downloadedImages = 0;
-
-      for (const group of selectedGroups) {
-        for (let index = 0; index < group.products.length; index++) {
-          const product = group.products[index];
-
-          try {
-            const imageResponse = await fetch(product.imageUrl);
-
-            if (!imageResponse.ok) {
-              throw new Error(
-                `Kunne ikke hente billede for ${product.name}`
-              );
-            }
-
-            const imageBlob = await imageResponse.blob();
-
-            const extension =
-              imageBlob.type === "image/png"
-                ? "png"
-                : "jpg";
-
-            const fileName =
-              `group-${group.number}-product-${index + 1}-${product.code}.${extension}`;
-
-            zip.file(fileName, imageBlob);
-
-            downloadedImages++;
-          } catch (error) {
-            console.error(
-              `Kunne ikke downloade ${product.name}:`,
-              error
-            );
-          }
-        }
-      }
-
-      if (downloadedImages === 0) {
-        throw new Error(
-          "Ingen af produktbillederne kunne downloades."
-        );
-      }
-
-      setMessage("Preparing download...");
-
-      const zipBlob = await zip.generateAsync({
-        type: "blob"
-      });
-
-      const downloadUrl =
-        URL.createObjectURL(zipBlob);
-
-      const link =
-        document.createElement("a");
-
-      link.href = downloadUrl;
-      link.download =
-        "shein-affiliate-9-products.zip";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      URL.revokeObjectURL(downloadUrl);
-
-      setGroups(selectedGroups);
-
-      setMessage(
-        `Complete, ${downloadedImages} images downloaded.`
-      );
-    } catch (error) {
-      console.error("Generate error:", error);
-
-      setMessage(
-        `Error, ${error.message}`
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function copyPrompt(prompt) {
-    try {
-      await navigator.clipboard.writeText(prompt);
-
-      setMessage("Prompt copied to clipboard.");
-    } catch {
-      setMessage(
-        "Could not copy the prompt automatically."
+    if (!products || products.length !== 9) {
+      throw new Error(
+        "Der blev ikke valgt præcis 9 produkter."
       );
     }
+
+    const prompts = createPromptSet(products);
+
+    const coverTemplateUrl =
+      process.env.TEMPLATE_COVER_URL;
+
+    const imageTemplateUrl =
+      process.env.TEMPLATE_IMAGE_URL;
+
+    if (!coverTemplateUrl) {
+      throw new Error(
+        "TEMPLATE_COVER_URL mangler i Environment Variables."
+      );
+    }
+
+    if (!imageTemplateUrl) {
+      throw new Error(
+        "TEMPLATE_IMAGE_URL mangler i Environment Variables."
+      );
+    }
+
+    const groups = [
+      products.slice(0, 3),
+      products.slice(3, 6),
+      products.slice(6, 9)
+    ];
+
+    return NextResponse.json({
+      success: true,
+
+      templates: {
+        cover: coverTemplateUrl,
+        image: imageTemplateUrl
+      },
+
+      groups: groups.map((group, index) => ({
+        number: index + 1,
+
+        prompt: prompts[index],
+
+        products: group.map((product) => ({
+          id: product["Product ID"],
+          name: product["Product Name"],
+          code: product["Product Code"],
+          price: product["Price"],
+          currency: product["Currency"],
+          imageUrl: product["Product Image URL"]
+        }))
+      }))
+    });
+  } catch (error) {
+    console.error("Generate error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error.message ||
+          "Kunne ikke generere produkter og prompts."
+      },
+      {
+        status: 500
+      }
+    );
   }
-
-  return (
-    <main className="page">
-      <div className="container">
-
-        <header className="header">
-
-          <div className="brand">
-            SHEIN
-            <span>AFFILIATE TOOL</span>
-          </div>
-
-          <div className="online">
-            <span className="online-dot"></span>
-            ONLINE
-          </div>
-
-        </header>
-
-        <section className="hero">
-
-          <div className="eyebrow">
-            CONTENT GENERATOR
-          </div>
-
-          <h1>
-            SHEIN Affiliate
-            <br />
-            <span>Generator</span>
-          </h1>
-
-          <p>
-            Select 9 products, download the images,
-            and create 3 ready to use prompts.
-          </p>
-
-          <button
-            className={`generate-button ${
-              loading ? "loading" : ""
-            }`}
-            onClick={generate}
-            disabled={loading}
-          >
-            <span>
-              {loading
-                ? "GENERATING..."
-                : "GENERATE"}
-            </span>
-
-            <span className="button-arrow">
-              →
-            </span>
-          </button>
-
-          {message && (
-            <div className="message">
-              <span className="message-dot"></span>
-              {message}
-            </div>
-          )}
-
-        </section>
-
-        {groups.length > 0 && (
-          <section className="results">
-
-            <div className="results-header">
-
-              <div>
-                <div className="section-label">
-                  GENERATED CONTENT
-                </div>
-
-                <h2>
-                  Your 3 prompts
-                </h2>
-              </div>
-
-              <div className="count">
-                <strong>09</strong>
-                PRODUCTS
-              </div>
-
-            </div>
-
-            <div className="groups">
-
-              {groups.map((group) => (
-                <article
-                  className="group"
-                  key={group.number}
-                >
-
-                  <div className="group-top">
-
-                    <div>
-                      <div className="group-label">
-                        GROUP 0{group.number}
-                      </div>
-
-                      <div className="product-count">
-                        3 PRODUCTS
-                      </div>
-                    </div>
-
-                    <div className="group-number">
-                      0{group.number}
-                    </div>
-
-                  </div>
-
-                  <div className="prompt-wrapper">
-
-                    <textarea
-                      value={group.prompt}
-                      readOnly
-                    />
-
-                  </div>
-
-                  <button
-                    className="copy-button"
-                    onClick={() =>
-                      copyPrompt(group.prompt)
-                    }
-                  >
-                    <span>
-                      COPY PROMPT
-                    </span>
-
-                    <span className="copy-icon">
-                      ⧉
-                    </span>
-                  </button>
-
-                </article>
-              ))}
-
-            </div>
-
-          </section>
-        )}
-
-        <footer>
-          <span>
-            SHEIN AFFILIATE GENERATOR
-          </span>
-
-          <span>
-            9 PRODUCTS · 3 PROMPTS
-          </span>
-        </footer>
-
-      </div>
-    </main>
-  );
 }
