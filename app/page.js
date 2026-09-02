@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import JSZip from "jszip";
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -9,7 +10,7 @@ export default function Home() {
 
   async function generate() {
     setLoading(true);
-    setMessage("Vælger 9 produkter...");
+    setMessage("Vælger 9 produkter og downloader billeder...");
     setGroups([]);
 
     try {
@@ -25,9 +26,7 @@ export default function Home() {
         data = JSON.parse(responseText);
       } catch {
         throw new Error(
-          `API returnerede ikke gyldig JSON. Status: ${response.status}. Svar: ${
-            responseText || "Tomt svar"
-          }`
+          `API returnerede ikke gyldig JSON. Status: ${response.status}.`
         );
       }
 
@@ -37,13 +36,87 @@ export default function Home() {
         );
       }
 
-      setGroups(data.groups || []);
+      const selectedGroups = data.groups || [];
+
+      setGroups(selectedGroups);
+
+      const zip = new JSZip();
+
+      let downloadedImages = 0;
+
+      for (const group of selectedGroups) {
+        for (let index = 0; index < group.products.length; index++) {
+          const product = group.products[index];
+
+          try {
+            const imageResponse = await fetch(product.imageUrl);
+
+            if (!imageResponse.ok) {
+              throw new Error(
+                `Kunne ikke hente billede for ${product.name}`
+              );
+            }
+
+            const imageBlob = await imageResponse.blob();
+
+            const extension =
+              imageBlob.type === "image/png"
+                ? "png"
+                : "jpg";
+
+            const fileName =
+              `gruppe-${group.number}-produkt-${index + 1}-${product.code}.${extension}`;
+
+            zip.file(fileName, imageBlob);
+
+            downloadedImages++;
+          } catch (error) {
+            console.error(
+              `Kunne ikke downloade ${product.name}:`,
+              error
+            );
+          }
+        }
+      }
+
+      if (downloadedImages === 0) {
+        throw new Error(
+          "Ingen af produktbillederne kunne downloades."
+        );
+      }
 
       setMessage(
-        "9 produkter er valgt og 3 prompts er klar."
+        `9 produkter valgt. ${downloadedImages} af 9 billeder er hentet. Opretter download...`
+      );
+
+      const zipBlob = await zip.generateAsync({
+        type: "blob"
+      });
+
+      const downloadUrl =
+        URL.createObjectURL(zipBlob);
+
+      const link =
+        document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = "shein-products-9-images.zip";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(downloadUrl);
+
+      setMessage(
+        `Færdig. ${downloadedImages} billeder er downloadet i én ZIP fil.`
       );
     } catch (error) {
-      setMessage(`Fejl: ${error.message}`);
+      console.error("Generate error:", error);
+
+      setMessage(
+        `Fejl: ${error.message}`
+      );
     } finally {
       setLoading(false);
     }
@@ -52,6 +125,7 @@ export default function Home() {
   async function copyPrompt(prompt) {
     try {
       await navigator.clipboard.writeText(prompt);
+
       setMessage("Prompt kopieret.");
     } catch {
       setMessage(
@@ -60,51 +134,29 @@ export default function Home() {
     }
   }
 
-  function downloadImage(url, filename) {
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = filename;
-    link.target = "_blank";
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  function downloadGroup(group) {
-    group.products.forEach((product, index) => {
-      setTimeout(() => {
-        downloadImage(
-          product.imageUrl,
-          `product-${group.number}-${index + 1}.jpg`
-        );
-      }, index * 500);
-    });
-
-    setMessage(
-      `Downloader billederne fra gruppe ${group.number}...`
-    );
-  }
-
   return (
     <main className="page">
       <div className="container">
+
         <div className="badge">
           SHEIN AFFILIATE TOOL
         </div>
 
-        <h1>SHEIN Affiliate Generator</h1>
+        <h1>
+          SHEIN Affiliate Generator
+        </h1>
 
         <p className="subtitle">
-          Vælg 9 produkter og lav 3 færdige prompts.
+          Generer 9 produkter og 3 færdige prompts.
         </p>
 
         <button
           onClick={generate}
           disabled={loading}
         >
-          {loading ? "GENERATING..." : "GENERATE"}
+          {loading
+            ? "GENERATING..."
+            : "GENERATE"}
         </button>
 
         {message && (
@@ -115,43 +167,16 @@ export default function Home() {
 
         {groups.length > 0 && (
           <div className="groups">
+
             {groups.map((group) => (
               <div
                 className="group"
                 key={group.number}
               >
+
                 <h2>
                   Gruppe {group.number}
                 </h2>
-
-                <div className="group-products">
-                  {group.products.map(
-                    (product, index) => (
-                      <div
-                        className="group-product"
-                        key={product.id}
-                      >
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                        />
-
-                        <strong>
-                          {product.name}
-                        </strong>
-
-                        <div>
-                          Kode: {product.code}
-                        </div>
-
-                        <div>
-                          Pris: {product.price}{" "}
-                          {product.currency}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
 
                 <button
                   onClick={() =>
@@ -161,21 +186,15 @@ export default function Home() {
                   COPY PROMPT
                 </button>
 
-                <button
-                  onClick={() =>
-                    downloadGroup(group)
-                  }
-                >
-                  DOWNLOAD 3 BILLEDER
-                </button>
-
                 <textarea
                   value={group.prompt}
                   readOnly
-                  rows={12}
+                  rows={20}
                 />
+
               </div>
             ))}
+
           </div>
         )}
 
@@ -183,6 +202,7 @@ export default function Home() {
           <span className="dot"></span>
           System ready
         </div>
+
       </div>
     </main>
   );
