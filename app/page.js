@@ -5,14 +5,12 @@ import { useState } from "react";
 export default function Home() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [images, setImages] = useState(null);
+  const [groups, setGroups] = useState([]);
 
   async function generate() {
     setLoading(true);
-    setMessage("Genererer billeder...");
-    setProducts([]);
-    setImages(null);
+    setMessage("Vælger 9 produkter...");
+    setGroups([]);
 
     try {
       const response = await fetch("/api/generate", {
@@ -35,14 +33,15 @@ export default function Home() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Der opstod en fejl under genereringen."
+          data.error || "Der opstod en fejl."
         );
       }
 
-      setProducts(data.products || []);
-      setImages(data.images || null);
+      setGroups(data.groups || []);
 
-      setMessage("4 billeder blev genereret.");
+      setMessage(
+        "9 produkter er valgt og 3 prompts er klar."
+      );
     } catch (error) {
       setMessage(`Fejl: ${error.message}`);
     } finally {
@@ -50,18 +49,61 @@ export default function Home() {
     }
   }
 
+  async function copyPrompt(prompt) {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setMessage("Prompt kopieret.");
+    } catch {
+      setMessage(
+        "Kunne ikke kopiere prompten automatisk."
+      );
+    }
+  }
+
+  function downloadImage(url, filename) {
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    link.target = "_blank";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function downloadGroup(group) {
+    group.products.forEach((product, index) => {
+      setTimeout(() => {
+        downloadImage(
+          product.imageUrl,
+          `product-${group.number}-${index + 1}.jpg`
+        );
+      }, index * 500);
+    });
+
+    setMessage(
+      `Downloader billederne fra gruppe ${group.number}...`
+    );
+  }
+
   return (
     <main className="page">
       <div className="container">
-        <div className="badge">SHEIN AFFILIATE TOOL</div>
+        <div className="badge">
+          SHEIN AFFILIATE TOOL
+        </div>
 
         <h1>SHEIN Affiliate Generator</h1>
 
         <p className="subtitle">
-          Generer affiliate content automatisk fra dine produkter.
+          Vælg 9 produkter og lav 3 færdige prompts.
         </p>
 
-        <button onClick={generate} disabled={loading}>
+        <button
+          onClick={generate}
+          disabled={loading}
+        >
           {loading ? "GENERATING..." : "GENERATE"}
         </button>
 
@@ -71,73 +113,67 @@ export default function Home() {
           </div>
         )}
 
-        {images && (
-          <div className="generated-images">
-            <h2>Genererede billeder</h2>
+        {groups.length > 0 && (
+          <div className="groups">
+            {groups.map((group) => (
+              <div
+                className="group"
+                key={group.number}
+              >
+                <h2>
+                  Gruppe {group.number}
+                </h2>
 
-            <div className="image-grid">
-              <div className="generated-image">
-                <h3>Cover</h3>
+                <div className="group-products">
+                  {group.products.map(
+                    (product, index) => (
+                      <div
+                        className="group-product"
+                        key={product.id}
+                      >
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                        />
 
-                <img
-                  src={`data:image/png;base64,${images.cover}`}
-                  alt="Generated cover"
-                />
-              </div>
+                        <strong>
+                          {product.name}
+                        </strong>
 
-              <div className="generated-image">
-                <h3>Billede 1</h3>
+                        <div>
+                          Kode: {product.code}
+                        </div>
 
-                <img
-                  src={`data:image/png;base64,${images.image1}`}
-                  alt="Generated image 1"
-                />
-              </div>
-
-              <div className="generated-image">
-                <h3>Billede 2</h3>
-
-                <img
-                  src={`data:image/png;base64,${images.image2}`}
-                  alt="Generated image 2"
-                />
-              </div>
-
-              <div className="generated-image">
-                <h3>Billede 3</h3>
-
-                <img
-                  src={`data:image/png;base64,${images.image3}`}
-                  alt="Generated image 3"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {products.length > 0 && (
-          <div className="products">
-            <h2>Valgte produkter</h2>
-
-            {products.map((product, index) => (
-              <div className="product" key={index}>
-                <strong>{product["Product Name"]}</strong>
-
-                <div>
-                  Produkt ID: {product["Product ID"]}
+                        <div>
+                          Pris: {product.price}{" "}
+                          {product.currency}
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
 
-                <div>
-                  Kategori: {product["Category"]}
-                </div>
+                <button
+                  onClick={() =>
+                    copyPrompt(group.prompt)
+                  }
+                >
+                  COPY PROMPT
+                </button>
 
-                <div>
-                  Produktkode: {product["Product Code"]}
-                </div>
+                <button
+                  onClick={() =>
+                    downloadGroup(group)
+                  }
+                >
+                  DOWNLOAD 3 BILLEDER
+                </button>
 
-                <div>
-                  Pris: {product["Price"]} {product["Currency"]}
-                </div>
+                <textarea
+                  value={group.prompt}
+                  readOnly
+                  rows={12}
+                />
               </div>
             ))}
           </div>
