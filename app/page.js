@@ -75,12 +75,37 @@ export default function Home() {
       let downloadedProducts = 0;
 
       setMessage(
+        "Creating folders..."
+      );
+
+      const folder1 =
+        zip.folder("01");
+
+      const folder2 =
+        zip.folder("02");
+
+      const folder3 =
+        zip.folder("03");
+
+      const folder4 =
+        zip.folder("04");
+
+      const folders = [
+        folder1,
+        folder2,
+        folder3
+      ];
+
+      setMessage(
         "Downloading 9 product images..."
       );
 
       for (
         const group of selectedGroups
       ) {
+        const groupFolder =
+          folders[group.number - 1];
+
         for (
           let index = 0;
           index <
@@ -111,15 +136,101 @@ export default function Home() {
               : "jpg";
 
           const fileName =
-            `group-${group.number}-product-${index + 1}-${product.code}.${extension}`;
+            `product-${index + 1}-${product.code}.${extension}`;
 
-          zip.file(
+          groupFolder.file(
             fileName,
             imageBlob
           );
 
           downloadedProducts++;
         }
+      }
+
+      if (
+        downloadedProducts !== 9
+      ) {
+        throw new Error(
+          `Kun ${downloadedProducts} af 9 produktbilleder blev hentet.`
+        );
+      }
+
+      setMessage(
+        "Downloading product template..."
+      );
+
+      const productTemplateResponse =
+        await fetch(
+          templates.image
+        );
+
+      if (!productTemplateResponse.ok) {
+        throw new Error(
+          "Produkt template kunne ikke downloades."
+        );
+      }
+
+      const productTemplateBlob =
+        await productTemplateResponse.blob();
+
+      folder1.file(
+        "product-template.jpg",
+        productTemplateBlob
+      );
+
+      folder2.file(
+        "product-template.jpg",
+        productTemplateBlob
+      );
+
+      folder3.file(
+        "product-template.jpg",
+        productTemplateBlob
+      );
+
+      setMessage(
+        "Preparing cover images..."
+      );
+
+      const coverProducts = [
+        selectedGroups[0].products[0],
+        selectedGroups[1].products[0],
+        selectedGroups[2].products[0]
+      ];
+
+      for (
+        let index = 0;
+        index <
+        coverProducts.length;
+        index++
+      ) {
+        const product =
+          coverProducts[index];
+
+        const imageResponse =
+          await fetch(
+            product.imageUrl
+          );
+
+        if (!imageResponse.ok) {
+          throw new Error(
+            `Kunne ikke hente forsidebillede: ${product.name}`
+          );
+        }
+
+        const imageBlob =
+          await imageResponse.blob();
+
+        const extension =
+          imageBlob.type ===
+          "image/png"
+            ? "png"
+            : "jpg";
+
+        folder4.file(
+          `product-${index + 1}-from-group-${index + 1}.${extension}`,
+          imageBlob
+        );
       }
 
       setMessage(
@@ -140,44 +251,13 @@ export default function Home() {
       const coverBlob =
         await coverResponse.blob();
 
-      zip.file(
+      folder4.file(
         "cover-template.jpg",
         coverBlob
       );
 
       setMessage(
-        "Downloading image template..."
-      );
-
-      const imageTemplateResponse =
-        await fetch(
-          templates.image
-        );
-
-      if (!imageTemplateResponse.ok) {
-        throw new Error(
-          "Billede template kunne ikke downloades."
-        );
-      }
-
-      const imageTemplateBlob =
-        await imageTemplateResponse.blob();
-
-      zip.file(
-        "image-template.jpg",
-        imageTemplateBlob
-      );
-
-      if (
-        downloadedProducts !== 9
-      ) {
-        throw new Error(
-          `Kun ${downloadedProducts} af 9 produktbilleder blev hentet.`
-        );
-      }
-
-      setMessage(
-        "Preparing 11 files..."
+        "Preparing ZIP..."
       );
 
       const zipBlob =
@@ -203,7 +283,7 @@ export default function Home() {
         downloadUrl;
 
       link.download =
-        "shein-affiliate-11-files.zip";
+        "shein-affiliate-13-files.zip";
 
       link.style.display =
         "none";
@@ -229,7 +309,7 @@ export default function Home() {
       );
 
       setMessage(
-        "Complete, 9 products and 2 templates downloaded."
+        "Complete, 9 products, 3 product templates and 1 cover template downloaded."
       );
     } catch (error) {
       console.error(
@@ -365,7 +445,7 @@ export default function Home() {
               <div className="count">
 
                 <strong>
-                  11
+                  13
                 </strong>
 
                 FILES READY
@@ -457,7 +537,7 @@ export default function Home() {
           </span>
 
           <span>
-            9 PRODUCTS · 2 TEMPLATES · 3 PROMPTS
+            9 PRODUCTS · 3 TEMPLATES · 3 PROMPTS
           </span>
 
         </footer>
