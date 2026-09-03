@@ -69,13 +69,8 @@ export default function Home() {
         );
       }
 
-      const zip = new JSZip();
-
-      const productsFolder =
-        zip.folder("PRODUCTS");
-
-      const templatesFolder =
-        zip.folder("TEMPLATES");
+      const zip =
+        new JSZip();
 
       let downloadedProducts = 0;
 
@@ -118,7 +113,7 @@ export default function Home() {
           const fileName =
             `group-${group.number}-product-${index + 1}-${product.code}.${extension}`;
 
-          productsFolder.file(
+          zip.file(
             fileName,
             imageBlob
           );
@@ -128,7 +123,7 @@ export default function Home() {
       }
 
       setMessage(
-        "Downloading 2 templates..."
+        "Downloading cover template..."
       );
 
       const coverResponse =
@@ -145,9 +140,13 @@ export default function Home() {
       const coverBlob =
         await coverResponse.blob();
 
-      templatesFolder.file(
+      zip.file(
         "cover-template.jpg",
         coverBlob
+      );
+
+      setMessage(
+        "Downloading image template..."
       );
 
       const imageTemplateResponse =
@@ -164,7 +163,7 @@ export default function Home() {
       const imageTemplateBlob =
         await imageTemplateResponse.blob();
 
-      templatesFolder.file(
+      zip.file(
         "image-template.jpg",
         imageTemplateBlob
       );
@@ -200,12 +199,14 @@ export default function Home() {
           "a"
         );
 
-      link.href = downloadUrl;
+      link.href =
+        downloadUrl;
 
       link.download =
         "shein-affiliate-11-files.zip";
 
-      link.style.display = "none";
+      link.style.display =
+        "none";
 
       document.body.appendChild(
         link
@@ -264,20 +265,25 @@ export default function Home() {
 
   return (
     <main className="page">
+
       <div className="container">
 
         <header className="header">
 
           <div className="brand">
             SHEIN
+
             <span>
               AFFILIATE TOOL
             </span>
           </div>
 
           <div className="online">
+
             <span className="online-dot"></span>
+
             ONLINE
+
           </div>
 
         </header>
@@ -291,6 +297,7 @@ export default function Home() {
           <h1>
             SHEIN Affiliate
             <br />
+
             <span>
               Generator
             </span>
@@ -313,6 +320,7 @@ export default function Home() {
             onClick={generate}
             disabled={loading}
           >
+
             <span>
               {loading
                 ? "GENERATING..."
@@ -322,12 +330,16 @@ export default function Home() {
             <span className="button-arrow">
               →
             </span>
+
           </button>
 
           {message && (
             <div className="message">
+
               <span className="message-dot"></span>
+
               {message}
+
             </div>
           )}
 
@@ -339,6 +351,7 @@ export default function Home() {
             <div className="results-header">
 
               <div>
+
                 <div className="section-label">
                   GENERATED CONTENT
                 </div>
@@ -346,13 +359,17 @@ export default function Home() {
                 <h2>
                   Your 3 prompts
                 </h2>
+
               </div>
 
               <div className="count">
+
                 <strong>
                   11
                 </strong>
+
                 FILES READY
+
               </div>
 
             </div>
@@ -363,25 +380,33 @@ export default function Home() {
                 (group) => (
                   <article
                     className="group"
-                    key={group.number}
+                    key={
+                      group.number
+                    }
                   >
 
                     <div className="group-top">
 
                       <div>
+
                         <div className="group-label">
                           GROUP 0
-                          {group.number}
+                          {
+                            group.number
+                          }
                         </div>
 
                         <div className="product-count">
                           3 PRODUCTS
                         </div>
+
                       </div>
 
                       <div className="group-number">
                         0
-                        {group.number}
+                        {
+                          group.number
+                        }
                       </div>
 
                     </div>
@@ -394,6 +419,7 @@ export default function Home() {
                         )
                       }
                     >
+
                       <span>
                         COPY PROMPT
                       </span>
@@ -401,6 +427,7 @@ export default function Home() {
                       <span className="copy-icon">
                         ⧉
                       </span>
+
                     </button>
 
                     <div className="prompt-wrapper">
@@ -436,6 +463,7 @@ export default function Home() {
         </footer>
 
       </div>
+
     </main>
   );
 }
