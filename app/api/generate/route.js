@@ -1,21 +1,40 @@
 import { NextResponse } from "next/server";
-import { getProducts } from "../../../lib/googleSheets";
-import { createPromptSet } from "../../../lib/promptTemplate";
+import {
+  getProducts
+} from "../../../lib/googleSheets";
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
+import {
+  createPromptSet,
+  createCoverPrompt
+} from "../../../lib/promptTemplate";
+
+export const dynamic =
+  "force-dynamic";
+
+export const runtime =
+  "nodejs";
 
 export async function POST() {
   try {
-    const products = await getProducts();
+    const products =
+      await getProducts();
 
-    if (!products || products.length !== 9) {
+    if (
+      !products ||
+      products.length !== 9
+    ) {
       throw new Error(
         "Der blev ikke valgt præcis 9 produkter."
       );
     }
 
-    const prompts = createPromptSet(products);
+    const prompts =
+      createPromptSet(
+        products
+      );
+
+    const coverPrompt =
+      createCoverPrompt();
 
     const coverTemplateUrl =
       process.env.TEMPLATE_COVER_URL;
@@ -45,26 +64,67 @@ export async function POST() {
       success: true,
 
       templates: {
-        cover: coverTemplateUrl,
-        image: imageTemplateUrl
+        cover:
+          coverTemplateUrl,
+
+        image:
+          imageTemplateUrl
       },
 
-      groups: groups.map((group, index) => ({
-        number: index + 1,
+      coverPrompt,
 
-        prompt: prompts[index],
+      groups:
+        groups.map(
+          (
+            group,
+            index
+          ) => ({
+            number:
+              index + 1,
 
-        products: group.map((product) => ({
-          id: product["Product ID"],
-          name: product["Product Name"],
-          code: product["Product Code"],
-          price: product["Price"],
-          currency: product["Currency"],
-          imageUrl: product["Product Image URL"]
-        }))
-      }))
+            prompt:
+              prompts[index],
+
+            products:
+              group.map(
+                (product) => ({
+                  id:
+                    product[
+                      "Product ID"
+                    ],
+
+                  name:
+                    product[
+                      "Product Name"
+                    ],
+
+                  code:
+                    product[
+                      "Product Code"
+                    ],
+
+                  price:
+                    product[
+                      "Price"
+                    ],
+
+                  currency:
+                    product[
+                      "Currency"
+                    ],
+
+                  imageUrl:
+                    product[
+                      "Product Image URL"
+                    ]
+                })
+              )
+          })
+        )
     });
+
   } catch (error) {
+
     console.error(
       "Generate error:",
       error
@@ -73,6 +133,7 @@ export async function POST() {
     return NextResponse.json(
       {
         success: false,
+
         error:
           error.message ||
           "Kunne ikke generere produkter og prompts."
