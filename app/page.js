@@ -14,16 +14,22 @@ export default function Home() {
     setMessage("Selecting 9 products...");
 
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST"
-      });
+      const response = await fetch(
+        "/api/generate",
+        {
+          method: "POST"
+        }
+      );
 
-      const responseText = await response.text();
+      const responseText =
+        await response.text();
 
       let data;
 
       try {
-        data = JSON.parse(responseText);
+        data = JSON.parse(
+          responseText
+        );
       } catch {
         throw new Error(
           `API returnerede ikke gyldig JSON. Status: ${response.status}.`
@@ -32,14 +38,20 @@ export default function Home() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Der opstod en fejl."
+          data.error ||
+          "Der opstod en fejl."
         );
       }
 
-      const selectedGroups = data.groups || [];
-      const templates = data.templates;
+      const selectedGroups =
+        data.groups || [];
 
-      if (selectedGroups.length !== 3) {
+      const templates =
+        data.templates;
+
+      if (
+        selectedGroups.length !== 3
+      ) {
         throw new Error(
           "Der blev ikke oprettet præcis 3 produktgrupper."
         );
@@ -59,24 +71,34 @@ export default function Home() {
 
       const zip = new JSZip();
 
-      const productsFolder = zip.folder("PRODUCTS");
-      const templatesFolder = zip.folder("TEMPLATES");
+      const productsFolder =
+        zip.folder("PRODUCTS");
+
+      const templatesFolder =
+        zip.folder("TEMPLATES");
 
       let downloadedProducts = 0;
 
-      setMessage("Downloading 9 product images...");
+      setMessage(
+        "Downloading 9 product images..."
+      );
 
-      for (const group of selectedGroups) {
+      for (
+        const group of selectedGroups
+      ) {
         for (
           let index = 0;
-          index < group.products.length;
+          index <
+          group.products.length;
           index++
         ) {
-          const product = group.products[index];
+          const product =
+            group.products[index];
 
-          const imageResponse = await fetch(
-            product.imageUrl
-          );
+          const imageResponse =
+            await fetch(
+              product.imageUrl
+            );
 
           if (!imageResponse.ok) {
             throw new Error(
@@ -88,7 +110,8 @@ export default function Home() {
             await imageResponse.blob();
 
           const extension =
-            imageBlob.type === "image/png"
+            imageBlob.type ===
+            "image/png"
               ? "png"
               : "jpg";
 
@@ -108,9 +131,10 @@ export default function Home() {
         "Downloading 2 templates..."
       );
 
-      const coverResponse = await fetch(
-        templates.cover
-      );
+      const coverResponse =
+        await fetch(
+          templates.cover
+        );
 
       if (!coverResponse.ok) {
         throw new Error(
@@ -127,7 +151,9 @@ export default function Home() {
       );
 
       const imageTemplateResponse =
-        await fetch(templates.image);
+        await fetch(
+          templates.image
+        );
 
       if (!imageTemplateResponse.ok) {
         throw new Error(
@@ -143,7 +169,9 @@ export default function Home() {
         imageTemplateBlob
       );
 
-      if (downloadedProducts !== 9) {
+      if (
+        downloadedProducts !== 9
+      ) {
         throw new Error(
           `Kun ${downloadedProducts} af 9 produktbilleder blev hentet.`
         );
@@ -163,26 +191,41 @@ export default function Home() {
         });
 
       const downloadUrl =
-        URL.createObjectURL(zipBlob);
+        URL.createObjectURL(
+          zipBlob
+        );
 
       const link =
-        document.createElement("a");
+        document.createElement(
+          "a"
+        );
 
       link.href = downloadUrl;
+
       link.download =
         "shein-affiliate-11-files.zip";
 
       link.style.display = "none";
 
-      document.body.appendChild(link);
+      document.body.appendChild(
+        link
+      );
+
       link.click();
-      document.body.removeChild(link);
+
+      document.body.removeChild(
+        link
+      );
 
       setTimeout(() => {
-        URL.revokeObjectURL(downloadUrl);
+        URL.revokeObjectURL(
+          downloadUrl
+        );
       }, 1000);
 
-      setGroups(selectedGroups);
+      setGroups(
+        selectedGroups
+      );
 
       setMessage(
         "Complete, 9 products and 2 templates downloaded."
@@ -201,7 +244,9 @@ export default function Home() {
     }
   }
 
-  async function copyPrompt(prompt) {
+  async function copyPrompt(
+    prompt
+  ) {
     try {
       await navigator.clipboard.writeText(
         prompt
@@ -225,7 +270,9 @@ export default function Home() {
 
           <div className="brand">
             SHEIN
-            <span>AFFILIATE TOOL</span>
+            <span>
+              AFFILIATE TOOL
+            </span>
           </div>
 
           <div className="online">
@@ -244,18 +291,24 @@ export default function Home() {
           <h1>
             SHEIN Affiliate
             <br />
-            <span>Generator</span>
+            <span>
+              Generator
+            </span>
           </h1>
 
           <p>
-            Select 9 products, download all product
-            images and templates, and create 3
-            ready to use prompts.
+            Select 9 products,
+            download all product
+            images and templates,
+            and create 3 ready to
+            use prompts.
           </p>
 
           <button
             className={`generate-button ${
-              loading ? "loading" : ""
+              loading
+                ? "loading"
+                : ""
             }`}
             onClick={generate}
             disabled={loading}
@@ -296,7 +349,9 @@ export default function Home() {
               </div>
 
               <div className="count">
-                <strong>11</strong>
+                <strong>
+                  11
+                </strong>
                 FILES READY
               </div>
 
@@ -304,58 +359,64 @@ export default function Home() {
 
             <div className="groups">
 
-              {groups.map((group) => (
-                <article
-                  className="group"
-                  key={group.number}
-                >
-
-                  <div className="group-top">
-
-                    <div>
-                      <div className="group-label">
-                        GROUP 0{group.number}
-                      </div>
-
-                      <div className="product-count">
-                        3 PRODUCTS
-                      </div>
-                    </div>
-
-                    <div className="group-number">
-                      0{group.number}
-                    </div>
-
-                  </div>
-
-                  <div className="prompt-wrapper">
-
-                    <textarea
-                      value={group.prompt}
-                      readOnly
-                    />
-
-                  </div>
-
-                  <button
-                    className="copy-button"
-                    onClick={() =>
-                      copyPrompt(
-                        group.prompt
-                      )
-                    }
+              {groups.map(
+                (group) => (
+                  <article
+                    className="group"
+                    key={group.number}
                   >
-                    <span>
-                      COPY PROMPT
-                    </span>
 
-                    <span className="copy-icon">
-                      ⧉
-                    </span>
-                  </button>
+                    <div className="group-top">
 
-                </article>
-              ))}
+                      <div>
+                        <div className="group-label">
+                          GROUP 0
+                          {group.number}
+                        </div>
+
+                        <div className="product-count">
+                          3 PRODUCTS
+                        </div>
+                      </div>
+
+                      <div className="group-number">
+                        0
+                        {group.number}
+                      </div>
+
+                    </div>
+
+                    <button
+                      className="copy-button"
+                      onClick={() =>
+                        copyPrompt(
+                          group.prompt
+                        )
+                      }
+                    >
+                      <span>
+                        COPY PROMPT
+                      </span>
+
+                      <span className="copy-icon">
+                        ⧉
+                      </span>
+                    </button>
+
+                    <div className="prompt-wrapper">
+
+                      <textarea
+                        value={
+                          group.prompt
+                        }
+                        readOnly
+                      />
+
+                    </div>
+
+                  </article>
+                )
+              )}
 
             </div>
 
@@ -363,6 +424,7 @@ export default function Home() {
         )}
 
         <footer>
+
           <span>
             SHEIN AFFILIATE GENERATOR
           </span>
@@ -370,6 +432,7 @@ export default function Home() {
           <span>
             9 PRODUCTS · 2 TEMPLATES · 3 PROMPTS
           </span>
+
         </footer>
 
       </div>
