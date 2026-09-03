@@ -65,7 +65,10 @@ export async function POST() {
       }))
     });
   } catch (error) {
-    console.error("Generate error:", error);
+    console.error(
+      "Generate error:",
+      error
+    );
 
     return NextResponse.json(
       {
