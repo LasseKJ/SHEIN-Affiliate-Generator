@@ -4,22 +4,36 @@ import { useState } from "react";
 import JSZip from "jszip";
 
 export default function Home() {
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [groups, setGroups] = useState([]);
+  const [message, setMessage] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [groups, setGroups] =
+    useState([]);
+
+  const [coverPrompt, setCoverPrompt] =
+    useState("");
 
   async function generate() {
     setLoading(true);
+
     setGroups([]);
-    setMessage("Selecting 9 products...");
+    setCoverPrompt("");
+
+    setMessage(
+      "Selecting 9 products..."
+    );
 
     try {
-      const response = await fetch(
-        "/api/generate",
-        {
-          method: "POST"
-        }
-      );
+      const response =
+        await fetch(
+          "/api/generate",
+          {
+            method: "POST"
+          }
+        );
 
       const responseText =
         await response.text();
@@ -27,9 +41,10 @@ export default function Home() {
       let data;
 
       try {
-        data = JSON.parse(
-          responseText
-        );
+        data =
+          JSON.parse(
+            responseText
+          );
       } catch {
         throw new Error(
           `API returnerede ikke gyldig JSON. Status: ${response.status}.`
@@ -50,20 +65,33 @@ export default function Home() {
         data.templates;
 
       if (
-        selectedGroups.length !== 3
+        selectedGroups.length !==
+        3
       ) {
         throw new Error(
           "Der blev ikke oprettet præcis 3 produktgrupper."
         );
       }
 
-      if (!templates?.cover) {
+      if (
+        !data.coverPrompt
+      ) {
+        throw new Error(
+          "Forside prompt kunne ikke findes."
+        );
+      }
+
+      if (
+        !templates?.cover
+      ) {
         throw new Error(
           "Forside template kunne ikke findes."
         );
       }
 
-      if (!templates?.image) {
+      if (
+        !templates?.image
+      ) {
         throw new Error(
           "Billede template kunne ikke findes."
         );
@@ -72,7 +100,8 @@ export default function Home() {
       const zip =
         new JSZip();
 
-      let downloadedProducts = 0;
+      let downloadedProducts =
+        0;
 
       setMessage(
         "Creating folders..."
@@ -101,10 +130,13 @@ export default function Home() {
       );
 
       for (
-        const group of selectedGroups
+        const group of
+          selectedGroups
       ) {
         const groupFolder =
-          folders[group.number - 1];
+          folders[
+            group.number - 1
+          ];
 
         for (
           let index = 0;
@@ -120,7 +152,9 @@ export default function Home() {
               product.imageUrl
             );
 
-          if (!imageResponse.ok) {
+          if (
+            !imageResponse.ok
+          ) {
             throw new Error(
               `Kunne ikke hente produktbillede: ${product.name}`
             );
@@ -148,7 +182,8 @@ export default function Home() {
       }
 
       if (
-        downloadedProducts !== 9
+        downloadedProducts !==
+        9
       ) {
         throw new Error(
           `Kun ${downloadedProducts} af 9 produktbilleder blev hentet.`
@@ -164,7 +199,9 @@ export default function Home() {
           templates.image
         );
 
-      if (!productTemplateResponse.ok) {
+      if (
+        !productTemplateResponse.ok
+      ) {
         throw new Error(
           "Produkt template kunne ikke downloades."
         );
@@ -193,9 +230,14 @@ export default function Home() {
       );
 
       const coverProducts = [
-        selectedGroups[0].products[0],
-        selectedGroups[1].products[0],
-        selectedGroups[2].products[0]
+        selectedGroups[0]
+          .products[0],
+
+        selectedGroups[1]
+          .products[0],
+
+        selectedGroups[2]
+          .products[0]
       ];
 
       for (
@@ -212,7 +254,9 @@ export default function Home() {
             product.imageUrl
           );
 
-        if (!imageResponse.ok) {
+        if (
+          !imageResponse.ok
+        ) {
           throw new Error(
             `Kunne ikke hente forsidebillede: ${product.name}`
           );
@@ -242,7 +286,9 @@ export default function Home() {
           templates.cover
         );
 
-      if (!coverResponse.ok) {
+      if (
+        !coverResponse.ok
+      ) {
         throw new Error(
           "Forside template kunne ikke downloades."
         );
@@ -263,7 +309,10 @@ export default function Home() {
       const zipBlob =
         await zip.generateAsync({
           type: "blob",
-          compression: "DEFLATE",
+
+          compression:
+            "DEFLATE",
+
           compressionOptions: {
             level: 6
           }
@@ -283,7 +332,7 @@ export default function Home() {
         downloadUrl;
 
       link.download =
-        "shein-affiliate-13-files.zip";
+        "shein-affiliate-16-files.zip";
 
       link.style.display =
         "none";
@@ -308,10 +357,16 @@ export default function Home() {
         selectedGroups
       );
 
+      setCoverPrompt(
+        data.coverPrompt
+      );
+
       setMessage(
         "Complete, 9 products, 3 product templates and 1 cover template downloaded."
       );
+
     } catch (error) {
+
       console.error(
         "Generate error:",
         error
@@ -320,8 +375,11 @@ export default function Home() {
       setMessage(
         `Error, ${error.message}`
       );
+
     } finally {
+
       setLoading(false);
+
     }
   }
 
@@ -329,6 +387,7 @@ export default function Home() {
     prompt
   ) {
     try {
+
       await navigator.clipboard.writeText(
         prompt
       );
@@ -336,10 +395,13 @@ export default function Home() {
       setMessage(
         "Prompt copied to clipboard."
       );
+
     } catch {
+
       setMessage(
         "Could not copy the prompt automatically."
       );
+
     }
   }
 
@@ -351,11 +413,13 @@ export default function Home() {
         <header className="header">
 
           <div className="brand">
+
             SHEIN
 
             <span>
               AFFILIATE TOOL
             </span>
+
           </div>
 
           <div className="online">
@@ -375,19 +439,22 @@ export default function Home() {
           </div>
 
           <h1>
+
             SHEIN Affiliate
+
             <br />
 
             <span>
               Generator
             </span>
+
           </h1>
 
           <p>
             Select 9 products,
             download all product
             images and templates,
-            and create 3 ready to
+            and create 4 ready to
             use prompts.
           </p>
 
@@ -397,14 +464,20 @@ export default function Home() {
                 ? "loading"
                 : ""
             }`}
-            onClick={generate}
-            disabled={loading}
+            onClick={
+              generate
+            }
+            disabled={
+              loading
+            }
           >
 
             <span>
+
               {loading
                 ? "GENERATING..."
                 : "GENERATE"}
+
             </span>
 
             <span className="button-arrow">
@@ -425,7 +498,9 @@ export default function Home() {
 
         </section>
 
-        {groups.length > 0 && (
+        {(groups.length > 0 ||
+          coverPrompt) && (
+
           <section className="results">
 
             <div className="results-header">
@@ -437,7 +512,7 @@ export default function Home() {
                 </div>
 
                 <h2>
-                  Your 3 prompts
+                  Your 4 prompts
                 </h2>
 
               </div>
@@ -445,7 +520,7 @@ export default function Home() {
               <div className="count">
 
                 <strong>
-                  13
+                  16
                 </strong>
 
                 FILES READY
@@ -458,6 +533,7 @@ export default function Home() {
 
               {groups.map(
                 (group) => (
+
                   <article
                     className="group"
                     key={
@@ -522,12 +598,72 @@ export default function Home() {
                     </div>
 
                   </article>
+
                 )
+              )}
+
+              {coverPrompt && (
+
+                <article className="group">
+
+                  <div className="group-top">
+
+                    <div>
+
+                      <div className="group-label">
+                        COVER
+                      </div>
+
+                      <div className="product-count">
+                        3 PRODUCTS
+                      </div>
+
+                    </div>
+
+                    <div className="group-number">
+                      04
+                    </div>
+
+                  </div>
+
+                  <button
+                    className="copy-button"
+                    onClick={() =>
+                      copyPrompt(
+                        coverPrompt
+                      )
+                    }
+                  >
+
+                    <span>
+                      COPY PROMPT
+                    </span>
+
+                    <span className="copy-icon">
+                      ⧉
+                    </span>
+
+                  </button>
+
+                  <div className="prompt-wrapper">
+
+                    <textarea
+                      value={
+                        coverPrompt
+                      }
+                      readOnly
+                    />
+
+                  </div>
+
+                </article>
+
               )}
 
             </div>
 
           </section>
+
         )}
 
         <footer>
@@ -537,7 +673,7 @@ export default function Home() {
           </span>
 
           <span>
-            9 PRODUCTS · 3 TEMPLATES · 3 PROMPTS
+            9 PRODUCTS · 4 TEMPLATES · 4 PROMPTS
           </span>
 
         </footer>
