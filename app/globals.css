@@ -1,626 +1,1307 @@
-"use client";
+* {
+  box-sizing: border-box;
+}
 
-import { useState } from "react";
-import JSZip from "jszip";
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
 
-export default function WinterGenerator() {
-  const [loading, setLoading] =
-    useState(false);
+body {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 
-  const [message, setMessage] =
-    useState("");
-
-  const [results, setResults] =
-    useState([]);
-
-  async function generate() {
-    setLoading(true);
-    setResults([]);
-    setMessage(
-      "Creating 3 Winter outfits..."
+  background:
+    radial-gradient(
+      circle at top center,
+      #fff1f6 0%,
+      #ffffff 38%,
+      #f7f7f8 100%
     );
 
-    try {
-      const response =
-        await fetch(
-          "/api/generate-winter",
-          {
-            method: "POST",
+  color: #111111;
+}
 
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
+button,
+textarea {
+  font: inherit;
+}
 
-            body: JSON.stringify({
-              category: "Winter"
-            })
-          }
-        );
+button {
+  cursor: pointer;
+}
 
-      const responseText =
-        await response.text();
+/* PAGE */
 
-      let data;
+.page {
+  min-height: 100vh;
+  padding: 28px 24px 40px;
+}
 
-      try {
-        data =
-          JSON.parse(
-            responseText
-          );
-      } catch {
-        throw new Error(
-          `API returnerede ikke gyldig JSON. Status: ${response.status}.`
-        );
-      }
+.container {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+}
 
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-          "Der opstod en fejl."
-        );
-      }
+/* HEADER */
 
-      if (
-        !data.success ||
-        !data.outfits ||
-        data.outfits.length !== 3
-      ) {
-        throw new Error(
-          "Der blev ikke oprettet præcis 3 Winter outfits."
-        );
-      }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-      setResults(
-        data.outfits
-      );
+  padding: 8px 0 24px;
 
-      const zip =
-        new JSZip();
+  border-bottom: 1px solid #e9e9eb;
+}
 
-      setMessage(
-        "Creating folders..."
-      );
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
-      /*
-        ZIP'en skal kun indeholde
-        Billede 1, Billede 3 og Billede 5.
-      */
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
 
-      const imageNumbers = [
-        1,
-        3,
-        5
-      ];
+.brand span {
+  padding: 6px 9px;
 
-      const folders = {};
+  border-radius: 6px;
 
-      for (
-        const imageNumber of imageNumbers
-      ) {
-        folders[imageNumber] =
-          zip.folder(
-            `Billede ${imageNumber}`
-          );
-      }
+  background: #111111;
+  color: #ffffff;
 
-      for (
-        let outfitIndex = 0;
-        outfitIndex < 3;
-        outfitIndex++
-      ) {
-        const outfit =
-          data.outfits[
-            outfitIndex
-          ];
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
 
-        const modelImageNumber =
-          outfitIndex * 2 + 1;
+.online {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
-        const modelFolder =
-          folders[
-            modelImageNumber
-          ];
+  color: #777777;
 
-        if (!modelFolder) {
-          throw new Error(
-            `Kunne ikke finde ZIP mappe til Billede ${modelImageNumber}.`
-          );
-        }
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
 
-        setMessage(
-          `Downloading products for Winter outfit ${outfitIndex + 1}...`
-        );
+.online-dot,
+.message-dot {
+  width: 7px;
+  height: 7px;
 
-        const products = [
-          {
-            product:
-              outfit.products.shoe,
+  border-radius: 50%;
 
-            type:
-              "shoe"
-          },
+  background: #e91e63;
 
-          {
-            product:
-              outfit.products.top,
+  box-shadow:
+    0 0 0 4px #fde7ef;
+}
 
-            type:
-              "top"
-          },
+/* CONTENT SELECTOR */
 
-          {
-            product:
-              outfit.products.bottom,
+.content-selector-section {
+  max-width: 900px;
 
-            type:
-              "bottom"
-          },
+  margin: 0 auto;
 
-          {
-            product:
-              outfit.products.accessory,
+  padding:
+    42px 20px 0;
 
-            type:
-              "accessory"
-          }
-        ];
+  text-align: center;
+}
 
-        for (
-          const item of products
-        ) {
-          const product =
-            item.product;
+.selector-label {
+  margin-bottom: 14px;
 
-          if (
-            !product.imageUrl
-          ) {
-            throw new Error(
-              `Produktet ${product.name} har ingen billed URL.`
-            );
-          }
+  color: #e91e63;
 
-          const imageResponse =
-            await fetch(
-              product.imageUrl
-            );
+  font-size: 10px;
+  font-weight: 900;
 
-          if (
-            !imageResponse.ok
-          ) {
-            throw new Error(
-              `Kunne ikke hente produktbillede: ${product.name}`
-            );
-          }
+  letter-spacing: 0.18em;
+}
 
-          const imageBlob =
-            await imageResponse.blob();
+.content-selector {
+  display: grid;
 
-          let extension =
-            "jpg";
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
 
-          if (
-            imageBlob.type ===
-            "image/png"
-          ) {
-            extension =
-              "png";
-          }
+  gap: 12px;
+}
 
-          const fileName =
-            `${item.type}-${product.code}.${extension}`;
+.content-type-button {
+  display: flex;
 
-          modelFolder.file(
-            fileName,
-            imageBlob
-          );
-        }
-      }
+  align-items: center;
+  justify-content: space-between;
 
-      setMessage(
-        "Creating Winter ZIP..."
-      );
+  min-height: 62px;
 
-      const zipBlob =
-        await zip.generateAsync({
-          type: "blob",
+  padding:
+    0 18px 0 22px;
 
-          compression:
-            "DEFLATE",
+  border:
+    1px solid #e5e5e7;
 
-          compressionOptions: {
-            level: 6
-          }
-        });
+  border-radius: 14px;
 
-      const downloadUrl =
-        URL.createObjectURL(
-          zipBlob
-        );
+  background: #ffffff;
 
-      const link =
-        document.createElement(
-          "a"
-        );
+  color: #111111;
 
-      link.href =
-        downloadUrl;
+  font-size: 11px;
+  font-weight: 900;
 
-      link.download =
-        "winter-outfits.zip";
+  letter-spacing: 0.12em;
 
-      link.style.display =
-        "none";
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
 
-      document.body.appendChild(
-        link
-      );
+.content-type-button:hover {
+  transform: translateY(-2px);
 
-      link.click();
+  border-color: #111111;
 
-      document.body.removeChild(
-        link
-      );
+  box-shadow:
+    0 10px 25px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+}
 
-      setTimeout(() => {
-        URL.revokeObjectURL(
-          downloadUrl
-        );
-      }, 1000);
+.content-type-button.active {
+  border-color: #111111;
 
-      setMessage(
-        "Complete, 3 Winter outfits and 6 image prompts generated."
-      );
+  background: #111111;
 
-    } catch (error) {
-      console.error(
-        "Winter generate error:",
-        error
-      );
+  color: #ffffff;
 
-      setMessage(
-        `Error, ${error.message}`
-      );
+  box-shadow:
+    0 12px 30px
+    rgba(
+      0,
+      0,
+      0,
+      0.12
+    );
+}
 
-    } finally {
-      setLoading(false);
-    }
+.selector-arrow {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+
+  background: #f2f2f3;
+
+  color: #111111;
+
+  font-size: 17px;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.content-type-button.active
+.selector-arrow {
+  background: #ffffff;
+
+  color: #111111;
+}
+
+.content-type-button:hover
+.selector-arrow {
+  transform: translateX(2px);
+}
+
+/* HERO */
+
+.hero {
+  max-width: 760px;
+
+  margin: 0 auto;
+
+  padding:
+    82px 20px 76px;
+
+  text-align: center;
+}
+
+.eyebrow,
+.section-label,
+.group-label {
+  color: #e91e63;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 0.18em;
+}
+
+.eyebrow {
+  margin-bottom: 18px;
+}
+
+.hero h1,
+.clothing-hero h1 {
+  margin: 0;
+
+  font-size:
+    clamp(
+      48px,
+      7vw,
+      82px
+    );
+
+  line-height: 0.94;
+
+  letter-spacing: -0.065em;
+
+  font-weight: 950;
+}
+
+.hero h1 span,
+.clothing-hero h1 span {
+  color: #e91e63;
+}
+
+.hero p,
+.clothing-hero p {
+  max-width: 500px;
+
+  margin:
+    25px auto 34px;
+
+  color: #737373;
+
+  font-size: 15px;
+
+  line-height: 1.7;
+}
+
+/* GENERATE */
+
+.generate-button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 35px;
+
+  min-width: 245px;
+  height: 62px;
+
+  padding:
+    0 22px 0 28px;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  background: #111111;
+
+  color: #ffffff;
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.14em;
+
+  box-shadow:
+    0 12px 30px
+    rgba(
+      0,
+      0,
+      0,
+      0.13
+    );
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.generate-button:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 16px 35px
+    rgba(
+      0,
+      0,
+      0,
+      0.18
+    );
+
+  background: #e91e63;
+}
+
+.generate-button:active {
+  transform:
+    translateY(0);
+}
+
+.generate-button:disabled {
+  cursor: wait;
+
+  opacity: 0.65;
+}
+
+.button-arrow {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: #111111;
+
+  font-size: 18px;
+
+  line-height: 1;
+}
+
+.generate-button.loading
+.button-arrow {
+  animation:
+    pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform:
+      scale(1);
   }
 
-  async function copyPrompt(
-    prompt,
-    number
-  ) {
-    try {
-      await navigator.clipboard.writeText(
-        prompt
-      );
+  50% {
+    transform:
+      scale(0.85);
+  }
+}
 
-      setMessage(
-        `Prompt ${number} copied to clipboard.`
-      );
+/* MESSAGE */
 
-    } catch {
-      setMessage(
-        "Could not copy the prompt automatically."
-      );
-    }
+.message {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 22px;
+
+  padding:
+    10px 15px;
+
+  border:
+    1px solid #eeeeef;
+
+  border-radius: 100px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.75
+    );
+
+  color: #666666;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+/* RESULTS */
+
+.results {
+  padding-bottom: 40px;
+}
+
+.results-header {
+  display: flex;
+
+  align-items: flex-end;
+
+  justify-content:
+    space-between;
+
+  margin-bottom: 22px;
+}
+
+.results-header h2 {
+  margin:
+    7px 0 0;
+
+  font-size: 30px;
+
+  line-height: 1;
+
+  letter-spacing:
+    -0.045em;
+}
+
+.count {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: #888888;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+}
+
+.count strong {
+  color: #111111;
+
+  font-size: 18px;
+
+  letter-spacing:
+    -0.04em;
+}
+
+/* GROUPS */
+
+.groups {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 18px;
+}
+
+.group {
+  display: flex;
+
+  flex-direction: column;
+
+  min-width: 0;
+
+  padding: 20px;
+
+  border:
+    1px solid #e8e8ea;
+
+  border-radius: 18px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.88
+    );
+
+  box-shadow:
+    0 10px 35px
+    rgba(
+      0,
+      0,
+      0,
+      0.045
+    );
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.group:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 18px 45px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+}
+
+.group-top {
+  display: flex;
+
+  align-items:
+    flex-start;
+
+  justify-content:
+    space-between;
+
+  margin-bottom: 16px;
+}
+
+.product-count {
+  margin-top: 5px;
+
+  color: #999999;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.1em;
+}
+
+.group-number {
+  color: #eeeeef;
+
+  font-size: 42px;
+
+  font-weight: 950;
+
+  line-height: 0.8;
+
+  letter-spacing:
+    -0.08em;
+}
+
+/* COPY BUTTON */
+
+.copy-button {
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  width: 100%;
+
+  height: 48px;
+
+  margin-bottom: 10px;
+
+  padding:
+    0 14px 0 17px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #111111;
+
+  color: #ffffff;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    0.12em;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.copy-button:hover {
+  background: #e91e63;
+
+  transform:
+    translateY(-1px);
+}
+
+.copy-icon {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 7px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.12
+    );
+
+  font-size: 16px;
+}
+
+/* PROMPT */
+
+.prompt-wrapper {
+  overflow: hidden;
+
+  border:
+    1px solid #eeeeef;
+
+  border-radius: 11px;
+
+  background: #fafafa;
+}
+
+.prompt-wrapper textarea {
+  display: block;
+
+  width: 100%;
+
+  min-height: 430px;
+
+  padding: 17px;
+
+  border: 0;
+
+  outline: none;
+
+  resize: none;
+
+  background:
+    transparent;
+
+  color: #555555;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  font-size: 11px;
+
+  line-height: 1.65;
+}
+
+/* CLOTHING */
+
+.clothing-selection {
+  width: 100%;
+}
+
+.clothing-hero {
+  max-width: 760px;
+
+  margin: 0 auto;
+
+  padding:
+    62px 20px 48px;
+
+  text-align: center;
+}
+
+.clothing-category-section {
+  max-width: 900px;
+
+  margin:
+    0 auto 45px;
+
+  padding:
+    0 20px;
+}
+
+.clothing-category-label {
+  margin-bottom: 14px;
+
+  color: #e91e63;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    0.18em;
+}
+
+.clothing-category-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 12px;
+}
+
+.category-button {
+  min-height: 62px;
+
+  border:
+    1px solid #e5e5e7;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  color: #111111;
+
+  font-size: 11px;
+
+  font-weight: 900;
+
+  letter-spacing:
+    0.14em;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.category-button:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    #111111;
+
+  box-shadow:
+    0 10px 25px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+}
+
+.category-button.selected {
+  border-color:
+    #111111;
+
+  background:
+    #111111;
+
+  color:
+    #ffffff;
+
+  box-shadow:
+    0 12px 30px
+    rgba(
+      0,
+      0,
+      0,
+      0.12
+    );
+}
+
+.category-button:disabled {
+  cursor:
+    not-allowed;
+
+  opacity:
+    0.45;
+}
+
+/* CLOTHING GENERATOR */
+
+.clothing-generator {
+  width: 100%;
+}
+
+.clothing-generator
+.clothing-hero {
+  padding-top:
+    25px;
+}
+
+.clothing-results {
+  width: 100%;
+
+  padding-bottom:
+    40px;
+}
+
+.clothing-results
+.section-label {
+  margin-bottom:
+    16px;
+}
+
+/* QUICK COPY */
+
+.quick-copy-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 10px;
+
+  margin:
+    16px 0 42px;
+}
+
+.quick-copy-grid
+.copy-button {
+  margin-bottom:
+    0;
+}
+
+/* CLOTHING OUTFITS */
+
+.clothing-outfit-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 18px;
+}
+
+.clothing-result-card {
+  min-width: 0;
+
+  padding: 20px;
+
+  border:
+    1px solid #e8e8ea;
+
+  border-radius: 18px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.88
+    );
+
+  box-shadow:
+    0 10px 35px
+    rgba(
+      0,
+      0,
+      0,
+      0.045
+    );
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.clothing-result-card:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 18px 45px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+}
+
+.clothing-result-header {
+  display: flex;
+
+  align-items:
+    flex-start;
+
+  justify-content:
+    space-between;
+
+  margin-bottom:
+    22px;
+}
+
+.clothing-category-name {
+  margin-top:
+    7px;
+
+  color:
+    #111111;
+
+  font-size:
+    20px;
+
+  font-weight:
+    950;
+
+  line-height:
+    1;
+
+  letter-spacing:
+    -0.04em;
+}
+
+/* CLOTHING PRODUCT INFO */
+
+.clothing-info-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 10px;
+
+  margin-bottom:
+    24px;
+}
+
+.clothing-info-grid > div {
+  min-width: 0;
+
+  padding:
+    13px;
+
+  border:
+    1px solid #eeeeef;
+
+  border-radius:
+    10px;
+
+  background:
+    #fafafa;
+}
+
+.clothing-info-grid span {
+  display: block;
+
+  margin-bottom:
+    6px;
+
+  color:
+    #e91e63;
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.13em;
+}
+
+.clothing-info-grid strong {
+  display: block;
+
+  overflow:
+    hidden;
+
+  color:
+    #222222;
+
+  font-size:
+    11px;
+
+  font-weight:
+    800;
+
+  line-height:
+    1.35;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+.clothing-info-grid small {
+  display: block;
+
+  margin-top:
+    5px;
+
+  color:
+    #999999;
+
+  font-size:
+    8px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.04em;
+}
+
+/* CLOTHING PROMPTS */
+
+.clothing-prompt-section {
+  margin-top:
+    22px;
+}
+
+.prompt-heading {
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  margin-bottom:
+    10px;
+}
+
+.prompt-heading h3 {
+  margin: 0;
+
+  color:
+    #111111;
+
+  font-size:
+    11px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.12em;
+}
+
+.clothing-prompt-section
+.copy-button {
+  margin-bottom:
+    10px;
+}
+
+/* FOOTER */
+
+footer {
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  padding:
+    22px 0;
+
+  border-top:
+    1px solid #e9e9eb;
+
+  color:
+    #aaaaaa;
+
+  font-size:
+    9px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.12em;
+}
+
+/* TABLET */
+
+@media (
+  max-width: 1050px
+) {
+  .groups {
+    grid-template-columns:
+      1fr;
   }
 
-  function getPrompt(
-    number
-  ) {
-    const outfitIndex =
-      Math.floor(
-        (number - 1) / 2
-      );
-
-    const outfit =
-      results[
-        outfitIndex
-      ];
-
-    if (!outfit) {
-      return "";
-    }
-
-    if (
-      number % 2 === 1
-    ) {
-      return outfit.modelPrompt;
-    }
-
-    return outfit.flatLayPrompt;
+  .group {
+    min-height:
+      500px;
   }
 
-  return (
-    <section className="clothing-generator">
+  .clothing-outfit-grid {
+    grid-template-columns:
+      1fr;
+  }
+}
 
-      <div className="clothing-hero">
+/* MOBILE */
 
-        <div className="eyebrow">
-          WINTER
-        </div>
+@media (
+  max-width: 700px
+) {
+  .page {
+    padding:
+      20px 16px 30px;
+  }
 
-        <h1>
-          Create
-          <span> Winter Looks.</span>
-        </h1>
+  .header {
+    padding-bottom:
+      18px;
+  }
 
-        <p>
-          Generate 3 complete Winter
-          outfits with 6 ready to use
-          image prompts.
-        </p>
+  .content-selector-section {
+    padding:
+      30px 0 0;
+  }
 
-        <button
-          className={`generate-button ${
-            loading
-              ? "loading"
-              : ""
-          }`}
-          onClick={generate}
-          disabled={loading}
-        >
-          <span>
-            {loading
-              ? "GENERATING..."
-              : "GENERATE WINTER"}
-          </span>
+  .content-selector {
+    grid-template-columns:
+      1fr;
+  }
 
-          <span className="button-arrow">
-            →
-          </span>
-        </button>
+  .clothing-category-section {
+    padding:
+      0;
+  }
 
-        {message && (
-          <div className="message">
-            <span className="message-dot" />
-            {message}
-          </div>
-        )}
+  .clothing-category-grid {
+    grid-template-columns:
+      1fr;
+  }
 
-      </div>
+  .quick-copy-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
 
-      {results.length > 0 && (
-        <section className="clothing-results">
+  .clothing-info-grid {
+    grid-template-columns:
+      1fr;
+  }
 
-          <div className="section-label">
-            QUICK COPY
-          </div>
+  .clothing-result-card {
+    padding:
+      17px;
+  }
 
-          <div className="quick-copy-grid">
+  .hero {
+    padding:
+      55px 10px 55px;
+  }
 
-            {[1, 2, 3, 4, 5, 6].map(
-              (number) => (
-                <button
-                  key={number}
-                  className="copy-button"
-                  onClick={() =>
-                    copyPrompt(
-                      getPrompt(number),
-                      number
-                    )
-                  }
-                >
-                  <span>
-                    COPY PROMPT {number}
-                  </span>
+  .clothing-hero {
+    padding:
+      45px 10px 35px;
+  }
 
-                  <span className="copy-icon">
-                    ⧉
-                  </span>
-                </button>
-              )
-            )}
+  .hero h1,
+  .clothing-hero h1 {
+    font-size:
+      clamp(
+        42px,
+        13vw,
+        64px
+      );
+  }
 
-          </div>
+  .generate-button {
+    width:
+      100%;
 
-          <div className="section-label">
-            GENERATED OUTFITS
-          </div>
+    min-width:
+      0;
+  }
+}
 
-          <div className="clothing-outfit-grid">
+/* SMALL MOBILE */
 
-            {results.map(
-              (
-                outfit,
-                index
-              ) => (
-                <article
-                  className="clothing-result-card"
-                  key={
-                    outfit.outfitNumber
-                  }
-                >
+@media (
+  max-width: 450px
+) {
+  .quick-copy-grid {
+    grid-template-columns:
+      1fr;
+  }
 
-                  <div className="clothing-result-header">
+  .quick-copy-grid
+  .copy-button {
+    height:
+      46px;
+  }
 
-                    <div>
+  .brand {
+    font-size:
+      15px;
+  }
 
-                      <div className="group-label">
-                        OUTFIT{" "}
-                        {index + 1}
-                      </div>
-
-                      <div className="clothing-category-name">
-                        WINTER
-                      </div>
-
-                    </div>
-
-                    <div className="group-number">
-                      0
-                      {index + 1}
-                    </div>
-
-                  </div>
-
-                  <div className="clothing-info-grid">
-
-                    <div>
-                      <span>
-                        SHOE
-                      </span>
-
-                      <strong>
-                        {
-                          outfit.products.shoe.name
-                        }
-                      </strong>
-
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.shoe.code
-                        }
-                      </small>
-                    </div>
-
-                    <div>
-                      <span>
-                        TOP
-                      </span>
-
-                      <strong>
-                        {
-                          outfit.products.top.name
-                        }
-                      </strong>
-
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.top.code
-                        }
-                      </small>
-                    </div>
-
-                    <div>
-                      <span>
-                        BOTTOM
-                      </span>
-
-                      <strong>
-                        {
-                          outfit.products.bottom.name
-                        }
-                      </strong>
-
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.bottom.code
-                        }
-                      </small>
-                    </div>
-
-                    <div>
-                      <span>
-                        ACCESSORY
-                      </span>
-
-                      <strong>
-                        {
-                          outfit.products.accessory.name
-                        }
-                      </strong>
-
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.accessory.code
-                        }
-                      </small>
-                    </div>
-
-                  </div>
-
-                  <div className="clothing-prompt-section">
-
-                    <div className="prompt-heading">
-                      <h3>
-                        BILLEDE{" "}
-                        {index * 2 + 1}
-                      </h3>
-                    </div>
-
-                    <button
-                      className="copy-button"
-                      onClick={() =>
-                        copyPrompt(
-                          outfit.modelPrompt,
-                          index * 2 + 1
-                        )
-                      }
-                    >
-                      <span>
-                        COPY PROMPT
-                      </span>
-
-                      <span className="copy-icon">
-                        ⧉
-                      </span>
-                    </button>
-
-                    <div className="prompt-wrapper">
-                      <textarea
-                        value={
-                          outfit.modelPrompt
-                        }
-                        readOnly
-                      />
-                    </div>
-
-                  </div>
-
-                  <div className="clothing-prompt-section">
-
-                    <div className="prompt-heading">
-                      <h3>
-                        BILLEDE{" "}
-                        {index * 2 + 2}
-                      </h3>
-                    </div>
-
-                    <button
-                      className="copy-button"
-                      onClick={() =>
-                        copyPrompt(
-                          outfit.flatLayPrompt,
-                          index * 2 + 2
-                        )
-                      }
-                    >
-                      <span>
-                        COPY PROMPT
-                      </span>
-
-                      <span className="copy-icon">
-                        ⧉
-                      </span>
-                    </button>
-
-                    <div className="prompt-wrapper">
-                      <textarea
-                        value={
-                          outfit.flatLayPrompt
-                        }
-                        readOnly
-                      />
-                    </div>
-
-                  </div>
-
-                </article>
-              )
-            )}
-
-          </div>
-
-        </section>
-      )}
-
-    </section>
-  );
+  .online {
+    font-size:
+      8px;
+  }
 }
