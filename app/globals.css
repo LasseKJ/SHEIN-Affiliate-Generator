@@ -39,6 +39,9 @@ button {
   cursor: pointer;
 }
 
+
+/* PAGE */
+
 .page {
   min-height: 100vh;
   padding: 28px 24px 40px;
@@ -49,6 +52,7 @@ button {
   max-width: 1380px;
   margin: 0 auto;
 }
+
 
 /* HEADER */
 
@@ -69,6 +73,7 @@ button {
 
   font-size: 17px;
   font-weight: 900;
+
   letter-spacing: -0.04em;
 }
 
@@ -82,6 +87,7 @@ button {
 
   font-size: 9px;
   font-weight: 800;
+
   letter-spacing: 0.12em;
 }
 
@@ -94,6 +100,7 @@ button {
 
   font-size: 10px;
   font-weight: 800;
+
   letter-spacing: 0.12em;
 }
 
@@ -109,6 +116,124 @@ button {
   box-shadow:
     0 0 0 4px #fde7ef;
 }
+
+
+/* CONTENT TYPE SELECTOR */
+
+.content-selector-section {
+  max-width: 760px;
+
+  margin: 0 auto;
+
+  padding: 35px 20px 0;
+
+  text-align: center;
+}
+
+.selector-label {
+  margin-bottom: 14px;
+
+  color: #e91e63;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 0.18em;
+}
+
+.content-selector {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 12px;
+}
+
+.content-type-button {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 58px;
+
+  padding:
+    0 14px 0 18px;
+
+  border:
+    1px solid #e6e6e8;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  color: #111111;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  letter-spacing: 0.1em;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border 0.2s ease,
+    transform 0.2s ease;
+}
+
+.content-type-button:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    #111111;
+}
+
+.content-type-button.active {
+  background:
+    #111111;
+
+  color:
+    #ffffff;
+
+  border-color:
+    #111111;
+}
+
+.selector-arrow {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  background:
+    #f4f4f4;
+
+  color:
+    #111111;
+
+  font-size: 16px;
+}
+
+.content-type-button.active
+.selector-arrow {
+  background:
+    #ffffff;
+
+  color:
+    #111111;
+}
+
 
 /* HERO */
 
@@ -129,6 +254,7 @@ button {
 
   font-size: 10px;
   font-weight: 900;
+
   letter-spacing: 0.18em;
 }
 
@@ -169,7 +295,8 @@ button {
   line-height: 1.7;
 }
 
-/* GENERATE */
+
+/* GENERATE BUTTON */
 
 .generate-button {
   display: inline-flex;
@@ -201,7 +328,12 @@ button {
 
   box-shadow:
     0 12px 30px
-    rgba(0, 0, 0, 0.13);
+    rgba(
+      0,
+      0,
+      0,
+      0.13
+    );
 
   transition:
     transform 0.2s ease,
@@ -215,9 +347,15 @@ button {
 
   box-shadow:
     0 16px 35px
-    rgba(0, 0, 0, 0.18);
+    rgba(
+      0,
+      0,
+      0,
+      0.18
+    );
 
-  background: #e91e63;
+  background:
+    #e91e63;
 }
 
 .generate-button:active {
@@ -226,8 +364,11 @@ button {
 }
 
 .generate-button:disabled {
-  cursor: wait;
-  opacity: 0.65;
+  cursor:
+    wait;
+
+  opacity:
+    0.65;
 }
 
 .button-arrow {
@@ -241,9 +382,11 @@ button {
 
   border-radius: 50%;
 
-  background: #ffffff;
+  background:
+    #ffffff;
 
-  color: #111111;
+  color:
+    #111111;
 
   font-size: 18px;
 
@@ -268,6 +411,7 @@ button {
       scale(0.85);
   }
 }
+
 
 /* MESSAGE */
 
@@ -296,37 +440,46 @@ button {
       0.75
     );
 
-  color: #666666;
+  color:
+    #666666;
 
-  font-size: 11px;
+  font-size:
+    11px;
 
-  font-weight: 700;
+  font-weight:
+    700;
 }
+
 
 /* RESULTS */
 
 .results {
-  padding-bottom: 40px;
+  padding-bottom:
+    40px;
 }
 
 .results-header {
   display: flex;
 
-  align-items: flex-end;
+  align-items:
+    flex-end;
 
   justify-content:
     space-between;
 
-  margin-bottom: 22px;
+  margin-bottom:
+    22px;
 }
 
 .results-header h2 {
   margin:
     7px 0 0;
 
-  font-size: 30px;
+  font-size:
+    30px;
 
-  line-height: 1;
+  line-height:
+    1;
 
   letter-spacing:
     -0.045em;
@@ -335,28 +488,36 @@ button {
 .count {
   display: flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 
-  color: #888888;
+  color:
+    #888888;
 
-  font-size: 9px;
+  font-size:
+    9px;
 
-  font-weight: 800;
+  font-weight:
+    800;
 
   letter-spacing:
     0.12em;
 }
 
 .count strong {
-  color: #111111;
+  color:
+    #111111;
 
-  font-size: 18px;
+  font-size:
+    18px;
 
   letter-spacing:
     -0.04em;
 }
+
 
 /* GROUPS */
 
@@ -372,22 +533,27 @@ button {
       )
     );
 
-  gap: 18px;
+  gap:
+    18px;
 }
 
 .group {
   display: flex;
 
-  flex-direction: column;
+  flex-direction:
+    column;
 
-  min-width: 0;
+  min-width:
+    0;
 
-  padding: 20px;
+  padding:
+    20px;
 
   border:
     1px solid #e8e8ea;
 
-  border-radius: 18px;
+  border-radius:
+    18px;
 
   background:
     rgba(
@@ -434,65 +600,85 @@ button {
   justify-content:
     space-between;
 
-  margin-bottom: 16px;
+  margin-bottom:
+    16px;
 }
 
 .product-count {
-  margin-top: 5px;
+  margin-top:
+    5px;
 
-  color: #999999;
+  color:
+    #999999;
 
-  font-size: 9px;
+  font-size:
+    9px;
 
-  font-weight: 800;
+  font-weight:
+    800;
 
   letter-spacing:
     0.1em;
 }
 
 .group-number {
-  color: #eeeeef;
+  color:
+    #eeeeef;
 
-  font-size: 42px;
+  font-size:
+    42px;
 
-  font-weight: 950;
+  font-weight:
+    950;
 
-  line-height: 0.8;
+  line-height:
+    0.8;
 
   letter-spacing:
     -0.08em;
 }
+
 
 /* COPY BUTTON */
 
 .copy-button {
   display: flex;
 
-  align-items: center;
+  align-items:
+    center;
 
   justify-content:
     space-between;
 
-  width: 100%;
+  width:
+    100%;
 
-  height: 48px;
+  height:
+    48px;
 
-  margin-bottom: 10px;
+  margin-bottom:
+    10px;
 
   padding:
     0 14px 0 17px;
 
-  border: 0;
+  border:
+    0;
 
-  border-radius: 10px;
+  border-radius:
+    10px;
 
-  background: #111111;
+  background:
+    #111111;
 
-  color: #ffffff;
+  color:
+    #ffffff;
 
-  font-size: 10px;
+  font-size:
+    10px;
 
-  font-weight: 900;
+  font-weight:
+    900;
 
   letter-spacing:
     0.12em;
@@ -503,7 +689,8 @@ button {
 }
 
 .copy-button:hover {
-  background: #e91e63;
+  background:
+    #e91e63;
 
   transform:
     translateY(-1px);
@@ -512,14 +699,20 @@ button {
 .copy-icon {
   display: flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  width: 28px;
-  height: 28px;
+  width:
+    28px;
 
-  border-radius: 7px;
+  height:
+    28px;
+
+  border-radius:
+    7px;
 
   background:
     rgba(
@@ -529,41 +722,54 @@ button {
       0.12
     );
 
-  font-size: 16px;
+  font-size:
+    16px;
 }
+
 
 /* PROMPT */
 
 .prompt-wrapper {
-  overflow: hidden;
+  overflow:
+    hidden;
 
   border:
     1px solid #eeeeef;
 
-  border-radius: 11px;
+  border-radius:
+    11px;
 
-  background: #fafafa;
+  background:
+    #fafafa;
 }
 
 .prompt-wrapper textarea {
-  display: block;
+  display:
+    block;
 
-  width: 100%;
+  width:
+    100%;
 
-  min-height: 430px;
+  min-height:
+    430px;
 
-  padding: 17px;
+  padding:
+    17px;
 
-  border: 0;
+  border:
+    0;
 
-  outline: none;
+  outline:
+    none;
 
-  resize: none;
+  resize:
+    none;
 
   background:
     transparent;
 
-  color: #555555;
+  color:
+    #555555;
 
   font-family:
     ui-monospace,
@@ -573,35 +779,307 @@ button {
     Consolas,
     monospace;
 
-  font-size: 11px;
+  font-size:
+    11px;
 
-  line-height: 1.65;
+  line-height:
+    1.65;
 }
+
+
+/* CLOTHING HERO */
+
+.clothing-hero {
+  padding-top:
+    60px;
+}
+
+
+/* CLOTHING CATEGORY */
+
+.clothing-category-section {
+  margin:
+    30px auto 28px;
+}
+
+.clothing-category-label {
+  margin-bottom:
+    12px;
+
+  color:
+    #888888;
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.14em;
+}
+
+.clothing-category-grid {
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap:
+    8px;
+}
+
+.category-button {
+  min-height:
+    48px;
+
+  padding:
+    8px 10px;
+
+  border:
+    1px solid #e7e7e9;
+
+  border-radius:
+    9px;
+
+  background:
+    #ffffff;
+
+  color:
+    #555555;
+
+  font-size:
+    9px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.04em;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border 0.2s ease,
+    transform 0.2s ease;
+}
+
+.category-button:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    #111111;
+
+  color:
+    #111111;
+}
+
+.category-button.selected {
+  background:
+    #e91e63;
+
+  border-color:
+    #e91e63;
+
+  color:
+    #ffffff;
+}
+
+.category-button:disabled {
+  cursor:
+    wait;
+
+  opacity:
+    0.6;
+}
+
+
+/* CLOTHING RESULTS */
+
+.clothing-results {
+  padding-bottom:
+    50px;
+}
+
+.clothing-result-card {
+  display:
+    grid;
+
+  grid-template-columns:
+    0.75fr 1.25fr;
+
+  gap:
+    18px;
+}
+
+.clothing-product-info,
+.clothing-prompt-section {
+  padding:
+    24px;
+
+  border:
+    1px solid #e8e8ea;
+
+  border-radius:
+    18px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.88
+    );
+
+  box-shadow:
+    0 10px 35px
+    rgba(
+      0,
+      0,
+      0,
+      0.045
+    );
+}
+
+.clothing-info-label {
+  color:
+    #e91e63;
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.16em;
+}
+
+.clothing-category-name {
+  margin-top:
+    8px;
+
+  font-size:
+    26px;
+
+  font-weight:
+    950;
+
+  letter-spacing:
+    -0.05em;
+}
+
+.clothing-info-grid {
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    18px;
+
+  margin-top:
+    35px;
+}
+
+.clothing-info-grid div {
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    5px;
+}
+
+.clothing-info-grid span {
+  color:
+    #999999;
+
+  font-size:
+    8px;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.14em;
+}
+
+.clothing-info-grid strong {
+  color:
+    #222222;
+
+  font-size:
+    13px;
+
+  line-height:
+    1.4;
+}
+
+.prompt-heading {
+  margin-bottom:
+    15px;
+}
+
+.prompt-heading h3 {
+  margin:
+    7px 0 0;
+
+  font-size:
+    25px;
+
+  letter-spacing:
+    -0.045em;
+}
+
+.clothing-prompt-section
+.copy-button {
+  margin-bottom:
+    10px;
+}
+
 
 /* FOOTER */
 
 footer {
   display: flex;
 
-  align-items: center;
+  align-items:
+    center;
 
   justify-content:
     space-between;
 
-  padding: 22px 0;
+  padding:
+    22px 0;
 
   border-top:
     1px solid #e9e9eb;
 
-  color: #aaaaaa;
+  color:
+    #aaaaaa;
 
-  font-size: 9px;
+  font-size:
+    9px;
 
-  font-weight: 800;
+  font-weight:
+    800;
 
   letter-spacing:
     0.12em;
 }
+
 
 /* TABLET */
 
@@ -614,15 +1092,57 @@ footer {
   }
 
   .group {
-    min-height: 500px;
+    min-height:
+      500px;
   }
 
   .prompt-wrapper textarea {
-    min-height: 280px;
+    min-height:
+      280px;
+  }
+
+  .clothing-result-card {
+    grid-template-columns:
+      1fr;
   }
 }
 
+
 /* MOBILE */
+
+@media (
+  max-width: 700px
+) {
+  .content-selector {
+    grid-template-columns:
+      1fr;
+  }
+
+  .clothing-category-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+
+  .clothing-result-card {
+    grid-template-columns:
+      1fr;
+  }
+
+  .clothing-product-info,
+  .clothing-prompt-section {
+    padding:
+      18px;
+  }
+}
+
+
+/* SMALL MOBILE */
 
 @media (
   max-width: 600px
@@ -638,11 +1158,13 @@ footer {
   }
 
   .brand {
-    font-size: 14px;
+    font-size:
+      14px;
   }
 
   .brand span {
-    font-size: 7px;
+    font-size:
+      7px;
   }
 
   .hero {
@@ -651,28 +1173,34 @@ footer {
   }
 
   .hero h1 {
-    font-size: 52px;
+    font-size:
+      52px;
   }
 
   .hero p {
-    font-size: 13px;
+    font-size:
+      13px;
   }
 
   .generate-button {
-    width: 100%;
+    width:
+      100%;
 
-    min-width: 0;
+    min-width:
+      0;
   }
 
   .results-header {
     align-items:
       flex-start;
 
-    gap: 20px;
+    gap:
+      20px;
   }
 
   .results-header h2 {
-    font-size: 26px;
+    font-size:
+      26px;
   }
 
   .groups {
@@ -681,15 +1209,19 @@ footer {
   }
 
   .group {
-    padding: 16px;
+    padding:
+      16px;
 
-    border-radius: 15px;
+    border-radius:
+      15px;
   }
 
   .prompt-wrapper textarea {
-    min-height: 340px;
+    min-height:
+      340px;
 
-    font-size: 10px;
+    font-size:
+      10px;
   }
 
   footer {
@@ -699,6 +1231,32 @@ footer {
     align-items:
       flex-start;
 
-    gap: 8px;
+    gap:
+      8px;
+  }
+}
+
+
+/* VERY SMALL MOBILE */
+
+@media (
+  max-width: 430px
+) {
+  .content-selector-section {
+    padding:
+      25px 8px 0;
+  }
+
+  .clothing-category-grid {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .category-button {
+    min-height:
+      44px;
+
+    font-size:
+      8px;
   }
 }
