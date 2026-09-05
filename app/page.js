@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import SquishyGenerator from "../components/SquishyGenerator";
 import AutumnGenerator from "../components/AutumnGenerator";
+import WinterGenerator from "../components/WinterGenerator";
 
 export default function Home() {
   const [contentType, setContentType] =
@@ -153,36 +154,7 @@ export default function Home() {
             )}
 
             {clothingCategory === "Winter" && (
-              <section className="clothing-results">
-
-                <div className="section-label">
-                  WINTER
-                </div>
-
-                <div className="clothing-result-card">
-
-                  <div className="clothing-result-header">
-
-                    <div>
-                      <div className="group-label">
-                        WINTER
-                      </div>
-
-                      <div className="clothing-category-name">
-                        COMING NEXT
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <p>
-                    Winter generator is ready
-                    to be connected.
-                  </p>
-
-                </div>
-
-              </section>
+              <WinterGenerator />
             )}
 
           </section>
