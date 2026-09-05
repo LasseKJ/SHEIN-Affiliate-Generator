@@ -69,6 +69,10 @@ export default function AutumnGenerator() {
         );
       }
 
+      setResults(
+        data.outfits
+      );
+
       const zip =
         new JSZip();
 
@@ -76,18 +80,26 @@ export default function AutumnGenerator() {
         "Creating folders..."
       );
 
-      const folders = [];
+      /*
+        ZIP'en skal kun indeholde
+        Billede 1, Billede 3 og Billede 5.
+      */
+
+      const imageNumbers = [
+        1,
+        3,
+        5
+      ];
+
+      const folders = {};
 
       for (
-        let index = 0;
-        index < 6;
-        index++
+        const imageNumber of imageNumbers
       ) {
-        folders.push(
+        folders[imageNumber] =
           zip.folder(
-            `Billede ${index + 1}`
-          )
-        );
+            `Billede ${imageNumber}`
+          );
       }
 
       for (
@@ -103,18 +115,16 @@ export default function AutumnGenerator() {
         const modelImageNumber =
           outfitIndex * 2 + 1;
 
-        const flatLayImageNumber =
-          outfitIndex * 2 + 2;
-
         const modelFolder =
           folders[
-            modelImageNumber - 1
+            modelImageNumber
           ];
 
-        const flatLayFolder =
-          folders[
-            flatLayImageNumber - 1
-          ];
+        if (!modelFolder) {
+          throw new Error(
+            `Kunne ikke finde ZIP mappe til Billede ${modelImageNumber}.`
+          );
+        }
 
         setMessage(
           `Downloading products for outfit ${outfitIndex + 1}...`
@@ -124,22 +134,33 @@ export default function AutumnGenerator() {
           {
             product:
               outfit.products.shoe,
-            type: "shoe"
+
+            type:
+              "shoe"
           },
+
           {
             product:
               outfit.products.top,
-            type: "top"
+
+            type:
+              "top"
           },
+
           {
             product:
               outfit.products.bottom,
-            type: "bottom"
+
+            type:
+              "bottom"
           },
+
           {
             product:
               outfit.products.accessory,
-            type: "accessory"
+
+            type:
+              "accessory"
           }
         ];
 
@@ -192,16 +213,6 @@ export default function AutumnGenerator() {
             imageBlob
           );
         }
-
-        modelFolder.file(
-          "prompt.txt",
-          outfit.modelPrompt
-        );
-
-        flatLayFolder.file(
-          "prompt.txt",
-          outfit.flatLayPrompt
-        );
       }
 
       setMessage(
@@ -255,13 +266,10 @@ export default function AutumnGenerator() {
         );
       }, 1000);
 
-      setResults(
-        data.outfits
+      setMessage(
+        "Complete, 3 Autumn outfits and 6 image prompts generated."
       );
 
-      setMessage(
-        "Complete, 3 Autumn outfits and 6 image prompts downloaded."
-      );
     } catch (error) {
       console.error(
         "Autumn generate error:",
@@ -271,13 +279,15 @@ export default function AutumnGenerator() {
       setMessage(
         `Error, ${error.message}`
       );
+
     } finally {
       setLoading(false);
     }
   }
 
   async function copyPrompt(
-    prompt
+    prompt,
+    number
   ) {
     try {
       await navigator.clipboard.writeText(
@@ -285,8 +295,9 @@ export default function AutumnGenerator() {
       );
 
       setMessage(
-        "Prompt copied to clipboard."
+        `Prompt ${number} copied to clipboard.`
       );
+
     } catch {
       setMessage(
         "Could not copy the prompt automatically."
@@ -294,10 +305,37 @@ export default function AutumnGenerator() {
     }
   }
 
+  function getPrompt(
+    number
+  ) {
+    const outfitIndex =
+      Math.floor(
+        (number - 1) / 2
+      );
+
+    const outfit =
+      results[
+        outfitIndex
+      ];
+
+    if (!outfit) {
+      return "";
+    }
+
+    if (
+      number % 2 === 1
+    ) {
+      return outfit.modelPrompt;
+    }
+
+    return outfit.flatLayPrompt;
+  }
+
   return (
     <section className="clothing-generator">
 
       <div className="clothing-hero">
+
         <div className="eyebrow">
           AUTUMN
         </div>
@@ -339,10 +377,42 @@ export default function AutumnGenerator() {
             {message}
           </div>
         )}
+
       </div>
 
       {results.length > 0 && (
         <section className="clothing-results">
+
+          <div className="section-label">
+            QUICK COPY
+          </div>
+
+          <div className="quick-copy-grid">
+
+            {[1, 2, 3, 4, 5, 6].map(
+              (number) => (
+                <button
+                  key={number}
+                  className="copy-button"
+                  onClick={() =>
+                    copyPrompt(
+                      getPrompt(number),
+                      number
+                    )
+                  }
+                >
+                  <span>
+                    COPY PROMPT {number}
+                  </span>
+
+                  <span className="copy-icon">
+                    ⧉
+                  </span>
+                </button>
+              )
+            )}
+
+          </div>
 
           <div className="section-label">
             GENERATED OUTFITS
@@ -365,15 +435,16 @@ export default function AutumnGenerator() {
                   <div className="clothing-result-header">
 
                     <div>
+
                       <div className="group-label">
-                        OUTFIT
-                        {" "}
+                        OUTFIT{" "}
                         {index + 1}
                       </div>
 
                       <div className="clothing-category-name">
                         AUTUMN
                       </div>
+
                     </div>
 
                     <div className="group-number">
@@ -392,21 +463,14 @@ export default function AutumnGenerator() {
 
                       <strong>
                         {
-                          outfit
-                            .products
-                            .shoe
-                            .name
+                          outfit.products.shoe.name
                         }
                       </strong>
 
                       <small>
-                        CODE:
-                        {" "}
+                        CODE:{" "}
                         {
-                          outfit
-                            .products
-                            .shoe
-                            .code
+                          outfit.products.shoe.code
                         }
                       </small>
                     </div>
@@ -418,21 +482,14 @@ export default function AutumnGenerator() {
 
                       <strong>
                         {
-                          outfit
-                            .products
-                            .top
-                            .name
+                          outfit.products.top.name
                         }
                       </strong>
 
                       <small>
-                        CODE:
-                        {" "}
+                        CODE:{" "}
                         {
-                          outfit
-                            .products
-                            .top
-                            .code
+                          outfit.products.top.code
                         }
                       </small>
                     </div>
@@ -444,21 +501,14 @@ export default function AutumnGenerator() {
 
                       <strong>
                         {
-                          outfit
-                            .products
-                            .bottom
-                            .name
+                          outfit.products.bottom.name
                         }
                       </strong>
 
                       <small>
-                        CODE:
-                        {" "}
+                        CODE:{" "}
                         {
-                          outfit
-                            .products
-                            .bottom
-                            .code
+                          outfit.products.bottom.code
                         }
                       </small>
                     </div>
@@ -470,21 +520,14 @@ export default function AutumnGenerator() {
 
                       <strong>
                         {
-                          outfit
-                            .products
-                            .accessory
-                            .name
+                          outfit.products.accessory.name
                         }
                       </strong>
 
                       <small>
-                        CODE:
-                        {" "}
+                        CODE:{" "}
                         {
-                          outfit
-                            .products
-                            .accessory
-                            .code
+                          outfit.products.accessory.code
                         }
                       </small>
                     </div>
@@ -495,8 +538,7 @@ export default function AutumnGenerator() {
 
                     <div className="prompt-heading">
                       <h3>
-                        BILLEDE
-                        {" "}
+                        BILLEDE{" "}
                         {index * 2 + 1}
                       </h3>
                     </div>
@@ -505,7 +547,8 @@ export default function AutumnGenerator() {
                       className="copy-button"
                       onClick={() =>
                         copyPrompt(
-                          outfit.modelPrompt
+                          outfit.modelPrompt,
+                          index * 2 + 1
                         )
                       }
                     >
@@ -533,8 +576,7 @@ export default function AutumnGenerator() {
 
                     <div className="prompt-heading">
                       <h3>
-                        BILLEDE
-                        {" "}
+                        BILLEDE{" "}
                         {index * 2 + 2}
                       </h3>
                     </div>
@@ -543,7 +585,8 @@ export default function AutumnGenerator() {
                       className="copy-button"
                       onClick={() =>
                         copyPrompt(
-                          outfit.flatLayPrompt
+                          outfit.flatLayPrompt,
+                          index * 2 + 2
                         )
                       }
                     >
