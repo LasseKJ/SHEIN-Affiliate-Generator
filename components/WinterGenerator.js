@@ -26,10 +26,12 @@ export default function WinterGenerator() {
           "/api/generate-winter",
           {
             method: "POST",
+
             headers: {
               "Content-Type":
                 "application/json"
             },
+
             body: JSON.stringify({
               category: "Winter"
             })
@@ -69,6 +71,10 @@ export default function WinterGenerator() {
         );
       }
 
+      setResults(
+        data.outfits
+      );
+
       const zip =
         new JSZip();
 
@@ -76,18 +82,26 @@ export default function WinterGenerator() {
         "Creating folders..."
       );
 
-      const folders = [];
+      /*
+        ZIP'en skal kun indeholde
+        Billede 1, Billede 3 og Billede 5.
+      */
+
+      const imageNumbers = [
+        1,
+        3,
+        5
+      ];
+
+      const folders = {};
 
       for (
-        let index = 0;
-        index < 6;
-        index++
+        const imageNumber of imageNumbers
       ) {
-        folders.push(
+        folders[imageNumber] =
           zip.folder(
-            `Billede ${index + 1}`
-          )
-        );
+            `Billede ${imageNumber}`
+          );
       }
 
       for (
@@ -103,18 +117,16 @@ export default function WinterGenerator() {
         const modelImageNumber =
           outfitIndex * 2 + 1;
 
-        const flatLayImageNumber =
-          outfitIndex * 2 + 2;
-
         const modelFolder =
           folders[
-            modelImageNumber - 1
+            modelImageNumber
           ];
 
-        const flatLayFolder =
-          folders[
-            flatLayImageNumber - 1
-          ];
+        if (!modelFolder) {
+          throw new Error(
+            `Kunne ikke finde ZIP mappe til Billede ${modelImageNumber}.`
+          );
+        }
 
         setMessage(
           `Downloading products for Winter outfit ${outfitIndex + 1}...`
@@ -124,22 +136,33 @@ export default function WinterGenerator() {
           {
             product:
               outfit.products.shoe,
-            type: "shoe"
+
+            type:
+              "shoe"
           },
+
           {
             product:
               outfit.products.top,
-            type: "top"
+
+            type:
+              "top"
           },
+
           {
             product:
               outfit.products.bottom,
-            type: "bottom"
+
+            type:
+              "bottom"
           },
+
           {
             product:
               outfit.products.accessory,
-            type: "accessory"
+
+            type:
+              "accessory"
           }
         ];
 
@@ -192,16 +215,6 @@ export default function WinterGenerator() {
             imageBlob
           );
         }
-
-        modelFolder.file(
-          "prompt.txt",
-          outfit.modelPrompt
-        );
-
-        flatLayFolder.file(
-          "prompt.txt",
-          outfit.flatLayPrompt
-        );
       }
 
       setMessage(
@@ -255,12 +268,8 @@ export default function WinterGenerator() {
         );
       }, 1000);
 
-      setResults(
-        data.outfits
-      );
-
       setMessage(
-        "Complete, 3 Winter outfits and 6 image prompts downloaded."
+        "Complete, 3 Winter outfits and 6 image prompts generated."
       );
 
     } catch (error) {
@@ -279,7 +288,8 @@ export default function WinterGenerator() {
   }
 
   async function copyPrompt(
-    prompt
+    prompt,
+    number
   ) {
     try {
       await navigator.clipboard.writeText(
@@ -287,7 +297,7 @@ export default function WinterGenerator() {
       );
 
       setMessage(
-        "Prompt copied to clipboard."
+        `Prompt ${number} copied to clipboard.`
       );
 
     } catch {
@@ -295,6 +305,32 @@ export default function WinterGenerator() {
         "Could not copy the prompt automatically."
       );
     }
+  }
+
+  function getPrompt(
+    number
+  ) {
+    const outfitIndex =
+      Math.floor(
+        (number - 1) / 2
+      );
+
+    const outfit =
+      results[
+        outfitIndex
+      ];
+
+    if (!outfit) {
+      return "";
+    }
+
+    if (
+      number % 2 === 1
+    ) {
+      return outfit.modelPrompt;
+    }
+
+    return outfit.flatLayPrompt;
   }
 
   return (
@@ -348,6 +384,37 @@ export default function WinterGenerator() {
 
       {results.length > 0 && (
         <section className="clothing-results">
+
+          <div className="section-label">
+            QUICK COPY
+          </div>
+
+          <div className="quick-copy-grid">
+
+            {[1, 2, 3, 4, 5, 6].map(
+              (number) => (
+                <button
+                  key={number}
+                  className="copy-button"
+                  onClick={() =>
+                    copyPrompt(
+                      getPrompt(number),
+                      number
+                    )
+                  }
+                >
+                  <span>
+                    COPY PROMPT {number}
+                  </span>
+
+                  <span className="copy-icon">
+                    ⧉
+                  </span>
+                </button>
+              )
+            )}
+
+          </div>
 
           <div className="section-label">
             GENERATED OUTFITS
@@ -482,7 +549,8 @@ export default function WinterGenerator() {
                       className="copy-button"
                       onClick={() =>
                         copyPrompt(
-                          outfit.modelPrompt
+                          outfit.modelPrompt,
+                          index * 2 + 1
                         )
                       }
                     >
@@ -519,7 +587,8 @@ export default function WinterGenerator() {
                       className="copy-button"
                       onClick={() =>
                         copyPrompt(
-                          outfit.flatLayPrompt
+                          outfit.flatLayPrompt,
+                          index * 2 + 2
                         )
                       }
                     >
