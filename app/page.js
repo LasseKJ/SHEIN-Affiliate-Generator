@@ -89,6 +89,7 @@ export default function Home() {
           <section className="clothing-selection">
 
             <div className="clothing-hero">
+
               <div className="eyebrow">
                 CLOTHING
               </div>
@@ -102,6 +103,7 @@ export default function Home() {
                 Select a season to create
                 complete fashion outfits.
               </p>
+
             </div>
 
             <div className="clothing-category-section">
@@ -114,8 +116,7 @@ export default function Home() {
 
                 <button
                   className={`category-button ${
-                    clothingCategory ===
-                    "Autumn"
+                    clothingCategory === "Autumn"
                       ? "selected"
                       : ""
                   }`}
@@ -129,8 +130,16 @@ export default function Home() {
                 </button>
 
                 <button
-                  className="category-button"
-                  disabled
+                  className={`category-button ${
+                    clothingCategory === "Winter"
+                      ? "selected"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setClothingCategory(
+                      "Winter"
+                    )
+                  }
                 >
                   WINTER
                 </button>
@@ -139,9 +148,41 @@ export default function Home() {
 
             </div>
 
-            {clothingCategory ===
-              "Autumn" && (
+            {clothingCategory === "Autumn" && (
               <AutumnGenerator />
+            )}
+
+            {clothingCategory === "Winter" && (
+              <section className="clothing-results">
+
+                <div className="section-label">
+                  WINTER
+                </div>
+
+                <div className="clothing-result-card">
+
+                  <div className="clothing-result-header">
+
+                    <div>
+                      <div className="group-label">
+                        WINTER
+                      </div>
+
+                      <div className="clothing-category-name">
+                        COMING NEXT
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <p>
+                    Winter generator is ready
+                    to be connected.
+                  </p>
+
+                </div>
+
+              </section>
             )}
 
           </section>
