@@ -4,6 +4,9 @@ import { useState } from "react";
 import JSZip from "jszip";
 
 export default function Home() {
+  const [contentType, setContentType] =
+    useState("squishy");
+
   const [message, setMessage] =
     useState("");
 
@@ -16,11 +19,19 @@ export default function Home() {
   const [coverPrompt, setCoverPrompt] =
     useState("");
 
-  async function generate() {
+  const [clothingProduct, setClothingProduct] =
+    useState(null);
+
+  const [clothingPrompt, setClothingPrompt] =
+    useState("");
+
+  async function generateSquishy() {
     setLoading(true);
 
     setGroups([]);
     setCoverPrompt("");
+    setClothingProduct(null);
+    setClothingPrompt("");
 
     setMessage(
       "Selecting 9 products..."
@@ -366,7 +377,6 @@ export default function Home() {
       );
 
     } catch (error) {
-
       console.error(
         "Generate error:",
         error
@@ -377,17 +387,106 @@ export default function Home() {
       );
 
     } finally {
-
       setLoading(false);
-
     }
+  }
+
+  async function generateClothingVideo() {
+    setLoading(true);
+
+    setGroups([]);
+    setCoverPrompt("");
+    setClothingProduct(null);
+    setClothingPrompt("");
+
+    setMessage(
+      "Selecting clothing product..."
+    );
+
+    try {
+      const response =
+        await fetch(
+          "/api/generate-clothing",
+          {
+            method: "POST"
+          }
+        );
+
+      const responseText =
+        await response.text();
+
+      let data;
+
+      try {
+        data =
+          JSON.parse(
+            responseText
+          );
+      } catch {
+        throw new Error(
+          `API returnerede ikke gyldig JSON. Status: ${response.status}.`
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          "Der opstod en fejl."
+        );
+      }
+
+      if (
+        !data.product ||
+        !data.prompt
+      ) {
+        throw new Error(
+          "Tøj video kunne ikke genereres."
+        );
+      }
+
+      setClothingProduct(
+        data.product
+      );
+
+      setClothingPrompt(
+        data.prompt
+      );
+
+      setMessage(
+        "Tøj video prompt er klar."
+      );
+
+    } catch (error) {
+      console.error(
+        "Clothing video error:",
+        error
+      );
+
+      setMessage(
+        `Error, ${error.message}`
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function generate() {
+    if (
+      contentType ===
+      "squishy"
+    ) {
+      await generateSquishy();
+      return;
+    }
+
+    await generateClothingVideo();
   }
 
   async function copyPrompt(
     prompt
   ) {
     try {
-
       await navigator.clipboard.writeText(
         prompt
       );
@@ -397,12 +496,30 @@ export default function Home() {
       );
 
     } catch {
-
       setMessage(
         "Could not copy the prompt automatically."
       );
-
     }
+  }
+
+  function changeContentType(
+    type
+  ) {
+    if (
+      loading
+    ) {
+      return;
+    }
+
+    setContentType(
+      type
+    );
+
+    setGroups([]);
+    setCoverPrompt("");
+    setClothingProduct(null);
+    setClothingPrompt("");
+    setMessage("");
   }
 
   return (
@@ -439,24 +556,94 @@ export default function Home() {
           </div>
 
           <h1>
-
             SHEIN Affiliate
-
             <br />
-
             <span>
               Generator
             </span>
-
           </h1>
 
           <p>
-            Select 9 products,
-            download all product
-            images and templates,
-            and create 4 ready to
-            use prompts.
+            Choose what type of
+            SHEIN content you want
+            to create.
           </p>
+
+          <div className="content-type-selector">
+
+            <button
+              className={
+                contentType ===
+                "squishy"
+                  ? "content-type-button active"
+                  : "content-type-button"
+              }
+              onClick={() =>
+                changeContentType(
+                  "squishy"
+                )
+              }
+              disabled={
+                loading
+              }
+            >
+
+              <span className="content-type-title">
+                SQUISHY POST
+              </span>
+
+              <span className="content-type-description">
+                9 products · 4 prompts
+              </span>
+
+            </button>
+
+            <button
+              className={
+                contentType ===
+                "clothing"
+                  ? "content-type-button active"
+                  : "content-type-button"
+              }
+              onClick={() =>
+                changeContentType(
+                  "clothing"
+                )
+              }
+              disabled={
+                loading
+              }
+            >
+
+              <span className="content-type-title">
+                TØJ VIDEO
+              </span>
+
+              <span className="content-type-description">
+                1 clothing product · AI video prompt
+              </span>
+
+            </button>
+
+          </div>
+
+          {contentType ===
+            "squishy" ? (
+            <p>
+              Select 9 products,
+              download all product
+              images and templates,
+              and create 4 ready to
+              use prompts.
+            </p>
+          ) : (
+            <p>
+              Select one active
+              clothing product and
+              create a ready to use
+              AI video prompt in 9:16.
+            </p>
+          )}
 
           <button
             className={`generate-button ${
@@ -473,11 +660,9 @@ export default function Home() {
           >
 
             <span>
-
               {loading
                 ? "GENERATING..."
                 : "GENERATE"}
-
             </span>
 
             <span className="button-arrow">
@@ -498,8 +683,10 @@ export default function Home() {
 
         </section>
 
-        {(groups.length > 0 ||
-          coverPrompt) && (
+        {contentType ===
+          "squishy" &&
+          (groups.length > 0 ||
+            coverPrompt) && (
 
           <section className="results">
 
@@ -666,6 +853,102 @@ export default function Home() {
 
         )}
 
+        {contentType ===
+          "clothing" &&
+          clothingPrompt && (
+
+          <section className="results">
+
+            <div className="results-header">
+
+              <div>
+
+                <div className="section-label">
+                  GENERATED CONTENT
+                </div>
+
+                <h2>
+                  Tøj Video
+                </h2>
+
+              </div>
+
+              <div className="count">
+
+                <strong>
+                  01
+                </strong>
+
+                VIDEO PROMPT
+
+              </div>
+
+            </div>
+
+            {clothingProduct && (
+
+              <article className="clothing-result">
+
+                <div className="clothing-product-info">
+
+                  <div className="group-label">
+                    SELECTED PRODUCT
+                  </div>
+
+                  <h3>
+                    {clothingProduct.name}
+                  </h3>
+
+                  <div className="clothing-meta">
+                    CODE:{" "}
+                    {clothingProduct.code}
+                  </div>
+
+                  <div className="clothing-price">
+                    {clothingProduct.price}{" "}
+                    {clothingProduct.currency}
+                  </div>
+
+                </div>
+
+                <button
+                  className="copy-button"
+                  onClick={() =>
+                    copyPrompt(
+                      clothingPrompt
+                    )
+                  }
+                >
+
+                  <span>
+                    COPY VIDEO PROMPT
+                  </span>
+
+                  <span className="copy-icon">
+                    ⧉
+                  </span>
+
+                </button>
+
+                <div className="prompt-wrapper">
+
+                  <textarea
+                    value={
+                      clothingPrompt
+                    }
+                    readOnly
+                  />
+
+                </div>
+
+              </article>
+
+            )}
+
+          </section>
+
+        )}
+
         <footer>
 
           <span>
@@ -673,7 +956,10 @@ export default function Home() {
           </span>
 
           <span>
-            9 PRODUCTS · 4 TEMPLATES · 4 PROMPTS
+            {contentType ===
+            "squishy"
+              ? "9 PRODUCTS · 4 TEMPLATES · 4 PROMPTS"
+              : "CLOTHING VIDEO · 9:16"}
           </span>
 
         </footer>
