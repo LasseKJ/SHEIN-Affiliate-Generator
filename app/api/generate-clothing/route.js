@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
 import {
-  getClothingProduct
-} from "../../../lib/googleSheetsClothing";
+  generateAutumnOutfits
+} from "../../../../lib/clothingOutfits";
 
 import {
-  createClothingVideoPrompt
-} from "../../../lib/clothingVideoPrompt";
+  createAutumnPrompts
+} from "../../../../lib/clothingPrompts";
 
 export const dynamic =
   "force-dynamic";
@@ -22,60 +22,162 @@ export async function POST(
       await request.json();
 
     const category =
-      body?.category;
+      body?.category || "";
 
-    if (!category) {
+    if (
+      category !== "Autumn"
+    ) {
       throw new Error(
-        "Der blev ikke valgt en kategori."
+        "Der er kun understøttet Autumn endnu."
       );
     }
 
-    const product =
-      await getClothingProduct(
-        category
-      );
+    const outfits =
+      await generateAutumnOutfits();
 
-    if (!product) {
+    if (
+      !outfits ||
+      outfits.length !== 3
+    ) {
       throw new Error(
-        "Kunne ikke finde et tøjprodukt."
+        "Der blev ikke oprettet præcis 3 outfits."
       );
     }
 
-    const prompt =
-      createClothingVideoPrompt(
-        product
+    const results =
+      outfits.map(
+        (
+          outfit,
+          index
+        ) => {
+          const prompts =
+            createAutumnPrompts(
+              outfit
+            );
+
+          return {
+            outfitNumber:
+              index + 1,
+
+            imageNumber:
+              index * 2 + 1,
+
+            modelPrompt:
+              prompts.model,
+
+            flatLayPrompt:
+              prompts.flatLay,
+
+            products: {
+              shoe: {
+                id:
+                  outfit.shoe.id,
+
+                name:
+                  outfit.shoe.name,
+
+                category:
+                  outfit.shoe.category,
+
+                code:
+                  outfit.shoe.code,
+
+                imageUrl:
+                  outfit.shoe.imageUrl,
+
+                price:
+                  outfit.shoe.price,
+
+                currency:
+                  outfit.shoe.currency
+              },
+
+              top: {
+                id:
+                  outfit.top.id,
+
+                name:
+                  outfit.top.name,
+
+                category:
+                  outfit.top.category,
+
+                code:
+                  outfit.top.code,
+
+                imageUrl:
+                  outfit.top.imageUrl,
+
+                price:
+                  outfit.top.price,
+
+                currency:
+                  outfit.top.currency
+              },
+
+              bottom: {
+                id:
+                  outfit.bottom.id,
+
+                name:
+                  outfit.bottom.name,
+
+                category:
+                  outfit.bottom.category,
+
+                code:
+                  outfit.bottom.code,
+
+                imageUrl:
+                  outfit.bottom.imageUrl,
+
+                price:
+                  outfit.bottom.price,
+
+                currency:
+                  outfit.bottom.currency
+              },
+
+              accessory: {
+                id:
+                  outfit.accessory.id,
+
+                name:
+                  outfit.accessory.name,
+
+                category:
+                  outfit.accessory.category,
+
+                code:
+                  outfit.accessory.code,
+
+                imageUrl:
+                  outfit.accessory.imageUrl,
+
+                price:
+                  outfit.accessory.price,
+
+                currency:
+                  outfit.accessory.currency
+              }
+            }
+          };
+        }
       );
 
     return NextResponse.json({
       success: true,
 
-      category,
+      category: "Autumn",
 
-      product: {
-        id:
-          product["Product ID"],
+      totalOutfits:
+        results.length,
 
-        name:
-          product["Product Name"],
+      totalImages:
+        results.length * 2,
 
-        code:
-          product["Product Code"],
-
-        price:
-          product["Price"],
-
-        currency:
-          product["Currency"],
-
-        imageUrl:
-          product[
-            "Product Image URL"
-          ]
-      },
-
-      prompt
+      outfits: results
     });
-
   } catch (error) {
     console.error(
       "Clothing generate error:",
@@ -87,8 +189,8 @@ export async function POST(
         success: false,
 
         error:
-          error.message ||
-          "Kunne ikke generere tøjvideo."
+          error?.message ||
+          "Kunne ikke generere Autumn outfits."
       },
       {
         status: 500
