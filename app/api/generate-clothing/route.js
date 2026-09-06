@@ -1,103 +1,246 @@
 import { NextResponse } from "next/server";
 
 import {
-  generateAutumnOutfits
+  generateAutumnVideos
 } from "../../../lib/clothingOutfits";
 
 import {
   createAutumnPrompts
 } from "../../../lib/clothingPrompts";
 
-export const dynamic = "force-dynamic";
+export const dynamic =
+  "force-dynamic";
 
-export const runtime = "nodejs";
+export const runtime =
+  "nodejs";
 
-export async function POST(request) {
+const ALLOWED_VIDEO_COUNTS = [
+  1,
+  2,
+  4,
+  8
+];
+
+export async function POST(
+  request
+) {
   try {
-    const body = await request.json();
+    const body =
+      await request.json();
 
-    const category = body?.category || "";
+    const category =
+      body?.category || "";
 
-    if (category !== "Autumn") {
+    const videoCount =
+      Number(
+        body?.videoCount || 1
+      );
+
+    if (
+      category !== "Autumn"
+    ) {
       throw new Error(
-        "Der er kun understøttet Autumn endnu."
+        "Der er kun understøttet Autumn i denne route."
       );
     }
 
-    const outfits = await generateAutumnOutfits();
-
-    if (!outfits || outfits.length !== 3) {
+    if (
+      !ALLOWED_VIDEO_COUNTS.includes(
+        videoCount
+      )
+    ) {
       throw new Error(
-        "Der blev ikke oprettet præcis 3 outfits."
+        "Antallet af videoer skal være 1, 2, 4 eller 8."
       );
     }
 
-    const results = outfits.map((outfit, index) => {
-      const prompts = createAutumnPrompts(outfit);
+    const videos =
+      await generateAutumnVideos(
+        videoCount
+      );
 
-      return {
-        outfitNumber: index + 1,
+    if (
+      !videos ||
+      videos.length !==
+        videoCount
+    ) {
+      throw new Error(
+        "Der blev ikke oprettet det valgte antal videoer."
+      );
+    }
 
-        imageNumber: index * 2 + 1,
+    const results =
+      videos.map(
+        (video) => {
 
-        modelPrompt: prompts.model,
+          const videoOutfits =
+            video.outfits.map(
+              (
+                outfit,
+                outfitIndex
+              ) => {
 
-        flatLayPrompt: prompts.flatLay,
+                const prompts =
+                  createAutumnPrompts(
+                    outfit
+                  );
 
-        products: {
-          shoe: {
-            id: outfit.shoe.id,
-            name: outfit.shoe.name,
-            category: outfit.shoe.category,
-            code: outfit.shoe.code,
-            imageUrl: outfit.shoe.imageUrl,
-            price: outfit.shoe.price,
-            currency: outfit.shoe.currency
-          },
+                return {
+                  outfitNumber:
+                    outfitIndex +
+                    1,
 
-          top: {
-            id: outfit.top.id,
-            name: outfit.top.name,
-            category: outfit.top.category,
-            code: outfit.top.code,
-            imageUrl: outfit.top.imageUrl,
-            price: outfit.top.price,
-            currency: outfit.top.currency
-          },
+                  imageNumbers: {
+                    model:
+                      outfitIndex *
+                        2 +
+                      1,
 
-          bottom: {
-            id: outfit.bottom.id,
-            name: outfit.bottom.name,
-            category: outfit.bottom.category,
-            code: outfit.bottom.code,
-            imageUrl: outfit.bottom.imageUrl,
-            price: outfit.bottom.price,
-            currency: outfit.bottom.currency
-          },
+                    flatLay:
+                      outfitIndex *
+                        2 +
+                      2
+                  },
 
-          accessory: {
-            id: outfit.accessory.id,
-            name: outfit.accessory.name,
-            category: outfit.accessory.category,
-            code: outfit.accessory.code,
-            imageUrl: outfit.accessory.imageUrl,
-            price: outfit.accessory.price,
-            currency: outfit.accessory.currency
-          }
+                  modelPrompt:
+                    prompts.model,
+
+                  flatLayPrompt:
+                    prompts.flatLay,
+
+                  products: {
+                    shoe: {
+                      id:
+                        outfit.shoe.id,
+
+                      name:
+                        outfit.shoe.name,
+
+                      category:
+                        outfit.shoe.category,
+
+                      code:
+                        outfit.shoe.code,
+
+                      imageUrl:
+                        outfit.shoe.imageUrl,
+
+                      price:
+                        outfit.shoe.price,
+
+                      currency:
+                        outfit.shoe.currency
+                    },
+
+                    top: {
+                      id:
+                        outfit.top.id,
+
+                      name:
+                        outfit.top.name,
+
+                      category:
+                        outfit.top.category,
+
+                      code:
+                        outfit.top.code,
+
+                      imageUrl:
+                        outfit.top.imageUrl,
+
+                      price:
+                        outfit.top.price,
+
+                      currency:
+                        outfit.top.currency
+                    },
+
+                    bottom: {
+                      id:
+                        outfit.bottom.id,
+
+                      name:
+                        outfit.bottom.name,
+
+                      category:
+                        outfit.bottom.category,
+
+                      code:
+                        outfit.bottom.code,
+
+                      imageUrl:
+                        outfit.bottom.imageUrl,
+
+                      price:
+                        outfit.bottom.price,
+
+                      currency:
+                        outfit.bottom.currency
+                    },
+
+                    accessory: {
+                      id:
+                        outfit.accessory.id,
+
+                      name:
+                        outfit.accessory.name,
+
+                      category:
+                        outfit.accessory.category,
+
+                      code:
+                        outfit.accessory.code,
+
+                      imageUrl:
+                        outfit.accessory.imageUrl,
+
+                      price:
+                        outfit.accessory.price,
+
+                      currency:
+                        outfit.accessory.currency
+                    }
+                  }
+                };
+              }
+            );
+
+          return {
+            videoNumber:
+              video.videoNumber,
+
+            prompts: videoOutfits.flatMap(
+              (outfit) => [
+                outfit.modelPrompt,
+                outfit.flatLayPrompt
+              ]
+            ),
+
+            outfits:
+              videoOutfits
+          };
         }
-      };
-    });
+      );
 
     return NextResponse.json({
       success: true,
 
-      category: "Autumn",
+      category:
+        "Autumn",
 
-      totalOutfits: results.length,
+      videoCount,
 
-      totalImages: results.length * 2,
+      totalVideos:
+        results.length,
 
-      outfits: results
+      totalImages:
+        results.length * 6,
+
+      totalPrompts:
+        results.length * 6,
+
+      videos:
+        results
     });
 
   } catch (error) {
@@ -112,7 +255,7 @@ export async function POST(request) {
 
         error:
           error?.message ||
-          "Kunne ikke generere Autumn outfits."
+          "Kunne ikke generere Autumn videoer."
       },
       {
         status: 500
