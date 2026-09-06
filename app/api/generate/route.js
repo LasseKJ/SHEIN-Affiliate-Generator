@@ -8,7 +8,7 @@ import {
   createPromptSet,
   createCoverPrompt
 } from "../../../lib/promptTemplate";
-
+print("hello world")
 export const dynamic =
   "force-dynamic";
 
