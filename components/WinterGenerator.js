@@ -10,14 +10,19 @@ export default function WinterGenerator() {
   const [message, setMessage] =
     useState("");
 
-  const [results, setResults] =
+  const [videoCount, setVideoCount] =
+    useState(1);
+
+  const [videos, setVideos] =
     useState([]);
 
   async function generate() {
     setLoading(true);
-    setResults([]);
+
+    setVideos([]);
+
     setMessage(
-      "Creating 3 Winter outfits..."
+      `Creating ${videoCount} Winter video${videoCount === 1 ? "" : "s"}...`
     );
 
     try {
@@ -32,9 +37,13 @@ export default function WinterGenerator() {
                 "application/json"
             },
 
-            body: JSON.stringify({
-              category: "Winter"
-            })
+            body:
+              JSON.stringify({
+                category:
+                  "Winter",
+
+                videoCount
+              })
           }
         );
 
@@ -63,157 +72,165 @@ export default function WinterGenerator() {
 
       if (
         !data.success ||
-        !data.outfits ||
-        data.outfits.length !== 3
+        !data.videos ||
+        data.videos.length !==
+          videoCount
       ) {
         throw new Error(
-          "Der blev ikke oprettet præcis 3 Winter outfits."
+          "Der blev ikke oprettet det valgte antal videoer."
         );
       }
 
-      setResults(
-        data.outfits
+      setVideos(
+        data.videos
       );
 
       const zip =
         new JSZip();
 
-      setMessage(
-        "Creating folders..."
-      );
-
-      /*
-        ZIP'en skal kun indeholde
-        Billede 1, Billede 3 og Billede 5.
-      */
-
-      const imageNumbers = [
-        1,
-        3,
-        5
-      ];
-
-      const folders = {};
-
       for (
-        const imageNumber of imageNumbers
+        let videoIndex = 0;
+        videoIndex <
+        data.videos.length;
+        videoIndex++
       ) {
-        folders[imageNumber] =
+        const video =
+          data.videos[
+            videoIndex
+          ];
+
+        const videoFolder =
           zip.folder(
-            `Billede ${imageNumber}`
+            `VIDEO ${video.videoNumber}`
           );
-      }
 
-      for (
-        let outfitIndex = 0;
-        outfitIndex < 3;
-        outfitIndex++
-      ) {
-        const outfit =
-          data.outfits[
-            outfitIndex
-          ];
+        const imageFolders = {};
 
-        const modelImageNumber =
-          outfitIndex * 2 + 1;
-
-        const modelFolder =
-          folders[
-            modelImageNumber
-          ];
-
-        if (!modelFolder) {
-          throw new Error(
-            `Kunne ikke finde ZIP mappe til Billede ${modelImageNumber}.`
-          );
-        }
-
-        setMessage(
-          `Downloading products for Winter outfit ${outfitIndex + 1}...`
-        );
-
-        const products = [
-          {
-            product:
-              outfit.products.shoe,
-
-            type:
-              "shoe"
-          },
-
-          {
-            product:
-              outfit.products.top,
-
-            type:
-              "top"
-          },
-
-          {
-            product:
-              outfit.products.bottom,
-
-            type:
-              "bottom"
-          },
-
-          {
-            product:
-              outfit.products.accessory,
-
-            type:
-              "accessory"
-          }
+        const imageNumbers = [
+          1,
+          3,
+          5
         ];
 
         for (
-          const item of products
+          const imageNumber of
+          imageNumbers
         ) {
-          const product =
-            item.product;
+          imageFolders[
+            imageNumber
+          ] =
+            videoFolder.folder(
+              `Billede ${imageNumber}`
+            );
+        }
 
-          if (
-            !product.imageUrl
-          ) {
+        for (
+          let outfitIndex = 0;
+          outfitIndex <
+          video.outfits.length;
+          outfitIndex++
+        ) {
+          const outfit =
+            video.outfits[
+              outfitIndex
+            ];
+
+          const modelImageNumber =
+            outfitIndex * 2 + 1;
+
+          const modelFolder =
+            imageFolders[
+              modelImageNumber
+            ];
+
+          if (!modelFolder) {
             throw new Error(
-              `Produktet ${product.name} har ingen billed URL.`
+              `Kunne ikke finde ZIP mappe til Billede ${modelImageNumber}.`
             );
           }
 
-          const imageResponse =
-            await fetch(
-              product.imageUrl
-            );
-
-          if (
-            !imageResponse.ok
-          ) {
-            throw new Error(
-              `Kunne ikke hente produktbillede: ${product.name}`
-            );
-          }
-
-          const imageBlob =
-            await imageResponse.blob();
-
-          let extension =
-            "jpg";
-
-          if (
-            imageBlob.type ===
-            "image/png"
-          ) {
-            extension =
-              "png";
-          }
-
-          const fileName =
-            `${item.type}-${product.code}.${extension}`;
-
-          modelFolder.file(
-            fileName,
-            imageBlob
+          setMessage(
+            `Video ${video.videoNumber} of ${data.videos.length}, downloading outfit ${outfitIndex + 1}...`
           );
+
+          const products = [
+            {
+              product:
+                outfit.products.shoe,
+
+              type:
+                "shoe"
+            },
+
+            {
+              product:
+                outfit.products.top,
+
+              type:
+                "top"
+            },
+
+            {
+              product:
+                outfit.products.bottom,
+
+              type:
+                "bottom"
+            },
+
+            {
+              product:
+                outfit.products.accessory,
+
+              type:
+                "accessory"
+            }
+          ];
+
+          for (
+            const item of products
+          ) {
+            const product =
+              item.product;
+
+            if (
+              !product.imageUrl
+            ) {
+              throw new Error(
+                `Produktet ${product.name} har ingen billed URL.`
+              );
+            }
+
+            const imageResponse =
+              await fetch(
+                product.imageUrl
+              );
+
+            if (
+              !imageResponse.ok
+            ) {
+              throw new Error(
+                `Kunne ikke hente produktbillede: ${product.name}`
+              );
+            }
+
+            const imageBlob =
+              await imageResponse.blob();
+
+            const extension =
+              imageBlob.type ===
+              "image/png"
+                ? "png"
+                : "jpg";
+
+            const fileName =
+              `${item.type}-${product.code}.${extension}`;
+
+            modelFolder.file(
+              fileName,
+              imageBlob
+            );
+          }
         }
       }
 
@@ -247,7 +264,7 @@ export default function WinterGenerator() {
         downloadUrl;
 
       link.download =
-        "winter-outfits.zip";
+        `winter-outfits-${videoCount}-videos.zip`;
 
       link.style.display =
         "none";
@@ -269,7 +286,7 @@ export default function WinterGenerator() {
       }, 1000);
 
       setMessage(
-        "Complete, 3 Winter outfits and 6 image prompts generated."
+        `Complete, ${videoCount} Winter video${videoCount === 1 ? "" : "s"} with ${videoCount * 6} image prompts generated.`
       );
 
     } catch (error) {
@@ -308,29 +325,39 @@ export default function WinterGenerator() {
   }
 
   function getPrompt(
-    number
+    videoNumber,
+    imageNumber
   ) {
-    const outfitIndex =
-      Math.floor(
-        (number - 1) / 2
+    const video =
+      videos.find(
+        (item) =>
+          item.videoNumber ===
+          videoNumber
       );
 
-    const outfit =
-      results[
-        outfitIndex
-      ];
-
-    if (!outfit) {
+    if (!video) {
       return "";
     }
 
-    if (
-      number % 2 === 1
-    ) {
-      return outfit.modelPrompt;
-    }
+    const promptIndex =
+      imageNumber - 1;
 
-    return outfit.flatLayPrompt;
+    return (
+      video.prompts[
+        promptIndex
+      ] || ""
+    );
+  }
+
+  function getGlobalPromptNumber(
+    videoNumber,
+    imageNumber
+  ) {
+    return (
+      (videoNumber - 1) *
+        6 +
+      imageNumber
+    );
   }
 
   return (
@@ -348,10 +375,46 @@ export default function WinterGenerator() {
         </h1>
 
         <p>
-          Generate 3 complete Winter
-          outfits with 6 ready to use
-          image prompts.
+          Generate complete Winter
+          videos with 6 image prompts
+          per video.
         </p>
+
+        <div className="clothing-video-count">
+
+          <div className="selector-label">
+            HOW MANY VIDEOS?
+          </div>
+
+          <div className="video-count-grid">
+
+            {[1, 2, 4, 8].map(
+              (count) => (
+                <button
+                  key={count}
+                  type="button"
+                  className={`video-count-button ${
+                    videoCount === count
+                      ? "selected"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setVideoCount(
+                      count
+                    )
+                  }
+                  disabled={
+                    loading
+                  }
+                >
+                  {count}
+                </button>
+              )
+            )}
+
+          </div>
+
+        </div>
 
         <button
           className={`generate-button ${
@@ -359,266 +422,318 @@ export default function WinterGenerator() {
               ? "loading"
               : ""
           }`}
-          onClick={generate}
-          disabled={loading}
+          onClick={
+            generate
+          }
+          disabled={
+            loading
+          }
         >
+
           <span>
             {loading
               ? "GENERATING..."
-              : "GENERATE WINTER"}
+              : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}
           </span>
 
           <span className="button-arrow">
             →
           </span>
+
         </button>
 
         {message && (
           <div className="message">
+
             <span className="message-dot" />
+
             {message}
+
           </div>
         )}
 
       </div>
 
-      {results.length > 0 && (
+      {videos.length > 0 && (
+
         <section className="clothing-results">
+
+          <div className="results-header">
+
+            <div>
+
+              <div className="section-label">
+                GENERATED CONTENT
+              </div>
+
+              <h2>
+                Your Winter prompts
+              </h2>
+
+            </div>
+
+            <div className="count">
+
+              <strong>
+                {videos.length * 6}
+              </strong>
+
+              PROMPTS READY
+
+            </div>
+
+          </div>
 
           <div className="section-label">
             QUICK COPY
           </div>
 
-          <div className="quick-copy-grid">
+          <div className="clothing-quick-copy-table">
 
-            {[1, 2, 3, 4, 5, 6].map(
-              (number) => (
-                <button
-                  key={number}
-                  className="copy-button"
-                  onClick={() =>
-                    copyPrompt(
-                      getPrompt(number),
-                      number
-                    )
+            <div className="clothing-quick-copy-header">
+
+              <div>
+                VIDEO
+              </div>
+
+              <div>
+                BILLEDE 1
+              </div>
+
+              <div>
+                BILLEDE 2
+              </div>
+
+              <div>
+                BILLEDE 3
+              </div>
+
+              <div>
+                BILLEDE 4
+              </div>
+
+              <div>
+                BILLEDE 5
+              </div>
+
+              <div>
+                BILLEDE 6
+              </div>
+
+            </div>
+
+            {videos.map(
+              (video) => (
+
+                <div
+                  className="clothing-quick-copy-row"
+                  key={
+                    video.videoNumber
                   }
                 >
-                  <span>
-                    COPY PROMPT {number}
-                  </span>
 
-                  <span className="copy-icon">
-                    ⧉
-                  </span>
-                </button>
+                  <div className="clothing-quick-copy-video">
+                    VIDEO{" "}
+                    {video.videoNumber}
+                  </div>
+
+                  {[
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ].map(
+                    (
+                      imageNumber
+                    ) => {
+
+                      const promptNumber =
+                        getGlobalPromptNumber(
+                          video.videoNumber,
+                          imageNumber
+                        );
+
+                      return (
+                        <button
+                          key={
+                            imageNumber
+                          }
+                          className="quick-copy-button"
+                          onClick={() =>
+                            copyPrompt(
+                              getPrompt(
+                                video.videoNumber,
+                                imageNumber
+                              ),
+                              promptNumber
+                            )
+                          }
+                        >
+
+                          <span>
+                            COPY PROMPT{" "}
+                            {
+                              promptNumber
+                            }
+                          </span>
+
+                          <span className="copy-icon">
+                            ⧉
+                          </span>
+
+                        </button>
+                      );
+                    }
+                  )}
+
+                </div>
+
               )
             )}
 
           </div>
 
           <div className="section-label">
-            GENERATED OUTFITS
+            PROMPTS
           </div>
 
-          <div className="clothing-outfit-grid">
+          <div className="clothing-prompt-table">
 
-            {results.map(
-              (
-                outfit,
-                index
-              ) => (
-                <article
-                  className="clothing-result-card"
+            <div className="clothing-prompt-header">
+
+              <div>
+                VIDEO
+              </div>
+
+              <div>
+                BILLEDE 1
+              </div>
+
+              <div>
+                BILLEDE 2
+              </div>
+
+              <div>
+                BILLEDE 3
+              </div>
+
+              <div>
+                BILLEDE 4
+              </div>
+
+              <div>
+                BILLEDE 5
+              </div>
+
+              <div>
+                BILLEDE 6
+              </div>
+
+            </div>
+
+            {videos.map(
+              (video) => (
+
+                <div
+                  className="clothing-prompt-row"
                   key={
-                    outfit.outfitNumber
+                    video.videoNumber
                   }
                 >
 
-                  <div className="clothing-result-header">
-
-                    <div>
-
-                      <div className="group-label">
-                        OUTFIT{" "}
-                        {index + 1}
-                      </div>
-
-                      <div className="clothing-category-name">
-                        WINTER
-                      </div>
-
-                    </div>
-
-                    <div className="group-number">
-                      0
-                      {index + 1}
-                    </div>
-
+                  <div className="clothing-prompt-video-name">
+                    VIDEO{" "}
+                    {video.videoNumber}
                   </div>
 
-                  <div className="clothing-info-grid">
+                  {video.prompts.map(
+                    (
+                      prompt,
+                      promptIndex
+                    ) => {
 
-                    <div>
-                      <span>
-                        SHOE
-                      </span>
+                      const imageNumber =
+                        promptIndex +
+                        1;
 
-                      <strong>
-                        {
-                          outfit.products.shoe.name
-                        }
-                      </strong>
+                      const promptNumber =
+                        getGlobalPromptNumber(
+                          video.videoNumber,
+                          imageNumber
+                        );
 
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.shoe.code
-                        }
-                      </small>
-                    </div>
+                      return (
+                        <article
+                          className="clothing-prompt-card"
+                          key={
+                            promptNumber
+                          }
+                        >
 
-                    <div>
-                      <span>
-                        TOP
-                      </span>
+                          <div className="clothing-prompt-card-top">
 
-                      <strong>
-                        {
-                          outfit.products.top.name
-                        }
-                      </strong>
+                            <span>
+                              BILLEDE{" "}
+                              {
+                                imageNumber
+                              }
+                            </span>
 
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.top.code
-                        }
-                      </small>
-                    </div>
+                            <strong>
+                              {
+                                promptNumber
+                              }
+                            </strong>
 
-                    <div>
-                      <span>
-                        BOTTOM
-                      </span>
+                          </div>
 
-                      <strong>
-                        {
-                          outfit.products.bottom.name
-                        }
-                      </strong>
+                          <button
+                            className="copy-button"
+                            onClick={() =>
+                              copyPrompt(
+                                prompt,
+                                promptNumber
+                              )
+                            }
+                          >
 
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.bottom.code
-                        }
-                      </small>
-                    </div>
+                            <span>
+                              COPY PROMPT
+                            </span>
 
-                    <div>
-                      <span>
-                        ACCESSORY
-                      </span>
+                            <span className="copy-icon">
+                              ⧉
+                            </span>
 
-                      <strong>
-                        {
-                          outfit.products.accessory.name
-                        }
-                      </strong>
+                          </button>
 
-                      <small>
-                        CODE:{" "}
-                        {
-                          outfit.products.accessory.code
-                        }
-                      </small>
-                    </div>
+                          <div className="prompt-wrapper">
 
-                  </div>
+                            <textarea
+                              value={
+                                prompt
+                              }
+                              readOnly
+                            />
 
-                  <div className="clothing-prompt-section">
+                          </div>
 
-                    <div className="prompt-heading">
-                      <h3>
-                        BILLEDE{" "}
-                        {index * 2 + 1}
-                      </h3>
-                    </div>
+                        </article>
+                      );
+                    }
+                  )}
 
-                    <button
-                      className="copy-button"
-                      onClick={() =>
-                        copyPrompt(
-                          outfit.modelPrompt,
-                          index * 2 + 1
-                        )
-                      }
-                    >
-                      <span>
-                        COPY PROMPT
-                      </span>
+                </div>
 
-                      <span className="copy-icon">
-                        ⧉
-                      </span>
-                    </button>
-
-                    <div className="prompt-wrapper">
-                      <textarea
-                        value={
-                          outfit.modelPrompt
-                        }
-                        readOnly
-                      />
-                    </div>
-
-                  </div>
-
-                  <div className="clothing-prompt-section">
-
-                    <div className="prompt-heading">
-                      <h3>
-                        BILLEDE{" "}
-                        {index * 2 + 2}
-                      </h3>
-                    </div>
-
-                    <button
-                      className="copy-button"
-                      onClick={() =>
-                        copyPrompt(
-                          outfit.flatLayPrompt,
-                          index * 2 + 2
-                        )
-                      }
-                    >
-                      <span>
-                        COPY PROMPT
-                      </span>
-
-                      <span className="copy-icon">
-                        ⧉
-                      </span>
-                    </button>
-
-                    <div className="prompt-wrapper">
-                      <textarea
-                        value={
-                          outfit.flatLayPrompt
-                        }
-                        readOnly
-                      />
-                    </div>
-
-                  </div>
-
-                </article>
               )
             )}
 
           </div>
 
         </section>
+
       )}
 
     </section>
