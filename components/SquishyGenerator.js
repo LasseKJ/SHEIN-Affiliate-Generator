@@ -663,8 +663,7 @@ export default function SquishyGenerator() {
                         >
 
                           <span>
-                            COPY PROMPT{" "}
-                            {promptNumber}
+                            PROMPT V{video.videoNumber}-{promptIndex + 1}
                           </span>
 
                           <span className="copy-icon">
@@ -770,9 +769,7 @@ export default function SquishyGenerator() {
                             </span>
 
                             <strong>
-                              {
-                                promptNumber
-                              }
+                              V{video.videoNumber}-{promptIndex + 1}
                             </strong>
 
                           </div>
@@ -788,7 +785,7 @@ export default function SquishyGenerator() {
                           >
 
                             <span>
-                              COPY PROMPT
+                              PROMPT V{video.videoNumber}-{promptIndex + 1}
                             </span>
 
                             <span className="copy-icon">
