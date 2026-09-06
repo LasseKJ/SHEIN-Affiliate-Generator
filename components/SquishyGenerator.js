@@ -10,20 +10,19 @@ export default function SquishyGenerator() {
   const [loading, setLoading] =
     useState(false);
 
-  const [groups, setGroups] =
-    useState([]);
+  const [videoCount, setVideoCount] =
+    useState(1);
 
-  const [coverPrompt, setCoverPrompt] =
-    useState("");
+  const [videos, setVideos] =
+    useState([]);
 
   async function generate() {
     setLoading(true);
 
-    setGroups([]);
-    setCoverPrompt("");
+    setVideos([]);
 
     setMessage(
-      "Selecting 9 products..."
+      `Selecting products for ${videoCount} video${videoCount === 1 ? "" : "s"}...`
     );
 
     try {
@@ -31,7 +30,16 @@ export default function SquishyGenerator() {
         await fetch(
           "/api/generate",
           {
-            method: "POST"
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+              videoCount
+            })
           }
         );
 
@@ -58,28 +66,19 @@ export default function SquishyGenerator() {
         );
       }
 
-      const selectedGroups =
-        data.groups || [];
+      if (
+        !data.success ||
+        !data.videos ||
+        data.videos.length !==
+          videoCount
+      ) {
+        throw new Error(
+          "Der blev ikke oprettet det valgte antal videoer."
+        );
+      }
 
       const templates =
         data.templates;
-
-      if (
-        selectedGroups.length !==
-        3
-      ) {
-        throw new Error(
-          "Der blev ikke oprettet præcis 3 produktgrupper."
-        );
-      }
-
-      if (
-        !data.coverPrompt
-      ) {
-        throw new Error(
-          "Forside prompt kunne ikke findes."
-        );
-      }
 
       if (
         !templates?.cover
@@ -93,9 +92,13 @@ export default function SquishyGenerator() {
         !templates?.image
       ) {
         throw new Error(
-          "Billede template kunne ikke findes."
+          "Produkt template kunne ikke findes."
         );
       }
+
+      setVideos(
+        data.videos
+      );
 
       const zip =
         new JSZip();
@@ -103,49 +106,174 @@ export default function SquishyGenerator() {
       let downloadedProducts =
         0;
 
-      setMessage(
-        "Creating folders..."
-      );
-
-      const folder1 =
-        zip.folder("01");
-
-      const folder2 =
-        zip.folder("02");
-
-      const folder3 =
-        zip.folder("03");
-
-      const folder4 =
-        zip.folder("04");
-
-      const folders = [
-        folder1,
-        folder2,
-        folder3
-      ];
-
-      setMessage(
-        "Downloading 9 product images..."
-      );
-
       for (
-        const group of
-          selectedGroups
+        let videoIndex = 0;
+        videoIndex <
+        data.videos.length;
+        videoIndex++
       ) {
-        const groupFolder =
-          folders[
-            group.number - 1
+        const video =
+          data.videos[
+            videoIndex
           ];
+
+        const videoFolder =
+          zip.folder(
+            `VIDEO ${video.videoNumber}`
+          );
+
+        const folder1 =
+          videoFolder.folder(
+            "01"
+          );
+
+        const folder2 =
+          videoFolder.folder(
+            "02"
+          );
+
+        const folder3 =
+          videoFolder.folder(
+            "03"
+          );
+
+        const folder4 =
+          videoFolder.folder(
+            "04"
+          );
+
+        const folders = [
+          folder1,
+          folder2,
+          folder3
+        ];
+
+        setMessage(
+          `Video ${video.videoNumber} of ${data.videos.length}, downloading 9 product images...`
+        );
+
+        for (
+          const group of
+            video.groups
+        ) {
+          const groupFolder =
+            folders[
+              group.number - 1
+            ];
+
+          for (
+            let index = 0;
+            index <
+            group.products.length;
+            index++
+          ) {
+            const product =
+              group.products[
+                index
+              ];
+
+            if (
+              !product.imageUrl
+            ) {
+              throw new Error(
+                `Produktet ${product.name} har ingen billed URL.`
+              );
+            }
+
+            const imageResponse =
+              await fetch(
+                product.imageUrl
+              );
+
+            if (
+              !imageResponse.ok
+            ) {
+              throw new Error(
+                `Kunne ikke hente produktbillede: ${product.name}`
+              );
+            }
+
+            const imageBlob =
+              await imageResponse.blob();
+
+            const extension =
+              imageBlob.type ===
+              "image/png"
+                ? "png"
+                : "jpg";
+
+            const fileName =
+              `product-${index + 1}-${product.code}.${extension}`;
+
+            groupFolder.file(
+              fileName,
+              imageBlob
+            );
+
+            downloadedProducts++;
+          }
+        }
+
+        setMessage(
+          `Video ${video.videoNumber} of ${data.videos.length}, downloading product template...`
+        );
+
+        const productTemplateResponse =
+          await fetch(
+            templates.image
+          );
+
+        if (
+          !productTemplateResponse.ok
+        ) {
+          throw new Error(
+            "Produkt template kunne ikke downloades."
+          );
+        }
+
+        const productTemplateBlob =
+          await productTemplateResponse.blob();
+
+        folder1.file(
+          "product-template.jpg",
+          productTemplateBlob
+        );
+
+        folder2.file(
+          "product-template.jpg",
+          productTemplateBlob
+        );
+
+        folder3.file(
+          "product-template.jpg",
+          productTemplateBlob
+        );
+
+        setMessage(
+          `Video ${video.videoNumber} of ${data.videos.length}, preparing cover images...`
+        );
+
+        const coverProducts = [
+          video.groups[0]
+            .products[0],
+
+          video.groups[1]
+            .products[0],
+
+          video.groups[2]
+            .products[0]
+        ];
 
         for (
           let index = 0;
           index <
-          group.products.length;
+          coverProducts.length;
           index++
         ) {
           const product =
-            group.products[index];
+            coverProducts[
+              index
+            ];
 
           const imageResponse =
             await fetch(
@@ -156,7 +284,7 @@ export default function SquishyGenerator() {
             !imageResponse.ok
           ) {
             throw new Error(
-              `Kunne ikke hente produktbillede: ${product.name}`
+              `Kunne ikke hente forsidebillede: ${product.name}`
             );
           }
 
@@ -169,138 +297,46 @@ export default function SquishyGenerator() {
               ? "png"
               : "jpg";
 
-          const fileName =
-            `product-${index + 1}-${product.code}.${extension}`;
-
-          groupFolder.file(
-            fileName,
+          folder4.file(
+            `product-${index + 1}-from-group-${index + 1}.${extension}`,
             imageBlob
           );
-
-          downloadedProducts++;
         }
+
+        setMessage(
+          `Video ${video.videoNumber} of ${data.videos.length}, downloading cover template...`
+        );
+
+        const coverResponse =
+          await fetch(
+            templates.cover
+          );
+
+        if (
+          !coverResponse.ok
+        ) {
+          throw new Error(
+            "Forside template kunne ikke downloades."
+          );
+        }
+
+        const coverBlob =
+          await coverResponse.blob();
+
+        folder4.file(
+          "cover-template.jpg",
+          coverBlob
+        );
       }
 
       if (
         downloadedProducts !==
-        9
+        data.videos.length * 9
       ) {
         throw new Error(
-          `Kun ${downloadedProducts} af 9 produktbilleder blev hentet.`
+          `Kun ${downloadedProducts} af ${data.videos.length * 9} produktbilleder blev hentet.`
         );
       }
-
-      setMessage(
-        "Downloading product template..."
-      );
-
-      const productTemplateResponse =
-        await fetch(
-          templates.image
-        );
-
-      if (
-        !productTemplateResponse.ok
-      ) {
-        throw new Error(
-          "Produkt template kunne ikke downloades."
-        );
-      }
-
-      const productTemplateBlob =
-        await productTemplateResponse.blob();
-
-      folder1.file(
-        "product-template.jpg",
-        productTemplateBlob
-      );
-
-      folder2.file(
-        "product-template.jpg",
-        productTemplateBlob
-      );
-
-      folder3.file(
-        "product-template.jpg",
-        productTemplateBlob
-      );
-
-      setMessage(
-        "Preparing cover images..."
-      );
-
-      const coverProducts = [
-        selectedGroups[0]
-          .products[0],
-
-        selectedGroups[1]
-          .products[0],
-
-        selectedGroups[2]
-          .products[0]
-      ];
-
-      for (
-        let index = 0;
-        index <
-        coverProducts.length;
-        index++
-      ) {
-        const product =
-          coverProducts[index];
-
-        const imageResponse =
-          await fetch(
-            product.imageUrl
-          );
-
-        if (
-          !imageResponse.ok
-        ) {
-          throw new Error(
-            `Kunne ikke hente forsidebillede: ${product.name}`
-          );
-        }
-
-        const imageBlob =
-          await imageResponse.blob();
-
-        const extension =
-          imageBlob.type ===
-          "image/png"
-            ? "png"
-            : "jpg";
-
-        folder4.file(
-          `product-${index + 1}-from-group-${index + 1}.${extension}`,
-          imageBlob
-        );
-      }
-
-      setMessage(
-        "Downloading cover template..."
-      );
-
-      const coverResponse =
-        await fetch(
-          templates.cover
-        );
-
-      if (
-        !coverResponse.ok
-      ) {
-        throw new Error(
-          "Forside template kunne ikke downloades."
-        );
-      }
-
-      const coverBlob =
-        await coverResponse.blob();
-
-      folder4.file(
-        "cover-template.jpg",
-        coverBlob
-      );
 
       setMessage(
         "Preparing ZIP..."
@@ -332,7 +368,7 @@ export default function SquishyGenerator() {
         downloadUrl;
 
       link.download =
-        "shein-affiliate-16-files.zip";
+        `shein-squishy-${videoCount}-videos.zip`;
 
       link.style.display =
         "none";
@@ -353,16 +389,8 @@ export default function SquishyGenerator() {
         );
       }, 1000);
 
-      setGroups(
-        selectedGroups
-      );
-
-      setCoverPrompt(
-        data.coverPrompt
-      );
-
       setMessage(
-        "Complete, 9 products, 3 product templates and 1 cover template downloaded."
+        `Complete, ${videoCount} video${videoCount === 1 ? "" : "s"} with ${videoCount * 4} prompts generated.`
       );
 
     } catch (error) {
@@ -389,17 +417,9 @@ export default function SquishyGenerator() {
         prompt
       );
 
-      if (
-        number
-      ) {
-        setMessage(
-          `Prompt ${number} copied to clipboard.`
-        );
-      } else {
-        setMessage(
-          "Prompt copied to clipboard."
-        );
-      }
+      setMessage(
+        `Prompt ${number} copied to clipboard.`
+      );
 
     } catch {
       setMessage(
@@ -408,206 +428,335 @@ export default function SquishyGenerator() {
     }
   }
 
-  function getQuickPrompt(
+  function getPrompt(
     number
   ) {
-    if (
-      number >= 1 &&
-      number <= 3
-    ) {
-      const group =
-        groups[
-          number - 1
-        ];
+    const videoIndex =
+      Math.floor(
+        (number - 1) / 4
+      );
 
-      return group?.prompt || "";
+    const promptIndex =
+      (number - 1) % 4;
+
+    const video =
+      videos[
+        videoIndex
+      ];
+
+    if (!video) {
+      return "";
     }
 
-    if (
-      number === 4
-    ) {
-      return coverPrompt || "";
-    }
-
-    return "";
+    return (
+      video.prompts[
+        promptIndex
+      ] || ""
+    );
   }
 
   return (
-    <main className="page">
+    <section className="squishy-generator">
 
-      <div className="container">
+      <section className="hero">
 
-        <header className="header">
+        <div className="eyebrow">
+          CONTENT GENERATOR
+        </div>
 
-          <div className="brand">
-            SHEIN
+        <h1>
+          SHEIN Affiliate
 
-            <span>
-              AFFILIATE TOOL
-            </span>
+          <br />
+
+          <span>
+            Generator
+          </span>
+        </h1>
+
+        <p>
+          Create complete Squishy
+          content packages in batches
+          and get all prompts ready
+          for production.
+        </p>
+
+        <div className="video-count-selector">
+
+          <div className="selector-label">
+            HOW MANY VIDEOS?
           </div>
 
-          <div className="online">
+          <div className="video-count-grid">
 
-            <span className="online-dot"></span>
+            {[1, 2, 4, 8].map(
+              (count) => (
 
-            ONLINE
+                <button
+                  key={count}
+                  type="button"
+                  className={`video-count-button ${
+                    videoCount === count
+                      ? "selected"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setVideoCount(
+                      count
+                    )
+                  }
+                  disabled={loading}
+                >
+                  {count}
+                </button>
+
+              )
+            )}
 
           </div>
 
-        </header>
+        </div>
 
-        <section className="hero">
+        <button
+          className={`generate-button ${
+            loading
+              ? "loading"
+              : ""
+          }`}
+          onClick={
+            generate
+          }
+          disabled={
+            loading
+          }
+        >
 
-          <div className="eyebrow">
-            CONTENT GENERATOR
+          <span>
+            {loading
+              ? "GENERATING..."
+              : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}
+          </span>
+
+          <span className="button-arrow">
+            →
+          </span>
+
+        </button>
+
+        {message && (
+          <div className="message">
+
+            <span className="message-dot"></span>
+
+            {message}
+
           </div>
+        )}
 
-          <h1>
-            SHEIN Affiliate
+      </section>
 
-            <br />
+      {videos.length > 0 && (
 
-            <span>
-              Generator
-            </span>
-          </h1>
+        <section className="results">
 
-          <p>
-            Select 9 products,
-            download all product
-            images and templates,
-            and create 4 ready to
-            use prompts.
-          </p>
+          <div className="results-header">
 
-          <button
-            className={`generate-button ${
-              loading
-                ? "loading"
-                : ""
-            }`}
-            onClick={
-              generate
-            }
-            disabled={
-              loading
-            }
-          >
+            <div>
 
-            <span>
-              {loading
-                ? "GENERATING..."
-                : "GENERATE"}
-            </span>
+              <div className="section-label">
+                GENERATED CONTENT
+              </div>
 
-            <span className="button-arrow">
-              →
-            </span>
-
-          </button>
-
-          {message && (
-            <div className="message">
-
-              <span className="message-dot"></span>
-
-              {message}
+              <h2>
+                Your prompts
+              </h2>
 
             </div>
-          )}
 
-        </section>
+            <div className="count">
 
-        {(groups.length > 0 ||
-          coverPrompt) && (
+              <strong>
+                {videos.length * 4}
+              </strong>
 
-          <section className="results">
+              PROMPTS READY
 
-            <div className="results-header">
+            </div>
 
-              <div>
+          </div>
 
-                <div className="section-label">
-                  GENERATED CONTENT
+          <div className="section-label">
+            QUICK COPY
+          </div>
+
+          <div className="quick-copy-grid">
+
+            {Array.from(
+              {
+                length:
+                  videos.length *
+                  4
+              },
+              (
+                _,
+                index
+              ) =>
+                index + 1
+            ).map(
+              (number) => (
+
+                <button
+                  key={number}
+                  className="copy-button"
+                  onClick={() =>
+                    copyPrompt(
+                      getPrompt(
+                        number
+                      ),
+                      number
+                    )
+                  }
+                >
+
+                  <span>
+                    COPY PROMPT {number}
+                  </span>
+
+                  <span className="copy-icon">
+                    ⧉
+                  </span>
+
+                </button>
+
+              )
+            )}
+
+          </div>
+
+          {videos.map(
+            (video) => (
+
+              <section
+                className="squishy-video-section"
+                key={
+                  video.videoNumber
+                }
+              >
+
+                <div className="results-header">
+
+                  <div>
+
+                    <div className="section-label">
+                      VIDEO{" "}
+                      {
+                        video.videoNumber
+                      }
+                    </div>
+
+                    <h2>
+                      4 prompts
+                    </h2>
+
+                  </div>
+
                 </div>
 
-                <h2>
-                  Your 4 prompts
-                </h2>
+                <div className="groups">
 
-              </div>
+                  {video.groups.map(
+                    (group) => (
 
-              <div className="count">
+                      <article
+                        className="group"
+                        key={
+                          group.number
+                        }
+                      >
 
-                <strong>
-                  16
-                </strong>
+                        <div className="group-top">
 
-                FILES READY
+                          <div>
 
-              </div>
+                            <div className="group-label">
+                              VIDEO{" "}
+                              {
+                                video.videoNumber
+                              }{" "}
+                              · GROUP{" "}
+                              {
+                                group.number
+                              }
+                            </div>
 
-            </div>
+                            <div className="product-count">
+                              3 PRODUCTS
+                            </div>
 
-            <div className="section-label">
-              QUICK COPY
-            </div>
+                          </div>
 
-            <div className="quick-copy-grid">
+                          <div className="group-number">
+                            0
+                            {
+                              group.number
+                            }
+                          </div>
 
-              {[1, 2, 3, 4].map(
-                (number) => (
+                        </div>
 
-                  <button
-                    key={number}
-                    className="copy-button"
-                    onClick={() =>
-                      copyPrompt(
-                        getQuickPrompt(
-                          number
-                        ),
-                        number
-                      )
-                    }
-                  >
+                        <button
+                          className="copy-button"
+                          onClick={() =>
+                            copyPrompt(
+                              group.prompt,
+                              (
+                                video.videoNumber -
+                                1
+                              ) *
+                                4 +
+                                group.number
+                            )
+                          }
+                        >
 
-                    <span>
-                      COPY PROMPT {number}
-                    </span>
+                          <span>
+                            COPY PROMPT
+                          </span>
 
-                    <span className="copy-icon">
-                      ⧉
-                    </span>
+                          <span className="copy-icon">
+                            ⧉
+                          </span>
 
-                  </button>
+                        </button>
 
-                )
-              )}
+                        <div className="prompt-wrapper">
 
-            </div>
+                          <textarea
+                            value={
+                              group.prompt
+                            }
+                            readOnly
+                          />
 
-            <div className="groups">
+                        </div>
 
-              {groups.map(
-                (group) => (
+                      </article>
 
-                  <article
-                    className="group"
-                    key={
-                      group.number
-                    }
-                  >
+                    )
+                  )}
+
+                  <article className="group">
 
                     <div className="group-top">
 
                       <div>
 
                         <div className="group-label">
-                          GROUP 0
+                          VIDEO{" "}
                           {
-                            group.number
-                          }
+                            video.videoNumber
+                          }{" "}
+                          · COVER
                         </div>
 
                         <div className="product-count">
@@ -617,10 +766,7 @@ export default function SquishyGenerator() {
                       </div>
 
                       <div className="group-number">
-                        0
-                        {
-                          group.number
-                        }
+                        04
                       </div>
 
                     </div>
@@ -629,8 +775,13 @@ export default function SquishyGenerator() {
                       className="copy-button"
                       onClick={() =>
                         copyPrompt(
-                          group.prompt,
-                          group.number
+                          video.coverPrompt,
+                          (
+                            video.videoNumber -
+                            1
+                          ) *
+                            4 +
+                            4
                         )
                       }
                     >
@@ -649,7 +800,7 @@ export default function SquishyGenerator() {
 
                       <textarea
                         value={
-                          group.prompt
+                          video.coverPrompt
                         }
                         readOnly
                       />
@@ -658,88 +809,17 @@ export default function SquishyGenerator() {
 
                   </article>
 
-                )
-              )}
+                </div>
 
-              {coverPrompt && (
+              </section>
 
-                <article className="group">
+            )
+          )}
 
-                  <div className="group-top">
+        </section>
 
-                    <div>
+      )}
 
-                      <div className="group-label">
-                        COVER
-                      </div>
-
-                      <div className="product-count">
-                        3 PRODUCTS
-                      </div>
-
-                    </div>
-
-                    <div className="group-number">
-                      04
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="copy-button"
-                    onClick={() =>
-                      copyPrompt(
-                        coverPrompt,
-                        4
-                      )
-                    }
-                  >
-
-                    <span>
-                      COPY PROMPT
-                    </span>
-
-                    <span className="copy-icon">
-                      ⧉
-                    </span>
-
-                  </button>
-
-                  <div className="prompt-wrapper">
-
-                    <textarea
-                      value={
-                        coverPrompt
-                      }
-                      readOnly
-                    />
-
-                  </div>
-
-                </article>
-
-              )}
-
-            </div>
-
-          </section>
-
-        )}
-
-        <footer>
-
-          <span>
-            SHEIN AFFILIATE GENERATOR
-          </span>
-
-          <span>
-            9 PRODUCTS · 4 TEMPLATES · 4 PROMPTS
-          </span>
-
-        </footer>
-
-      </div>
-
-    </main>
+    </section>
   );
 }
