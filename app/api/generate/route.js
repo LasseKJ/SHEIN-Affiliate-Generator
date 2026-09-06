@@ -29,14 +29,14 @@ export async function POST(
     const body =
       await request.json();
 
-    const requestedCount =
+    const videoCount =
       Number(
         body?.videoCount || 1
       );
 
     if (
       !ALLOWED_VIDEO_COUNTS.includes(
-        requestedCount
+        videoCount
       )
     ) {
       throw new Error(
@@ -44,72 +44,91 @@ export async function POST(
       );
     }
 
-    const videos = [];
+    const totalProducts =
+      videoCount * 9;
 
-    const usedProductCodes =
-      [];
+    console.log(
+      `Selecting ${totalProducts} Squishy products for ${videoCount} videos...`
+    );
+
+    const products =
+      await getProducts(
+        totalProducts
+      );
+
+    if (
+      !products ||
+      products.length !==
+        totalProducts
+    ) {
+      throw new Error(
+        `Der blev ikke valgt præcis ${totalProducts} produkter.`
+      );
+    }
+
+    const templates = {
+      cover:
+        process.env
+          .TEMPLATE_COVER_URL,
+
+      image:
+        process.env
+          .TEMPLATE_IMAGE_URL
+    };
+
+    if (
+      !templates.cover
+    ) {
+      throw new Error(
+        "TEMPLATE_COVER_URL mangler i Environment Variables."
+      );
+    }
+
+    if (
+      !templates.image
+    ) {
+      throw new Error(
+        "TEMPLATE_IMAGE_URL mangler i Environment Variables."
+      );
+    }
+
+    const videos = [];
 
     for (
       let videoIndex = 0;
       videoIndex <
-      requestedCount;
+      videoCount;
       videoIndex++
     ) {
-      const products =
-        await getProducts(
-          9,
-          usedProductCodes
+      const start =
+        videoIndex * 9;
+
+      const videoProducts =
+        products.slice(
+          start,
+          start + 9
         );
-
-      if (
-        !products ||
-        products.length !== 9
-      ) {
-        throw new Error(
-          `Video ${videoIndex + 1} kunne ikke få præcis 9 unikke produkter.`
-        );
-      }
-
-      products.forEach(
-        (product) => {
-          const code =
-            product[
-              "Product Code"
-            ];
-
-          if (
-            code &&
-            !usedProductCodes.includes(
-              code
-            )
-          ) {
-            usedProductCodes.push(
-              code
-            );
-          }
-        }
-      );
 
       const prompts =
         createPromptSet(
-          products
+          videoProducts
         );
 
       const coverPrompt =
         createCoverPrompt();
 
       const groups = [
-        products.slice(
+        videoProducts.slice(
           0,
           3
         ),
 
-        products.slice(
+        videoProducts.slice(
           3,
           6
         ),
 
-        products.slice(
+        videoProducts.slice(
           6,
           9
         )
@@ -125,6 +144,8 @@ export async function POST(
           prompts[2],
           coverPrompt
         ],
+
+        coverPrompt,
 
         groups:
           groups.map(
@@ -142,7 +163,9 @@ export async function POST(
 
               products:
                 group.map(
-                  (product) => ({
+                  (
+                    product
+                  ) => ({
                     id:
                       product[
                         "Product ID"
@@ -175,53 +198,21 @@ export async function POST(
                   })
                 )
             })
-          ),
-
-        coverPrompt
+          )
       });
-    }
-
-    const coverTemplateUrl =
-      process.env.TEMPLATE_COVER_URL;
-
-    const imageTemplateUrl =
-      process.env.TEMPLATE_IMAGE_URL;
-
-    if (
-      !coverTemplateUrl
-    ) {
-      throw new Error(
-        "TEMPLATE_COVER_URL mangler i Environment Variables."
-      );
-    }
-
-    if (
-      !imageTemplateUrl
-    ) {
-      throw new Error(
-        "TEMPLATE_IMAGE_URL mangler i Environment Variables."
-      );
     }
 
     return NextResponse.json({
       success: true,
 
-      videoCount:
-        videos.length,
+      videoCount,
+
+      totalProducts,
 
       totalPrompts:
-        videos.length * 4,
+        videoCount * 4,
 
-      totalProducts:
-        videos.length * 9,
-
-      templates: {
-        cover:
-          coverTemplateUrl,
-
-        image:
-          imageTemplateUrl
-      },
+      templates,
 
       videos
     });
