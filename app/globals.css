@@ -1909,7 +1909,7 @@ footer {
   }
 }
 
-/* CLOTHING VIDEO TABLES */
+/* CLOTHING MULTI VIDEO TABLES */
 
 .clothing-quick-copy-table,
 .clothing-prompt-table {
@@ -1922,9 +1922,11 @@ footer {
 .clothing-prompt-header,
 .clothing-prompt-row {
   display: grid;
-  grid-template-columns: 110px repeat(6, minmax(0, 1fr));
+  grid-template-columns:
+    110px
+    repeat(6, minmax(0, 1fr));
   gap: 10px;
-  min-width: 1120px;
+  min-width: 1050px;
 }
 
 .clothing-quick-copy-header,
@@ -2002,13 +2004,18 @@ footer {
   font-size: 18px;
   font-weight: 950;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
 }
 
 .clothing-prompt-card .copy-button {
   height: 42px;
   padding: 0 9px 0 11px;
-  font-size: 8px;
+  font-size: 7px;
+}
+
+.clothing-prompt-card .copy-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .clothing-prompt-card .prompt-wrapper textarea {
@@ -2018,10 +2025,8 @@ footer {
 }
 
 @media (max-width: 800px) {
-  .clothing-quick-copy-header,
-  .clothing-quick-copy-row,
-  .clothing-prompt-header,
-  .clothing-prompt-row {
-    min-width: 980px;
+  .clothing-quick-copy-table,
+  .clothing-prompt-table {
+    overflow-x: auto;
   }
 }
