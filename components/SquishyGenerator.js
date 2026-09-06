@@ -37,9 +37,10 @@ export default function SquishyGenerator() {
                 "application/json"
             },
 
-            body: JSON.stringify({
-              videoCount
-            })
+            body:
+              JSON.stringify({
+                videoCount
+              })
           }
         );
 
@@ -154,7 +155,7 @@ export default function SquishyGenerator() {
 
         for (
           const group of
-            video.groups
+          video.groups
         ) {
           const groupFolder =
             folders[
@@ -505,7 +506,9 @@ export default function SquishyGenerator() {
                       count
                     )
                   }
-                  disabled={loading}
+                  disabled={
+                    loading
+                  }
                 >
                   {count}
                 </button>
@@ -568,7 +571,7 @@ export default function SquishyGenerator() {
               </div>
 
               <h2>
-                Your prompts
+                Your video prompts
               </h2>
 
             </div>
@@ -619,7 +622,8 @@ export default function SquishyGenerator() {
                 >
 
                   <span>
-                    COPY PROMPT {number}
+                    COPY PROMPT{" "}
+                    {number}
                   </span>
 
                   <span className="copy-icon">
@@ -633,188 +637,137 @@ export default function SquishyGenerator() {
 
           </div>
 
-          {videos.map(
-            (video) => (
+          <div className="squishy-prompt-table">
 
-              <section
-                className="squishy-video-section"
-                key={
-                  video.videoNumber
-                }
-              >
+            <div className="squishy-table-header">
 
-                <div className="results-header">
+              <div className="squishy-video-label">
+                VIDEO
+              </div>
 
-                  <div>
+              <div>
+                BILLEDE 1
+              </div>
 
-                    <div className="section-label">
-                      VIDEO{" "}
-                      {
-                        video.videoNumber
-                      }
-                    </div>
+              <div>
+                BILLEDE 2
+              </div>
 
-                    <h2>
-                      4 prompts
-                    </h2>
+              <div>
+                BILLEDE 3
+              </div>
 
+              <div>
+                FORSIDE
+              </div>
+
+            </div>
+
+            {videos.map(
+              (video) => (
+
+                <div
+                  className="squishy-video-row"
+                  key={
+                    video.videoNumber
+                  }
+                >
+
+                  <div className="squishy-video-name">
+                    VIDEO{" "}
+                    {video.videoNumber}
                   </div>
 
-                </div>
+                  {video.prompts.map(
+                    (
+                      prompt,
+                      promptIndex
+                    ) => {
 
-                <div className="groups">
+                      const promptNumber =
+                        (
+                          video.videoNumber -
+                          1
+                        ) *
+                          4 +
+                        promptIndex +
+                        1;
 
-                  {video.groups.map(
-                    (group) => (
+                      const imageLabel =
+                        promptIndex ===
+                        3
+                          ? "FORSIDE"
+                          : `BILLEDE ${
+                              promptIndex +
+                              1
+                            }`;
 
-                      <article
-                        className="group"
-                        key={
-                          group.number
-                        }
-                      >
-
-                        <div className="group-top">
-
-                          <div>
-
-                            <div className="group-label">
-                              VIDEO{" "}
-                              {
-                                video.videoNumber
-                              }{" "}
-                              · GROUP{" "}
-                              {
-                                group.number
-                              }
-                            </div>
-
-                            <div className="product-count">
-                              3 PRODUCTS
-                            </div>
-
-                          </div>
-
-                          <div className="group-number">
-                            0
-                            {
-                              group.number
-                            }
-                          </div>
-
-                        </div>
-
-                        <button
-                          className="copy-button"
-                          onClick={() =>
-                            copyPrompt(
-                              group.prompt,
-                              (
-                                video.videoNumber -
-                                1
-                              ) *
-                                4 +
-                                group.number
-                            )
+                      return (
+                        <article
+                          className="squishy-prompt-card"
+                          key={
+                            promptNumber
                           }
                         >
 
-                          <span>
-                            COPY PROMPT
-                          </span>
+                          <div className="squishy-prompt-card-top">
 
-                          <span className="copy-icon">
-                            ⧉
-                          </span>
+                            <span>
+                              {
+                                imageLabel
+                              }
+                            </span>
 
-                        </button>
+                            <strong>
+                              {
+                                promptNumber
+                              }
+                            </strong>
 
-                        <div className="prompt-wrapper">
+                          </div>
 
-                          <textarea
-                            value={
-                              group.prompt
+                          <button
+                            className="copy-button"
+                            onClick={() =>
+                              copyPrompt(
+                                prompt,
+                                promptNumber
+                              )
                             }
-                            readOnly
-                          />
+                          >
 
-                        </div>
+                            <span>
+                              COPY PROMPT
+                            </span>
 
-                      </article>
+                            <span className="copy-icon">
+                              ⧉
+                            </span>
 
-                    )
+                          </button>
+
+                          <div className="prompt-wrapper">
+
+                            <textarea
+                              value={
+                                prompt
+                              }
+                              readOnly
+                            />
+
+                          </div>
+
+                        </article>
+                      );
+                    }
                   )}
-
-                  <article className="group">
-
-                    <div className="group-top">
-
-                      <div>
-
-                        <div className="group-label">
-                          VIDEO{" "}
-                          {
-                            video.videoNumber
-                          }{" "}
-                          · COVER
-                        </div>
-
-                        <div className="product-count">
-                          3 PRODUCTS
-                        </div>
-
-                      </div>
-
-                      <div className="group-number">
-                        04
-                      </div>
-
-                    </div>
-
-                    <button
-                      className="copy-button"
-                      onClick={() =>
-                        copyPrompt(
-                          video.coverPrompt,
-                          (
-                            video.videoNumber -
-                            1
-                          ) *
-                            4 +
-                            4
-                        )
-                      }
-                    >
-
-                      <span>
-                        COPY PROMPT
-                      </span>
-
-                      <span className="copy-icon">
-                        ⧉
-                      </span>
-
-                    </button>
-
-                    <div className="prompt-wrapper">
-
-                      <textarea
-                        value={
-                          video.coverPrompt
-                        }
-                        readOnly
-                      />
-
-                    </div>
-
-                  </article>
 
                 </div>
 
-              </section>
+              )
+            )}
 
-            )
-          )}
+          </div>
 
         </section>
 
