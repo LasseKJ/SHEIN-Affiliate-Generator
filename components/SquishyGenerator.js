@@ -592,49 +592,100 @@ export default function SquishyGenerator() {
             QUICK COPY
           </div>
 
-          <div className="quick-copy-grid">
+          <div className="quick-copy-table">
 
-            {Array.from(
-              {
-                length:
-                  videos.length *
-                  4
-              },
-              (
-                _,
-                index
-              ) =>
-                index + 1
-            ).map(
-              (number) => (
+            <div className="quick-copy-header">
 
-                <button
-                  key={number}
-                  className="copy-button"
-                  onClick={() =>
-                    copyPrompt(
-                      getPrompt(
-                        number
-                      ),
-                      number
-                    )
+              <div className="quick-copy-video-label">
+                VIDEO
+              </div>
+
+              <div>
+                BILLEDE 1
+              </div>
+
+              <div>
+                BILLEDE 2
+              </div>
+
+              <div>
+                BILLEDE 3
+              </div>
+
+              <div>
+                FORSIDE
+              </div>
+
+            </div>
+
+            {videos.map(
+              (video) => (
+
+                <div
+                  className="quick-copy-row"
+                  key={
+                    video.videoNumber
                   }
                 >
 
-                  <span>
-                    COPY PROMPT{" "}
-                    {number}
-                  </span>
+                  <div className="quick-copy-video-name">
+                    VIDEO{" "}
+                    {video.videoNumber}
+                  </div>
 
-                  <span className="copy-icon">
-                    ⧉
-                  </span>
+                  {video.prompts.map(
+                    (
+                      prompt,
+                      promptIndex
+                    ) => {
 
-                </button>
+                      const promptNumber =
+                        (
+                          video.videoNumber -
+                          1
+                        ) *
+                          4 +
+                        promptIndex +
+                        1;
+
+                      return (
+                        <button
+                          key={
+                            promptNumber
+                          }
+                          className="quick-copy-button"
+                          onClick={() =>
+                            copyPrompt(
+                              prompt,
+                              promptNumber
+                            )
+                          }
+                        >
+
+                          <span>
+                            COPY PROMPT{" "}
+                            {promptNumber}
+                          </span>
+
+                          <span className="copy-icon">
+                            ⧉
+                          </span>
+
+                        </button>
+                      );
+
+                    }
+                  )}
+
+                </div>
 
               )
             )}
 
+          </div>
+
+          <div className="section-label">
+            PROMPTS
           </div>
 
           <div className="squishy-prompt-table">
