@@ -172,10 +172,13 @@ export default function SquishyGenerator() {
 
         const folder1 =
           videoFolder.folder("01");
+
         const folder2 =
           videoFolder.folder("02");
+
         const folder3 =
           videoFolder.folder("03");
+
         const folder4 =
           videoFolder.folder("04");
 
@@ -212,8 +215,42 @@ export default function SquishyGenerator() {
                 ? "png"
                 : "jpg";
 
+            // Filnavnet fungerer som produktets ID,
+            // så ChatGPT kan matche det fysiske produkt
+            // med navn og produktkode, også hvis billederne
+            // uploades i en anden rækkefølge.
+
+            const productName = String(
+              product.name ||
+              product["Product Name"] ||
+              "product"
+            )
+              .trim()
+              .replace(
+                /[^a-zA-Z0-9æøåÆØÅ]+/g,
+                "-"
+              )
+              .replace(
+                /^-+|-+$/g,
+                ""
+              );
+
+            const productCode = String(
+              product.code ||
+              product["Product Code"] ||
+              "UNKNOWN"
+            )
+              .trim()
+              .replace(
+                /[^a-zA-Z0-9]+/g,
+                ""
+              );
+
+            const fileName =
+              `P${index + 1}-${productName}-${productCode}.${extension}`;
+
             groupFolder.file(
-              `product-${index + 1}-${product.code}.${extension}`,
+              fileName,
               blob
             );
 
@@ -245,10 +282,12 @@ export default function SquishyGenerator() {
           "product-template.jpg",
           productTemplateBlob
         );
+
         folder2.file(
           "product-template.jpg",
           productTemplateBlob
         );
+
         folder3.file(
           "product-template.jpg",
           productTemplateBlob
@@ -279,8 +318,34 @@ export default function SquishyGenerator() {
               ? "png"
               : "jpg";
 
+          const productName = String(
+            product.name ||
+            product["Product Name"] ||
+            "product"
+          )
+            .trim()
+            .replace(
+              /[^a-zA-Z0-9æøåÆØÅ]+/g,
+              "-"
+            )
+            .replace(
+              /^-+|-+$/g,
+              ""
+            );
+
+          const productCode = String(
+            product.code ||
+            product["Product Code"] ||
+            "UNKNOWN"
+          )
+            .trim()
+            .replace(
+              /[^a-zA-Z0-9]+/g,
+              ""
+            );
+
           folder4.file(
-            `product-${index + 1}-from-group-${index + 1}.${extension}`,
+            `P${index + 1}-${productName}-${productCode}.${extension}`,
             blob
           );
         }
@@ -338,8 +403,10 @@ export default function SquishyGenerator() {
         );
 
       link.href = url;
+
       link.download =
         `shein-squishy-${videoCount}-videos.zip`;
+
       link.style.display =
         "none";
 
@@ -348,6 +415,7 @@ export default function SquishyGenerator() {
       );
 
       link.click();
+
       link.remove();
 
       setTimeout(() => {
@@ -469,6 +537,7 @@ export default function SquishyGenerator() {
               <div className="quick-copy-video-label">
                 VIDEO
               </div>
+
               <div>BILLEDE 1</div>
               <div>BILLEDE 2</div>
               <div>BILLEDE 3</div>
@@ -530,6 +599,7 @@ export default function SquishyGenerator() {
               <div className="squishy-video-label">
                 VIDEO
               </div>
+
               <div>BILLEDE 1</div>
               <div>BILLEDE 2</div>
               <div>BILLEDE 3</div>
