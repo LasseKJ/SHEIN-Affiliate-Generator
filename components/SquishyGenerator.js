@@ -165,36 +165,18 @@ export default function SquishyGenerator() {
       for (
         const video of data.videos
       ) {
+        // Alle filer for én video ligger direkte i samme mappe.
+        // Mapperne 01, 02, 03 og 04 bruges ikke længere.
         const videoFolder =
           zip.folder(
             `VIDEO ${video.videoNumber}`
           );
 
-        const folder1 =
-          videoFolder.folder("01");
-
-        const folder2 =
-          videoFolder.folder("02");
-
-        const folder3 =
-          videoFolder.folder("03");
-
-        const folder4 =
-          videoFolder.folder("04");
-
-        const folders = [
-          folder1,
-          folder2,
-          folder3
-        ];
-
         for (
           const group of video.groups
         ) {
-          const groupFolder =
-            folders[
-              group.number - 1
-            ];
+          const imageNumber =
+            String(group.number).padStart(2, "0");
 
           for (
             let index = 0;
@@ -215,11 +197,7 @@ export default function SquishyGenerator() {
                 ? "png"
                 : "jpg";
 
-            // Filnavnet fungerer som produktets ID,
-            // så ChatGPT kan matche det fysiske produkt
-            // med navn og produktkode, også hvis billederne
-            // uploades i en anden rækkefølge.
-
+            // Produktnavnet gøres sikkert til et filnavn.
             const productName = String(
               product.name ||
               product["Product Name"] ||
@@ -235,6 +213,7 @@ export default function SquishyGenerator() {
                 ""
               );
 
+            // Produktkoden bruges også direkte i filnavnet.
             const productCode = String(
               product.code ||
               product["Product Code"] ||
@@ -246,10 +225,18 @@ export default function SquishyGenerator() {
                 ""
               );
 
+            // Eksempel:
+            // V1-01-Product-1-Banana-HDK23D.jpg
+            //
+            // V1 = Video 1
+            // 01 = Billede 1
+            // Product-1 = Produkt nummer 1
+            // Banana = Produktnavn
+            // HDK23D = Produktkode
             const fileName =
-              `P${index + 1}-${productName}-${productCode}.${extension}`;
+              `V${video.videoNumber}-${imageNumber}-Product-${index + 1}-${productName}-${productCode}.${extension}`;
 
-            groupFolder.file(
+            videoFolder.file(
               fileName,
               blob
             );
@@ -278,21 +265,25 @@ export default function SquishyGenerator() {
         const productTemplateBlob =
           await productTemplateResponse.blob();
 
-        folder1.file(
-          "product-template.jpg",
+        // Produkt template til Billede 1.
+        videoFolder.file(
+          `V${video.videoNumber}-01-Product-Template.jpg`,
           productTemplateBlob
         );
 
-        folder2.file(
-          "product-template.jpg",
+        // Produkt template til Billede 2.
+        videoFolder.file(
+          `V${video.videoNumber}-02-Product-Template.jpg`,
           productTemplateBlob
         );
 
-        folder3.file(
-          "product-template.jpg",
+        // Produkt template til Billede 3.
+        videoFolder.file(
+          `V${video.videoNumber}-03-Product-Template.jpg`,
           productTemplateBlob
         );
 
+        // Forsiden bruger ét produkt fra hver af de tre grupper.
         const coverProducts = [
           video.groups[0].products[0],
           video.groups[1].products[0],
@@ -344,8 +335,10 @@ export default function SquishyGenerator() {
               ""
             );
 
-          folder4.file(
-            `P${index + 1}-${productName}-${productCode}.${extension}`,
+          // Eksempel:
+          // V1-04-Product-1-Banana-HDK23D.jpg
+          videoFolder.file(
+            `V${video.videoNumber}-04-Product-${index + 1}-${productName}-${productCode}.${extension}`,
             blob
           );
         }
@@ -364,8 +357,8 @@ export default function SquishyGenerator() {
         const coverBlob =
           await coverResponse.blob();
 
-        folder4.file(
-          "cover-template.jpg",
+        videoFolder.file(
+          `V${video.videoNumber}-04-Cover-Template.jpg`,
           coverBlob
         );
       }
