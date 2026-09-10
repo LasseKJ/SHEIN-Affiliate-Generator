@@ -92,6 +92,55 @@ export default function AutumnGenerator() {
     return response.blob();
   }
 
+  function createSafeFilePart(
+    value
+  ) {
+    return String(
+      value || "product"
+    )
+      .trim()
+      .replace(
+        /[^a-zA-Z0-9æøåÆØÅ]+/g,
+        "-"
+      )
+      .replace(
+        /^-+|-+$/g,
+        "");
+  }
+
+  function createSafeCode(
+    value
+  ) {
+    return String(
+      value || "UNKNOWN"
+    )
+      .trim()
+      .replace(
+        /[^a-zA-Z0-9]+/g,
+        "");
+  }
+
+  function createProductFilename(
+    imageNumber,
+    type,
+    product,
+    extension
+  ) {
+    const productName =
+      createSafeFilePart(
+        product?.name ||
+        product?.["Product Name"]
+      );
+
+    const productCode =
+      createSafeCode(
+        product?.code ||
+        product?.["Product Code"]
+      );
+
+    return `B${imageNumber}-${type}-${productName}-${productCode}.${extension}`;
+  }
+
   async function generate() {
     setLoading(true);
     setVideos([]);
@@ -150,10 +199,39 @@ export default function AutumnGenerator() {
         );
       }
 
-      setVideos(data.videos);
+      setVideos(
+        data.videos
+      );
 
       const zip =
         new JSZip();
+
+      /*
+        ZIP STRUKTUR:
+
+        VIDEO 1/
+          B1-Accessory-...
+          B1-Top-...
+          B1-Bottom-...
+          B1-Shoe-...
+
+          B2-Accessory-...
+          B2-Top-...
+          B2-Bottom-...
+          B2-Shoe-...
+
+          B3-...
+          B4-...
+          B5-...
+          B6-...
+
+        Der oprettes IKKE længere mapper som:
+          Billede 1/
+          Billede 3/
+          Billede 5/
+
+        Alle filer ligger direkte i VIDEO mappen.
+      */
 
       for (
         const video of data.videos
@@ -162,18 +240,6 @@ export default function AutumnGenerator() {
           zip.folder(
             `VIDEO ${video.videoNumber}`
           );
-
-        const imageFolders = {};
-
-        [1, 3, 5].forEach(
-          (imageNumber) => {
-            imageFolders[
-              imageNumber
-            ] = videoFolder.folder(
-              `Billede ${imageNumber}`
-            );
-          }
-        );
 
         for (
           let outfitIndex = 0;
@@ -188,11 +254,6 @@ export default function AutumnGenerator() {
           const modelImageNumber =
             outfitIndex * 2 + 1;
 
-          const folder =
-            imageFolders[
-              modelImageNumber
-            ];
-
           setMessage(
             `Video ${video.videoNumber} of ${data.videos.length}, downloading outfit ${outfitIndex + 1}...`
           );
@@ -201,22 +262,22 @@ export default function AutumnGenerator() {
             {
               product:
                 outfit.products.shoe,
-              type: "shoe"
+              type: "Shoe"
             },
             {
               product:
                 outfit.products.top,
-              type: "top"
+              type: "Top"
             },
             {
               product:
                 outfit.products.bottom,
-              type: "bottom"
+              type: "Bottom"
             },
             {
               product:
                 outfit.products.accessory,
-              type: "accessory"
+              type: "Accessory"
             }
           ];
 
@@ -234,8 +295,16 @@ export default function AutumnGenerator() {
                 ? "png"
                 : "jpg";
 
-            folder.file(
-              `${item.type}-${item.product.code}.${extension}`,
+            const fileName =
+              createProductFilename(
+                modelImageNumber,
+                item.type,
+                item.product,
+                extension
+              );
+
+            videoFolder.file(
+              fileName,
               blob
             );
           }
@@ -266,8 +335,10 @@ export default function AutumnGenerator() {
         );
 
       link.href = url;
+
       link.download =
         `autumn-outfits-${videoCount}-videos.zip`;
+
       link.style.display =
         "none";
 
@@ -276,6 +347,7 @@ export default function AutumnGenerator() {
       );
 
       link.click();
+
       link.remove();
 
       setTimeout(() => {
@@ -382,6 +454,7 @@ export default function AutumnGenerator() {
               <strong>
                 {videos.length * 6}
               </strong>
+
               PROMPTS READY
             </div>
           </div>
@@ -392,60 +465,78 @@ export default function AutumnGenerator() {
 
           <div className="clothing-quick-copy-table">
             <div className="clothing-quick-copy-header">
-              <div>VIDEO</div>
+              <div>
+                VIDEO
+              </div>
+
               {IMAGE_NUMBERS.map(
                 (imageNumber) => (
-                  <div key={imageNumber}>
+                  <div
+                    key={imageNumber}
+                  >
                     BILLEDE {imageNumber}
                   </div>
                 )
               )}
             </div>
 
-            {videos.map((video) => (
-              <div
-                className="clothing-quick-copy-row"
-                key={video.videoNumber}
-              >
-                <div className="clothing-quick-copy-video">
-                  VIDEO {video.videoNumber}
-                </div>
-
-                {IMAGE_NUMBERS.map(
-                  (imageNumber) => {
-                    const label =
-                      promptLabel(
-                        video.videoNumber,
-                        imageNumber
-                      );
-
-                    return (
-                      <button
-                        key={imageNumber}
-                        className="quick-copy-button"
-                        onClick={() =>
-                          copyPrompt(
-                            getPrompt(
-                              video,
-                              imageNumber
-                            ),
-                            label
-                          )
-                        }
-                      >
-                        <span>
-                          {label}
-                        </span>
-
-                        <span className="copy-icon">
-                          ⧉
-                        </span>
-                      </button>
-                    );
+            {videos.map(
+              (video) => (
+                <div
+                  className="clothing-quick-copy-row"
+                  key={
+                    video.videoNumber
                   }
-                )}
-              </div>
-            ))}
+                >
+                  <div className="clothing-quick-copy-video">
+                    VIDEO{" "}
+                    {
+                      video.videoNumber
+                    }
+                  </div>
+
+                  {IMAGE_NUMBERS.map(
+                    (
+                      imageNumber
+                    ) => {
+                      const label =
+                        promptLabel(
+                          video.videoNumber,
+                          imageNumber
+                        );
+
+                      return (
+                        <button
+                          key={
+                            imageNumber
+                          }
+                          className="quick-copy-button"
+                          onClick={() =>
+                            copyPrompt(
+                              getPrompt(
+                                video,
+                                imageNumber
+                              ),
+                              label
+                            )
+                          }
+                        >
+                          <span>
+                            {
+                              label
+                            }
+                          </span>
+
+                          <span className="copy-icon">
+                            ⧉
+                          </span>
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+              )
+            )}
           </div>
 
           <div className="section-label">
@@ -454,87 +545,119 @@ export default function AutumnGenerator() {
 
           <div className="clothing-prompt-table">
             <div className="clothing-prompt-header">
-              <div>VIDEO</div>
+              <div>
+                VIDEO
+              </div>
+
               {IMAGE_NUMBERS.map(
                 (imageNumber) => (
-                  <div key={imageNumber}>
-                    BILLEDE {imageNumber}
+                  <div
+                    key={
+                      imageNumber
+                    }
+                  >
+                    BILLEDE{" "}
+                    {
+                      imageNumber
+                    }
                   </div>
                 )
               )}
             </div>
 
-            {videos.map((video) => (
-              <div
-                className="clothing-prompt-row"
-                key={video.videoNumber}
-              >
-                <div className="clothing-prompt-video-name">
-                  VIDEO {video.videoNumber}
-                </div>
+            {videos.map(
+              (video) => (
+                <div
+                  className="clothing-prompt-row"
+                  key={
+                    video.videoNumber
+                  }
+                >
+                  <div className="clothing-prompt-video-name">
+                    VIDEO{" "}
+                    {
+                      video.videoNumber
+                    }
+                  </div>
 
-                {IMAGE_NUMBERS.map(
-                  (imageNumber) => {
-                    const label =
-                      promptLabel(
-                        video.videoNumber,
-                        imageNumber
-                      );
+                  {IMAGE_NUMBERS.map(
+                    (
+                      imageNumber
+                    ) => {
+                      const label =
+                        promptLabel(
+                          video.videoNumber,
+                          imageNumber
+                        );
 
-                    const prompt =
-                      getPrompt(
-                        video,
-                        imageNumber
-                      );
+                      const prompt =
+                        getPrompt(
+                          video,
+                          imageNumber
+                        );
 
-                    return (
-                      <article
-                        className="clothing-prompt-card"
-                        key={imageNumber}
-                      >
-                        <div className="clothing-prompt-card-top">
-                          <span>
-                            BILLEDE {imageNumber}
-                          </span>
-
-                          <strong>
-                            V
-                            {video.videoNumber}
-                            -
-                            {imageNumber}
-                          </strong>
-                        </div>
-
-                        <button
-                          className="copy-button"
-                          onClick={() =>
-                            copyPrompt(
-                              prompt,
-                              label
-                            )
+                      return (
+                        <article
+                          className="clothing-prompt-card"
+                          key={
+                            imageNumber
                           }
                         >
-                          <span>
-                            {label}
-                          </span>
+                          <div className="clothing-prompt-card-top">
+                            <span>
+                              BILLEDE{" "}
+                              {
+                                imageNumber
+                              }
+                            </span>
 
-                          <span className="copy-icon">
-                            ⧉
-                          </span>
-                        </button>
+                            <strong>
+                              V
+                              {
+                                video.videoNumber
+                              }
+                              -
+                              {
+                                imageNumber
+                              }
+                            </strong>
+                          </div>
 
-                        <div className="prompt-wrapper">
-                          <textarea
-                            value={prompt}
-                            readOnly
-                          />
-                        </div>
-                      </article>
-                    );
-                  }
-                )}
-              </div>
-            ))}
+                          <button
+                            className="copy-button"
+                            onClick={() =>
+                              copyPrompt(
+                                prompt,
+                                label
+                              )
+                            }
+                          >
+                            <span>
+                              {
+                                label
+                              }
+                            </span>
+
+                            <span className="copy-icon">
+                              ⧉
+                            </span>
+                          </button>
+
+                          <div className="prompt-wrapper">
+                            <textarea
+                              value={
+                                prompt
+                              }
+                              readOnly
+                            />
+                          </div>
+                        </article>
+                      );
+                    }
+                  )}
+                </div>
+              )
+            )}
           </div>
         </section>
       )}
