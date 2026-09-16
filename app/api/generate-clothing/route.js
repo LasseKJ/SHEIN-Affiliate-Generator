@@ -5,7 +5,8 @@ import {
 } from "../../../lib/clothingOutfits";
 
 import {
-  createAutumnPrompts
+  createAutumnPrompts,
+  createAutumnCoverPrompt
 } from "../../../lib/clothingPrompts";
 
 export const dynamic =
@@ -42,7 +43,9 @@ export async function POST(request) {
       body?.category || "";
 
     const videoCount =
-      Number(body?.videoCount || 1);
+      Number(
+        body?.videoCount || 1
+      );
 
     if (category !== "Autumn") {
       throw new Error(
@@ -50,7 +53,11 @@ export async function POST(request) {
       );
     }
 
-    if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) {
+    if (
+      !ALLOWED_VIDEO_COUNTS.includes(
+        videoCount
+      )
+    ) {
       throw new Error(
         "Antallet af videoer skal være 1, 2, 4 eller 8."
       );
@@ -65,7 +72,10 @@ export async function POST(request) {
       videos.map((video) => {
         const outfits =
           video.outfits.map(
-            (outfit, outfitIndex) => {
+            (
+              outfit,
+              outfitIndex
+            ) => {
               const prompts =
                 createAutumnPrompts(
                   outfit
@@ -78,6 +88,7 @@ export async function POST(request) {
                 imageNumbers: {
                   model:
                     outfitIndex * 2 + 1,
+
                   flatLay:
                     outfitIndex * 2 + 2
                 },
@@ -93,14 +104,17 @@ export async function POST(request) {
                     serializeProduct(
                       outfit.shoe
                     ),
+
                   top:
                     serializeProduct(
                       outfit.top
                     ),
+
                   bottom:
                     serializeProduct(
                       outfit.bottom
                     ),
+
                   accessory:
                     serializeProduct(
                       outfit.accessory
@@ -110,16 +124,37 @@ export async function POST(request) {
             }
           );
 
+        const coverProducts =
+          outfits.flatMap(
+            (outfit) => [
+              outfit.products.top,
+              outfit.products.bottom,
+              outfit.products.accessory
+            ]
+          );
+
+        const coverPrompt =
+          createAutumnCoverPrompt(
+            video.outfits
+          );
+
         return {
           videoNumber:
             video.videoNumber,
 
-          prompts: outfits.flatMap(
-            (outfit) => [
-              outfit.modelPrompt,
-              outfit.flatLayPrompt
-            ]
-          ),
+          prompts: [
+            ...outfits.flatMap(
+              (outfit) => [
+                outfit.modelPrompt,
+                outfit.flatLayPrompt
+              ]
+            ),
+            coverPrompt
+          ],
+
+          coverPrompt,
+
+          coverProducts,
 
           outfits
         };
@@ -127,12 +162,22 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
+
       category: "Autumn",
+
       videoCount,
-      totalVideos: results.length,
-      totalImages: results.length * 6,
-      totalPrompts: results.length * 6,
-      videos: results
+
+      totalVideos:
+        results.length,
+
+      totalImages:
+        results.length * 6,
+
+      totalPrompts:
+        results.length * 7,
+
+      videos:
+        results
     });
   } catch (error) {
     console.error(
@@ -143,6 +188,7 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: false,
+
         error:
           error?.message ||
           "Kunne ikke generere Autumn videoer."
