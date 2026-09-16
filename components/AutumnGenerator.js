@@ -19,6 +19,16 @@ const IMAGE_NUMBERS = [
   6
 ];
 
+const PROMPT_COLUMNS = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+];
+
 export default function AutumnGenerator() {
   const [loading, setLoading] =
     useState(false);
@@ -34,18 +44,18 @@ export default function AutumnGenerator() {
 
   function promptLabel(
     videoNumber,
-    imageNumber
+    promptNumber
   ) {
-    return `PROMPT V${videoNumber}-${imageNumber}`;
+    return `PROMPT V${videoNumber}-${promptNumber}`;
   }
 
   function getPrompt(
     video,
-    imageNumber
+    promptNumber
   ) {
     return (
       video?.prompts?.[
-        imageNumber - 1
+        promptNumber - 1
       ] || ""
     );
   }
@@ -121,24 +131,53 @@ export default function AutumnGenerator() {
   }
 
   function createProductFilename(
-    imageNumber,
+    prefix,
     type,
     product,
     extension
   ) {
     const productName =
       createSafeFilePart(
-        product?.name ||
-        product?.["Product Name"]
+        product?.name
       );
 
     const productCode =
       createSafeCode(
-        product?.code ||
-        product?.["Product Code"]
+        product?.code
       );
 
-    return `B${imageNumber}-${type}-${productName}-${productCode}.${extension}`;
+    return `${prefix}-${type}-${productName}-${productCode}.${extension}`;
+  }
+
+  async function addProductToZip(
+    folder,
+    prefix,
+    type,
+    product
+  ) {
+    const blob =
+      await downloadProduct(
+        product
+      );
+
+    const extension =
+      blob.type ===
+      "image/png"
+        ? "png"
+        : "jpg";
+
+    const fileName =
+      createProductFilename(
+        prefix,
+        type,
+        product,
+        extension
+      );
+
+    folder.file(
+      fileName,
+      blob
+    );
   }
 
   async function generate() {
@@ -155,10 +194,12 @@ export default function AutumnGenerator() {
           "/api/generate-clothing",
           {
             method: "POST",
+
             headers: {
               "Content-Type":
                 "application/json"
             },
+
             body: JSON.stringify({
               category: "Autumn",
               videoCount
@@ -191,8 +232,11 @@ export default function AutumnGenerator() {
 
       if (
         !data.success ||
-        !Array.isArray(data.videos) ||
-        data.videos.length !== videoCount
+        !Array.isArray(
+          data.videos
+        ) ||
+        data.videos.length !==
+          videoCount
       ) {
         throw new Error(
           "Der blev ikke oprettet det valgte antal videoer."
@@ -206,33 +250,6 @@ export default function AutumnGenerator() {
       const zip =
         new JSZip();
 
-      /*
-        ZIP STRUKTUR:
-
-        VIDEO 1/
-          B1-Accessory-...
-          B1-Top-...
-          B1-Bottom-...
-          B1-Shoe-...
-
-          B2-Accessory-...
-          B2-Top-...
-          B2-Bottom-...
-          B2-Shoe-...
-
-          B3-...
-          B4-...
-          B5-...
-          B6-...
-
-        Der oprettes IKKE længere mapper som:
-          Billede 1/
-          Billede 3/
-          Billede 5/
-
-        Alle filer ligger direkte i VIDEO mappen.
-      */
-
       for (
         const video of data.videos
       ) {
@@ -240,6 +257,21 @@ export default function AutumnGenerator() {
           zip.folder(
             `VIDEO ${video.videoNumber}`
           );
+
+        /*
+          ALLE 12 produktbilleder
+          fra de 3 outfits ligger
+          direkte i VIDEO mappen.
+
+          B1 = outfit 1
+          B3 = outfit 2
+          B5 = outfit 3
+
+          Flat lay billederne
+          bruger samme outfit produkter
+          fordi de er references til
+          samme outfit.
+        */
 
         for (
           let outfitIndex = 0;
@@ -284,30 +316,73 @@ export default function AutumnGenerator() {
           for (
             const item of products
           ) {
-            const blob =
-              await downloadProduct(
-                item.product
-              );
-
-            const extension =
-              blob.type ===
-              "image/png"
-                ? "png"
-                : "jpg";
-
-            const fileName =
-              createProductFilename(
-                modelImageNumber,
-                item.type,
-                item.product,
-                extension
-              );
-
-            videoFolder.file(
-              fileName,
-              blob
+            await addProductToZip(
+              videoFolder,
+              `B${modelImageNumber}`,
+              item.type,
+              item.product
             );
           }
+        }
+
+        /*
+          FORSIDE
+
+          Forsiden bruger 9 produkter:
+
+          Outfit 1:
+          Top
+          Bottom
+          Accessory
+
+          Outfit 2:
+          Top
+          Bottom
+          Accessory
+
+          Outfit 3:
+          Top
+          Bottom
+          Accessory
+        */
+
+        const coverFolder =
+          videoFolder.folder(
+            "FORSIDE"
+          );
+
+        const coverProducts =
+          video.coverProducts ||
+          [];
+
+        for (
+          let index = 0;
+          index <
+          coverProducts.length;
+          index++
+        ) {
+          const product =
+            coverProducts[index];
+
+          const type =
+            product.category ===
+            "AutumnTop"
+              ? "Top"
+              : product.category ===
+                "AutumnBottom"
+              ? "Bottom"
+              : "Accessory";
+
+          setMessage(
+            `Video ${video.videoNumber} of ${data.videos.length}, downloading cover product ${index + 1} of 9...`
+          );
+
+          await addProductToZip(
+            coverFolder,
+            `B${index + 1}`,
+            type,
+            product
+          );
         }
       }
 
@@ -318,7 +393,10 @@ export default function AutumnGenerator() {
       const zipBlob =
         await zip.generateAsync({
           type: "blob",
-          compression: "DEFLATE",
+
+          compression:
+            "DEFLATE",
+
           compressionOptions: {
             level: 6
           }
@@ -334,7 +412,8 @@ export default function AutumnGenerator() {
           "a"
         );
 
-      link.href = url;
+      link.href =
+        url;
 
       link.download =
         `autumn-outfits-${videoCount}-videos.zip`;
@@ -351,11 +430,13 @@ export default function AutumnGenerator() {
       link.remove();
 
       setTimeout(() => {
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(
+          url
+        );
       }, 1000);
 
       setMessage(
-        `Complete, ${videoCount} Autumn video${videoCount === 1 ? "" : "s"} with ${videoCount * 6} prompts generated.`
+        `Complete, ${videoCount} Autumn video${videoCount === 1 ? "" : "s"} with ${videoCount * 7} prompts generated.`
       );
     } catch (error) {
       console.error(
@@ -373,7 +454,9 @@ export default function AutumnGenerator() {
 
   return (
     <section className="clothing-generator">
+
       <div className="clothing-hero">
+
         <div className="eyebrow">
           AUTUMN
         </div>
@@ -386,23 +469,31 @@ export default function AutumnGenerator() {
         <p>
           Generate complete Autumn
           videos with 6 image prompts
-          per video.
+          and 1 cover prompt per video.
         </p>
 
         <div className="clothing-video-count">
+
           <div className="selector-label">
             HOW MANY VIDEOS?
           </div>
 
           <div className="video-count-grid">
+
             {VIDEO_COUNTS.map(
               (count) => (
                 <button
                   key={count}
                   type="button"
-                  className={`video-count-button ${videoCount === count ? "selected" : ""}`}
+                  className={`video-count-button ${
+                    videoCount === count
+                      ? "selected"
+                      : ""
+                  }`}
                   onClick={() =>
-                    setVideoCount(count)
+                    setVideoCount(
+                      count
+                    )
                   }
                   disabled={loading}
                 >
@@ -410,18 +501,25 @@ export default function AutumnGenerator() {
                 </button>
               )
             )}
+
           </div>
         </div>
 
         <button
-          className={`generate-button ${loading ? "loading" : ""}`}
+          className={`generate-button ${
+            loading ? "loading" : ""
+          }`}
           onClick={generate}
           disabled={loading}
         >
           <span>
             {loading
               ? "GENERATING..."
-              : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}
+              : `GENERATE ${videoCount} VIDEO${
+                  videoCount === 1
+                    ? ""
+                    : "S"
+                }`}
           </span>
 
           <span className="button-arrow">
@@ -435,12 +533,17 @@ export default function AutumnGenerator() {
             {message}
           </div>
         )}
+
       </div>
 
       {videos.length > 0 && (
+
         <section className="clothing-results">
+
           <div className="results-header">
+
             <div>
+
               <div className="section-label">
                 GENERATED CONTENT
               </div>
@@ -448,15 +551,19 @@ export default function AutumnGenerator() {
               <h2>
                 Your Autumn prompts
               </h2>
+
             </div>
 
             <div className="count">
+
               <strong>
-                {videos.length * 6}
+                {videos.length * 7}
               </strong>
 
               PROMPTS READY
+
             </div>
+
           </div>
 
           <div className="section-label">
@@ -464,30 +571,39 @@ export default function AutumnGenerator() {
           </div>
 
           <div className="clothing-quick-copy-table">
+
             <div className="clothing-quick-copy-header">
+
               <div>
                 VIDEO
               </div>
 
-              {IMAGE_NUMBERS.map(
-                (imageNumber) => (
+              {PROMPT_COLUMNS.map(
+                (promptNumber) => (
                   <div
-                    key={imageNumber}
+                    key={
+                      promptNumber
+                    }
                   >
-                    BILLEDE {imageNumber}
+                    {promptNumber <= 6
+                      ? `BILLEDE ${promptNumber}`
+                      : "FORSIDE"}
                   </div>
                 )
               )}
+
             </div>
 
             {videos.map(
               (video) => (
+
                 <div
                   className="clothing-quick-copy-row"
                   key={
                     video.videoNumber
                   }
                 >
+
                   <div className="clothing-quick-copy-video">
                     VIDEO{" "}
                     {
@@ -495,48 +611,53 @@ export default function AutumnGenerator() {
                     }
                   </div>
 
-                  {IMAGE_NUMBERS.map(
+                  {PROMPT_COLUMNS.map(
                     (
-                      imageNumber
+                      promptNumber
                     ) => {
+
                       const label =
                         promptLabel(
                           video.videoNumber,
-                          imageNumber
+                          promptNumber
                         );
 
                       return (
                         <button
                           key={
-                            imageNumber
+                            promptNumber
                           }
                           className="quick-copy-button"
                           onClick={() =>
                             copyPrompt(
                               getPrompt(
                                 video,
-                                imageNumber
+                                promptNumber
                               ),
                               label
                             )
                           }
                         >
+
                           <span>
-                            {
-                              label
-                            }
+                            {label}
                           </span>
 
                           <span className="copy-icon">
                             ⧉
                           </span>
+
                         </button>
                       );
+
                     }
                   )}
+
                 </div>
+
               )
             )}
+
           </div>
 
           <div className="section-label">
@@ -544,35 +665,39 @@ export default function AutumnGenerator() {
           </div>
 
           <div className="clothing-prompt-table">
+
             <div className="clothing-prompt-header">
+
               <div>
                 VIDEO
               </div>
 
-              {IMAGE_NUMBERS.map(
-                (imageNumber) => (
+              {PROMPT_COLUMNS.map(
+                (promptNumber) => (
                   <div
                     key={
-                      imageNumber
+                      promptNumber
                     }
                   >
-                    BILLEDE{" "}
-                    {
-                      imageNumber
-                    }
+                    {promptNumber <= 6
+                      ? `BILLEDE ${promptNumber}`
+                      : "FORSIDE"}
                   </div>
                 )
               )}
+
             </div>
 
             {videos.map(
               (video) => (
+
                 <div
                   className="clothing-prompt-row"
                   key={
                     video.videoNumber
                   }
                 >
+
                   <div className="clothing-prompt-video-name">
                     VIDEO{" "}
                     {
@@ -580,35 +705,37 @@ export default function AutumnGenerator() {
                     }
                   </div>
 
-                  {IMAGE_NUMBERS.map(
+                  {PROMPT_COLUMNS.map(
                     (
-                      imageNumber
+                      promptNumber
                     ) => {
+
                       const label =
                         promptLabel(
                           video.videoNumber,
-                          imageNumber
+                          promptNumber
                         );
 
                       const prompt =
                         getPrompt(
                           video,
-                          imageNumber
+                          promptNumber
                         );
 
                       return (
                         <article
                           className="clothing-prompt-card"
                           key={
-                            imageNumber
+                            promptNumber
                           }
                         >
+
                           <div className="clothing-prompt-card-top">
+
                             <span>
-                              BILLEDE{" "}
-                              {
-                                imageNumber
-                              }
+                              {promptNumber <= 6
+                                ? `BILLEDE ${promptNumber}`
+                                : "FORSIDE"}
                             </span>
 
                             <strong>
@@ -618,9 +745,10 @@ export default function AutumnGenerator() {
                               }
                               -
                               {
-                                imageNumber
+                                promptNumber
                               }
                             </strong>
+
                           </div>
 
                           <button
@@ -632,35 +760,45 @@ export default function AutumnGenerator() {
                               )
                             }
                           >
+
                             <span>
-                              {
-                                label
-                              }
+                              {label}
                             </span>
 
                             <span className="copy-icon">
                               ⧉
                             </span>
+
                           </button>
 
                           <div className="prompt-wrapper">
+
                             <textarea
                               value={
                                 prompt
                               }
                               readOnly
                             />
+
                           </div>
+
                         </article>
                       );
+
                     }
                   )}
+
                 </div>
+
               )
             )}
+
           </div>
+
         </section>
+
       )}
+
     </section>
   );
 }
