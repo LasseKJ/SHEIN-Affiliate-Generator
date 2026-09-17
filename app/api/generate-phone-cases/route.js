@@ -4,11 +4,11 @@ import {
 
 import {
   generatePhoneCaseVideos
-} from "../../../../lib/phoneCases";
+} from "../../../lib/phoneCases";
 
 import {
   createPhoneCasePrompts
-} from "../../../../lib/phoneCasePrompts";
+} from "../../../lib/phoneCasePrompts";
 
 export const dynamic =
   "force-dynamic";
