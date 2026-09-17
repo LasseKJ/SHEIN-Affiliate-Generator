@@ -1,17 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useState
+} from "react";
 
 import SquishyGenerator from "../components/SquishyGenerator";
+
 import AutumnGenerator from "../components/AutumnGenerator";
+
 import WinterGenerator from "../components/WinterGenerator";
 
-export default function Home() {
-  const [contentType, setContentType] =
-    useState("squishy");
+import PhoneCaseGenerator from "../components/PhoneCaseGenerator";
 
-  const [clothingCategory, setClothingCategory] =
-    useState("");
+export default function Home() {
+  const [
+    contentType,
+    setContentType
+  ] = useState(
+    "squishy"
+  );
+
+  const [
+    clothingCategory,
+    setClothingCategory
+  ] = useState("");
 
   return (
     <main className="page">
@@ -19,15 +31,19 @@ export default function Home() {
       <div className="container">
 
         <header className="header">
+
           <div className="brand">
             SHEIN
-            <span>AFFILIATE</span>
+            <span>
+              AFFILIATE
+            </span>
           </div>
 
           <div className="online">
             <span className="online-dot" />
             ONLINE
           </div>
+
         </header>
 
         <section className="content-selector-section">
@@ -40,15 +56,22 @@ export default function Home() {
 
             <button
               className={`content-type-button ${
-                contentType === "squishy"
+                contentType ===
+                "squishy"
                   ? "active"
                   : ""
               }`}
               onClick={() => {
-                setContentType("squishy");
-                setClothingCategory("");
+                setContentType(
+                  "squishy"
+                );
+
+                setClothingCategory(
+                  ""
+                );
               }}
             >
+
               <span>
                 SQUISHY POST
               </span>
@@ -56,19 +79,27 @@ export default function Home() {
               <span className="selector-arrow">
                 →
               </span>
+
             </button>
 
             <button
               className={`content-type-button ${
-                contentType === "clothing"
+                contentType ===
+                "clothing"
                   ? "active"
                   : ""
               }`}
               onClick={() => {
-                setContentType("clothing");
-                setClothingCategory("");
+                setContentType(
+                  "clothing"
+                );
+
+                setClothingCategory(
+                  ""
+                );
               }}
             >
+
               <span>
                 CLOTHING
               </span>
@@ -76,17 +107,54 @@ export default function Home() {
               <span className="selector-arrow">
                 →
               </span>
+
+            </button>
+
+            <button
+              className={`content-type-button ${
+                contentType ===
+                "phoneCases"
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() => {
+                setContentType(
+                  "phoneCases"
+                );
+
+                setClothingCategory(
+                  ""
+                );
+              }}
+            >
+
+              <span>
+                PHONE CASES
+              </span>
+
+              <span className="selector-arrow">
+                →
+              </span>
+
             </button>
 
           </div>
 
         </section>
 
-        {contentType === "squishy" && (
+        {contentType ===
+          "squishy" && (
           <SquishyGenerator />
         )}
 
-        {contentType === "clothing" && (
+        {contentType ===
+          "phoneCases" && (
+          <PhoneCaseGenerator />
+        )}
+
+        {contentType ===
+          "clothing" && (
+
           <section className="clothing-selection">
 
             <div className="clothing-hero">
@@ -97,12 +165,17 @@ export default function Home() {
 
               <h1>
                 Choose your
-                <span> season.</span>
+                <span>
+                  {" "}
+                  season.
+                </span>
               </h1>
 
               <p>
-                Select a season to create
-                complete fashion outfits.
+                Select a season
+                to create
+                complete
+                fashion outfits.
               </p>
 
             </div>
@@ -117,7 +190,8 @@ export default function Home() {
 
                 <button
                   className={`category-button ${
-                    clothingCategory === "Autumn"
+                    clothingCategory ===
+                    "Autumn"
                       ? "selected"
                       : ""
                   }`}
@@ -132,7 +206,8 @@ export default function Home() {
 
                 <button
                   className={`category-button ${
-                    clothingCategory === "Winter"
+                    clothingCategory ===
+                    "Winter"
                       ? "selected"
                       : ""
                   }`}
@@ -149,15 +224,18 @@ export default function Home() {
 
             </div>
 
-            {clothingCategory === "Autumn" && (
+            {clothingCategory ===
+              "Autumn" && (
               <AutumnGenerator />
             )}
 
-            {clothingCategory === "Winter" && (
+            {clothingCategory ===
+              "Winter" && (
               <WinterGenerator />
             )}
 
           </section>
+
         )}
 
       </div>
