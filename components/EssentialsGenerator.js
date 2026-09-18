@@ -57,7 +57,7 @@ async function downloadProduct(product) {
 
 async function addProduct(folder, imageNumber, product) {
   const blob = await downloadProduct(product);
-  const extension = blob.type === "image/png" ? "png" : "jpg";
+  const extension = "jpg";
 
   folder.file(
     createFileName(imageNumber, product, extension),
@@ -181,13 +181,9 @@ export default function EssentialsGenerator() {
             `Video ${video.videoNumber} of ${data.videos.length}, downloading BILLEDE ${imageNumber}...`
           );
 
-          const imageFolder = videoFolder.folder(
-            `BILLEDE ${imageNumber}`
-          );
-
           for (const product of slide.products) {
             await addProduct(
-              imageFolder,
+              videoFolder,
               imageNumber,
               product
             );
