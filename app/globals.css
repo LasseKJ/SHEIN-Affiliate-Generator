@@ -2147,3 +2147,115 @@ footer {
     min-height: 68px;
   }
 }
+
+
+/* ESSENTIALS RESULTS */
+
+.essentials-results {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 50px;
+}
+
+.essentials-results-label {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.essentials-prompt-row {
+  display: grid;
+  grid-template-columns: 120px repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+  margin-top: 20px !important;
+  margin-bottom: 28px;
+  align-items: start;
+}
+
+.essentials-prompt-video-name {
+  padding: 18px 8px 0;
+  font-size: 10px;
+}
+
+.essentials-prompt-card {
+  min-width: 0;
+  padding: 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.055);
+}
+
+.essentials-prompt-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.09);
+}
+
+.essentials-prompt-card .clothing-prompt-card-top {
+  margin-bottom: 14px;
+}
+
+.essentials-prompt-card .copy-button {
+  height: 50px;
+  margin-bottom: 12px;
+}
+
+.essentials-prompt-card .prompt-wrapper {
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.essentials-prompt-card .prompt-wrapper textarea {
+  min-height: 300px;
+  max-height: 300px;
+  padding: 15px;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+@media (max-width: 1050px) {
+  .essentials-prompt-row {
+    grid-template-columns: 90px repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .essentials-prompt-card {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 800px) {
+  .essentials-results {
+    padding-bottom: 35px;
+  }
+
+  .essentials-prompt-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .essentials-prompt-video-name {
+    grid-column: 1 / -1;
+    padding: 4px 0 2px;
+  }
+}
+
+@media (max-width: 520px) {
+  .essentials-prompt-row {
+    grid-template-columns: 1fr;
+  }
+
+  .essentials-prompt-video-name {
+    grid-column: auto;
+  }
+
+  .essentials-prompt-card {
+    padding: 14px;
+  }
+
+  .essentials-prompt-card .prompt-wrapper textarea {
+    min-height: 240px;
+    max-height: 240px;
+  }
+}
