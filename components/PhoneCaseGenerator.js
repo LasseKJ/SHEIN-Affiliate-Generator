@@ -264,22 +264,16 @@ export default function PhoneCaseGenerator() {
           );
 
         /*
-          Hver video har:
+          Hver video indeholder
+          16 forskellige cases.
 
-          BILLEDE 1
-          4 cases
+          4 cases til BILLEDE 1
+          4 cases til BILLEDE 2
+          4 cases til BILLEDE 3
+          4 cases til BILLEDE 4
 
-          BILLEDE 2
-          4 cases
-
-          BILLEDE 3
-          4 cases
-
-          BILLEDE 4
-          4 cases
-
-          FORSIDE
-          16 cases
+          FORSIDE indeholder INGEN
+          produktbilleder.
         */
 
         for (
@@ -310,29 +304,22 @@ export default function PhoneCaseGenerator() {
           }
         }
 
-        const coverFolder =
-          videoFolder.folder(
-            "FORSIDE"
-          );
+        /*
+          FORSIDE:
 
-        setMessage(
-          `Video ${video.videoNumber} of ${data.videos.length}, downloading 16 cover products...`
+          Der oprettes kun en tom
+          FORSIDE mappe.
+
+          Der downloades INGEN cases
+          til forsiden.
+
+          Forsiden består kun af
+          cover prompten.
+        */
+
+        videoFolder.folder(
+          "FORSIDE"
         );
-
-        for (
-          let index = 0;
-          index <
-          video.cases.length;
-          index++
-        ) {
-          await addProduct(
-            coverFolder,
-            index + 1,
-            video.cases[
-              index
-            ]
-          );
-        }
       }
 
       setMessage(
@@ -427,7 +414,7 @@ export default function PhoneCaseGenerator() {
         <p>
           Generate 16 Phone Cases
           per video, 4 product slides
-          and 1 editorial cover.
+          and 1 clean cover.
         </p>
 
         <div className="clothing-video-count">
