@@ -315,16 +315,16 @@ export default function EssentialsGenerator() {
       )}
 
       {videos.length > 0 && (
-        <section style={{ marginTop: 40 }}>
-          <div className="clothing-category-label">QUICK COPY</div>
+        <section className="essentials-results" style={{ marginTop: 40 }}>
+          <div className="clothing-category-label essentials-results-label">QUICK COPY</div>
 
           {videos.map((video) => (
             <div
-              className="clothing-prompt-row"
+              className="clothing-prompt-row essentials-prompt-row"
               key={video.videoNumber}
               style={{ marginTop: 20 }}
             >
-              <div className="clothing-prompt-video-name">
+              <div className="clothing-prompt-video-name essentials-prompt-video-name">
                 VIDEO {video.videoNumber}
               </div>
 
@@ -334,7 +334,7 @@ export default function EssentialsGenerator() {
 
                 return (
                   <article
-                    className="clothing-prompt-card"
+                    className="clothing-prompt-card essentials-prompt-card"
                     key={promptNumber}
                   >
                     <div className="clothing-prompt-card-top">
