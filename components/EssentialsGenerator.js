@@ -262,17 +262,17 @@ export default function EssentialsGenerator() {
         </div>
       </div>
 
-      <div className="clothing-category-section">
+      <div className="clothing-category-section essentials-category-section">
         <div className="clothing-category-label">
           CHOOSE 3 CATEGORIES
         </div>
 
-        <div className="clothing-category-grid">
+        <div className="clothing-category-grid essentials-category-grid">
           {CATEGORIES.map((category) => (
             <button
               key={category.value}
               type="button"
-              className={`category-button ${
+              className={`category-button essentials-category-button ${
                 selectedCategories.includes(category.value)
                   ? "selected"
                   : ""
