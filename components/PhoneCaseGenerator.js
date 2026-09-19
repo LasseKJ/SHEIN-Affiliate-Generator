@@ -82,7 +82,7 @@ function createFileName(
       product?.name
     );
 
-  return `B${imageNumber}-Case-${name}-${code}.${extension}`;
+  return `B${imageNumber}-PhoneCase-${name}-${code}.${extension}`;
 }
 
 async function downloadProduct(
