@@ -68,7 +68,8 @@ export async function POST(request) {
             (outfit, outfitIndex) => {
               const prompts =
                 createWinterPrompts(
-                  outfit
+                  outfit,
+                  outfitIndex * 2 + 1
                 );
 
               return {
