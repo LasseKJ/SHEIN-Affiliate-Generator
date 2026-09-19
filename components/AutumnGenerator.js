@@ -146,7 +146,7 @@ export default function AutumnGenerator() {
         product?.code
       );
 
-    return `${prefix}-${type}-${productName}-${productCode}.${extension}`;
+    return `${prefix}-Autumn-${productName}-${productCode}.${extension}`;
   }
 
   async function addProductToZip(
