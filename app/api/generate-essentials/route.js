@@ -26,6 +26,7 @@ export async function POST(request) {
 
     const videoCount = Number(body?.videoCount || 1);
     const selectedCategories = body?.selectedCategories;
+    const categoryUsage = body?.categoryUsage || {};
 
     if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) {
       throw new Error(
@@ -35,7 +36,8 @@ export async function POST(request) {
 
     const generatedVideos = await generateEssentialsVideos(
       videoCount,
-      selectedCategories
+      selectedCategories,
+      categoryUsage
     );
 
     const videos = generatedVideos.map((video) => {
