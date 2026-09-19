@@ -4,6 +4,7 @@ import { useState } from "react";
 import JSZip from "jszip";
 
 const VIDEO_COUNTS = [1, 2, 4, 8];
+const USAGE_STORAGE_KEY = "shein-essentials-category-usage";
 
 const CATEGORIES = [
   { value: "Essentials-Makeup", label: "MAKEUP" },
@@ -80,8 +81,128 @@ export default function EssentialsGenerator() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [videoCount, setVideoCount] = useState(1);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [categoryUsage, setCategoryUsage] = useState(() => {
+    if (typeof window === "undefined") return {};
+
+    try {
+      return JSON.parse(localStorage.getItem(USAGE_STORAGE_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  });
   const [videos, setVideos] = useState([]);
+
+  function resetCategoryUsage() {
+    const reset = {};
+    CATEGORIES.forEach((category) => {
+      reset[category.value] = 0;
+    });
+    setCategoryUsage(reset);
+    localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(reset));
+  }
+
+use client";
+
+import { useState } from "react";
+import JSZip from "jszip";
+
+const VIDEO_COUNTS = [1, 2, 4, 8];
+const USAGE_STORAGE_KEY = "shein-essentials-category-usage";
+
+const CATEGORIES = [
+  { value: "Essentials-Makeup", label: "MAKEUP" },
+  { value: "Essentials-Cases", label: "CASES" },
+  { value: "Essentials-MakeupStorage", label: "MAKEUP STORAGE" },
+  { value: "Essentials-Hair", label: "HAIR" },
+  { value: "Essentials-HomeDecor", label: "HOME DECOR" },
+  { value: "Essentials-VanityExtras", label: "VANITY EXTRAS" },
+  { value: "Essentials-Kitchen", label: "KITCHEN" },
+  { value: "Essentials-Bath", label: "BATH" },
+];
+
+function safeFilePart(value) {
+  return String(value || "product")
+    .trim()
+    .replace(/[^a-zA-Z0-9æøåÆØÅ]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function safeCode(value) {
+  return String(value || "UNKNOWN")
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, "");
+}
+
+function createFileName(imageNumber, product, extension) {
+  const name = safeFilePart(product?.name);
+  const code = safeCode(product?.code);
+
+  return `B${imageNumber}-Essentials-${name}-${code}.${extension}`;
+}
+
+async function downloadProduct(product) {
+  if (!product?.imageUrl) {
+    throw new Error(
+      `Produktet ${product?.name || "ukendt"} har ingen billed URL.`
+    );
+  }
+
+  const response = await fetch(product.imageUrl);
+
+  if (!response.ok) {
+    throw new Error(
+      `Kunne ikke hente produktbillede: ${product.name}`
+    );
+  }
+
+  return response.blob();
+}
+
+async function addProduct(folder, imageNumber, product) {
+  const blob = await downloadProduct(product);
+  const extension = "jpg";
+
+  folder.file(
+    createFileName(imageNumber, product, extension),
+    blob
+  );
+}
+
+function categoryLabel(value) {
+  const item = CATEGORIES.find(
+    (category) => category.value === value
+  );
+
+  return item?.label || value;
+}
+
+function getPrompt(video, promptNumber) {
+  return video?.prompts?.[promptNumber - 1] || "";
+}
+
+export default function EssentialsGenerator() {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [videoCount, setVideoCount] = useState(1);
+  const [categoryUsage, setCategoryUsage] = useState(() => {
+    if (typeof window === "undefined") return {};
+
+    try {
+      return JSON.parse(localStorage.getItem(USAGE_STORAGE_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const [videos, setVideos] = useState([]);
+
+  function resetCategoryUsage() {
+    const reset = {};
+    CATEGORIES.forEach((category) => {
+      reset[category.value] = 0;
+    });
+    setCategoryUsage(reset);
+    localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(reset));
+  }
 
   function toggleCategory(value) {
     if (loading) return;
@@ -109,16 +230,11 @@ export default function EssentialsGenerator() {
   }
 
   async function generate() {
-    if (selectedCategories.length !== 3) {
-      setMessage("Choose exactly 3 Essentials categories first.");
-      return;
-    }
-
     setLoading(true);
     setVideos([]);
 
     setMessage(
-      `Selecting 6 products from each of the 3 selected categories for ${videoCount} video${videoCount === 1 ? "" : "s"}...`
+      `Randomly selecting 3 balanced categories for ${videoCount} video${videoCount === 1 ? "" : "s"}...`
     );
 
     try {
@@ -129,7 +245,8 @@ export default function EssentialsGenerator() {
         },
         body: JSON.stringify({
           videoCount,
-          selectedCategories
+          selectedCategories: null,
+          categoryUsage
         })
       });
 
@@ -158,6 +275,20 @@ export default function EssentialsGenerator() {
       }
 
       setVideos(data.videos);
+
+      const nextUsage = { ...categoryUsage };
+
+      for (const video of data.videos) {
+        for (const category of video.categories || []) {
+          nextUsage[category] = Number(nextUsage[category] || 0) + 1;
+        }
+      }
+
+      setCategoryUsage(nextUsage);
+      localStorage.setItem(
+        USAGE_STORAGE_KEY,
+        JSON.stringify(nextUsage)
+      );
 
       const zip = new JSZip();
 
@@ -263,105 +394,37 @@ export default function EssentialsGenerator() {
 
       <div className="clothing-category-section essentials-category-section">
         <div className="clothing-category-label">
-          CHOOSE 3 CATEGORIES
+          PICK 3, AUTOMATIC
         </div>
+
+        <p style={{ marginTop: 12 }}>
+          The generator randomly selects 3 Essentials categories for each video.
+          It prioritizes categories used the least, while keeping random selection
+          between categories with the same usage count.
+        </p>
 
         <div className="clothing-category-grid essentials-category-grid">
           {CATEGORIES.map((category) => (
-            <button
-              key={category.value}
-              type="button"
-              className={`category-button essentials-category-button ${
-                selectedCategories.includes(category.value)
-                  ? "selected"
-                  : ""
-              }`}
-              onClick={() => toggleCategory(category.value)}
-              disabled={
-                loading ||
-                (!selectedCategories.includes(category.value) &&
-                  selectedCategories.length >= 3)
-              }
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
-
-        <p style={{ marginTop: 16 }}>
-          Selected: {selectedCategories.length} / 3
-        </p>
-      </div>
-
-      <div style={{ marginTop: 28 }}>
-        <button
-          type="button"
-          className="content-type-button active"
-          onClick={generate}
-          disabled={loading || selectedCategories.length !== 3}
-        >
-          <span>
-            {loading ? "GENERATING..." : "GENERATE ESSENTIALS"}
-          </span>
-          <span className="selector-arrow">→</span>
-        </button>
-      </div>
-
-      {message && (
-        <div style={{ marginTop: 18 }}>
-          {message}
-        </div>
-      )}
-
-      {videos.length > 0 && (
-        <section className="essentials-results" style={{ marginTop: 40 }}>
-          <div className="clothing-category-label essentials-results-label">QUICK COPY</div>
-
-          {videos.map((video) => (
             <div
-              className="clothing-prompt-row essentials-prompt-row"
-              key={video.videoNumber}
-              style={{ marginTop: 20 }}
+              key={category.value}
+              className="category-button essentials-category-button"
+              style={{ cursor: "default" }}
             >
-              <div className="clothing-prompt-video-name essentials-prompt-video-name">
-                VIDEO {video.videoNumber}
-              </div>
-
-              {[1, 2, 3].map((promptNumber) => {
-                const prompt = getPrompt(video, promptNumber);
-                const label = `PROMPT V${video.videoNumber}-${promptNumber}`;
-
-                return (
-                  <article
-                    className="clothing-prompt-card essentials-prompt-card"
-                    key={promptNumber}
-                  >
-                    <div className="clothing-prompt-card-top">
-                      <span>BILLEDE {promptNumber}</span>
-                      <strong>
-                        V{video.videoNumber}-{promptNumber}
-                      </strong>
-                    </div>
-
-                    <button
-                      className="copy-button"
-                      onClick={() => copyPrompt(prompt, label)}
-                      type="button"
-                    >
-                      <span>{label}</span>
-                      <span className="copy-icon">⧉</span>
-                    </button>
-
-                    <div className="prompt-wrapper">
-                      <textarea value={prompt} readOnly />
-                    </div>
-                  </article>
-                );
-              })}
+              <span>{category.label}</span>
+              <strong style={{ display: "block", marginTop: 6 }}>
+                {Number(categoryUsage[category.value] || 0)} used
+              </strong>
             </div>
           ))}
-        </section>
-      )}
-    </section>
-  );
-}
+        </div>
+
+        <button
+          type="button"
+          className="content-type-button"
+          onClick={resetCategoryUsage}
+          disabled={loading}
+          style={{ marginTop: 16 }}
+        >
+          RESET COUNTER
+        </button>
+      </div>
