@@ -78,7 +78,8 @@ export async function POST(request) {
             ) => {
               const prompts =
                 createAutumnPrompts(
-                  outfit
+                  outfit,
+                  outfitIndex * 2 + 1
                 );
 
               return {
