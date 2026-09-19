@@ -103,7 +103,7 @@ export default function WinterGenerator() {
     try {
       const response =
         await fetch(
-          "/api/generate-clothing",
+          "/api/generate-winter",
           {
             method: "POST",
             headers: {
@@ -234,8 +234,28 @@ export default function WinterGenerator() {
                 ? "png"
                 : "jpg";
 
+            const safeName = String(
+              item.product.name || "product"
+            )
+              .trim()
+              .replace(
+                /[^a-zA-Z0-9æøåÆØÅ]+/g,
+                "-"
+              )
+              .replace(
+                /^-+|-+$/g,
+                "");
+
+            const safeCode = String(
+              item.product.code || "UNKNOWN"
+            )
+              .trim()
+              .replace(
+                /[^a-zA-Z0-9]+/g,
+                "");
+
             folder.file(
-              `${item.type}-${item.product.code}.${extension}`,
+              `B${modelImageNumber}-Winter-${safeName}-${safeCode}.${extension}`,
               blob
             );
           }
