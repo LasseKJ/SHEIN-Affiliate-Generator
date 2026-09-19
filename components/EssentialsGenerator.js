@@ -204,22 +204,6 @@ export default function EssentialsGenerator() {
     localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(reset));
   }
 
-  function toggleCategory(value) {
-    if (loading) return;
-
-    setSelectedCategories((current) => {
-      if (current.includes(value)) {
-        return current.filter((item) => item !== value);
-      }
-
-      if (current.length >= 3) {
-        return current;
-      }
-
-      return [...current, value];
-    });
-  }
-
   async function copyPrompt(prompt, label) {
     try {
       await navigator.clipboard.writeText(prompt);
