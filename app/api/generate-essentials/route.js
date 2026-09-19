@@ -44,8 +44,9 @@ export async function POST(request) {
       return {
         videoNumber: video.videoNumber,
         categories: video.categories,
-        slides: video.slides.map((slide) => ({
+        slides: video.slides.map((slide, slideIndex) => ({
           category: slide.category,
+          imageNumber: slideIndex + 1,
           products: slide.products.map(serializeProduct)
         })),
         prompts: promptData.prompts
