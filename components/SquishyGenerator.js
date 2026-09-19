@@ -234,7 +234,7 @@ export default function SquishyGenerator() {
             // Banana = Produktnavn
             // HDK23D = Produktkode
             const fileName =
-              `V${video.videoNumber}-${imageNumber}-Product-${index + 1}-${productName}-${productCode}.${extension}`;
+              `B${Number(group.number)}-Squishy-${productName}-${productCode}.${extension}`;
 
             videoFolder.file(
               fileName,
@@ -338,7 +338,7 @@ export default function SquishyGenerator() {
           // Eksempel:
           // V1-04-Product-1-Banana-HDK23D.jpg
           videoFolder.file(
-            `V${video.videoNumber}-04-Product-${index + 1}-${productName}-${productCode}.${extension}`,
+            `B4-Squishy-${productName}-${productCode}.${extension}`,
             blob
           );
         }
