@@ -14,7 +14,6 @@ const CATEGORIES = [
   { value: "Essentials-VanityExtras", label: "VANITY EXTRAS" },
   { value: "Essentials-Kitchen", label: "KITCHEN" },
   { value: "Essentials-Bath", label: "BATH" },
-  { value: "Essentials-GiftBoxes", label: "GIFT BOXES" }
 ];
 
 function safeFilePart(value) {
