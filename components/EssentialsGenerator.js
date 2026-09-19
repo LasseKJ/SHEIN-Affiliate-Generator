@@ -352,7 +352,7 @@ export default function EssentialsGenerator() {
         </h1>
 
         <p>
-          Choose 3 categories. Each category gets its own image with 6 products.
+          Pick 3 categories automatically. Each category gets its own image with 6 products.
         </p>
 
         <div className="clothing-video-count">
