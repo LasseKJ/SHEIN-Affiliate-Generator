@@ -77,6 +77,7 @@ function getPrompt(video, promptNumber) {
   return video?.prompts?.[promptNumber - 1] || "";
 }
 
+
 export default function EssentialsGenerator() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -260,9 +261,7 @@ export default function EssentialsGenerator() {
               <button
                 key={count}
                 type="button"
-                className={`video-count-button ${
-                  videoCount === count ? "selected" : ""
-                }`}
+                className={`video-count-button ${videoCount === count ? "selected" : ""}`}
                 onClick={() => setVideoCount(count)}
                 disabled={loading}
               >
@@ -309,3 +308,76 @@ export default function EssentialsGenerator() {
           RESET COUNTER
         </button>
       </div>
+
+      <div style={{ marginTop: 28 }}>
+        <button
+          type="button"
+          className="content-type-button active"
+          onClick={generate}
+          disabled={loading}
+        >
+          <span>
+            {loading ? "GENERATING..." : "GENERATE ESSENTIALS"}
+          </span>
+          <span className="selector-arrow">→</span>
+        </button>
+      </div>
+
+      {message && (
+        <div style={{ marginTop: 18 }}>
+          {message}
+        </div>
+      )}
+
+      {videos.length > 0 && (
+        <section style={{ marginTop: 40 }}>
+          <div className="clothing-category-label">QUICK COPY</div>
+
+          {videos.map((video) => (
+            <div
+              className="clothing-prompt-row"
+              key={video.videoNumber}
+              style={{ marginTop: 20 }}
+            >
+              <div className="clothing-prompt-video-name">
+                VIDEO {video.videoNumber}
+              </div>
+
+              {[1, 2, 3].map((promptNumber) => {
+                const prompt = getPrompt(video, promptNumber);
+                const label = `PROMPT V${video.videoNumber}-${promptNumber}`;
+
+                return (
+                  <article
+                    className="clothing-prompt-card"
+                    key={promptNumber}
+                  >
+                    <div className="clothing-prompt-card-top">
+                      <span>BILLEDE {promptNumber}</span>
+                      <strong>
+                        V{video.videoNumber}-{promptNumber}
+                      </strong>
+                    </div>
+
+                    <button
+                      className="copy-button"
+                      onClick={() => copyPrompt(prompt, label)}
+                      type="button"
+                    >
+                      <span>{label}</span>
+                      <span className="copy-icon">⧉</span>
+                    </button>
+
+                    <div className="prompt-wrapper">
+                      <textarea value={prompt} readOnly />
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ))}
+        </section>
+      )}
+    </section>
+  );
+}
