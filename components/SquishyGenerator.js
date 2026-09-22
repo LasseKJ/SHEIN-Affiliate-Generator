@@ -140,21 +140,6 @@ export default function SquishyGenerator() {
         );
       }
 
-      const templates =
-        data.templates;
-
-      if (!templates?.cover) {
-        throw new Error(
-          "Forside template kunne ikke findes."
-        );
-      }
-
-      if (!templates?.image) {
-        throw new Error(
-          "Produkt template kunne ikke findes."
-        );
-      }
-
       setVideos(data.videos);
 
       const zip =
@@ -245,44 +230,6 @@ export default function SquishyGenerator() {
           }
         }
 
-        setMessage(
-          `Video ${video.videoNumber} of ${data.videos.length}, downloading templates...`
-        );
-
-        const productTemplateResponse =
-          await fetch(
-            templates.image
-          );
-
-        if (
-          !productTemplateResponse.ok
-        ) {
-          throw new Error(
-            "Produkt template kunne ikke downloades."
-          );
-        }
-
-        const productTemplateBlob =
-          await productTemplateResponse.blob();
-
-        // Produkt template til Billede 1.
-        videoFolder.file(
-          `V${video.videoNumber}-01-Product-Template.jpg`,
-          productTemplateBlob
-        );
-
-        // Produkt template til Billede 2.
-        videoFolder.file(
-          `V${video.videoNumber}-02-Product-Template.jpg`,
-          productTemplateBlob
-        );
-
-        // Produkt template til Billede 3.
-        videoFolder.file(
-          `V${video.videoNumber}-03-Product-Template.jpg`,
-          productTemplateBlob
-        );
-
         // Forsiden bruger ét produkt fra hver af de tre grupper.
         const coverProducts = [
           video.groups[0].products[0],
@@ -342,25 +289,6 @@ export default function SquishyGenerator() {
             blob
           );
         }
-
-        const coverResponse =
-          await fetch(
-            templates.cover
-          );
-
-        if (!coverResponse.ok) {
-          throw new Error(
-            "Forside template kunne ikke downloades."
-          );
-        }
-
-        const coverBlob =
-          await coverResponse.blob();
-
-        videoFolder.file(
-          `V${video.videoNumber}-04-Cover-Template.jpg`,
-          coverBlob
-        );
       }
 
       if (
