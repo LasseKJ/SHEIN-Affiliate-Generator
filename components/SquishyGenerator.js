@@ -140,6 +140,16 @@ export default function SquishyGenerator() {
         );
       }
 
+      const templates = data.templates;
+
+      if (!templates?.cover) {
+        throw new Error("Forside template kunne ikke findes.");
+      }
+
+      if (!templates?.image) {
+        throw new Error("Produkt template kunne ikke findes.");
+      }
+
       setVideos(data.videos);
 
       const zip =
@@ -230,6 +240,33 @@ export default function SquishyGenerator() {
           }
         }
 
+        setMessage(
+          `Video ${video.videoNumber} of ${data.videos.length}, downloading templates...`
+        );
+
+        const productTemplateResponse = await fetch(templates.image);
+
+        if (!productTemplateResponse.ok) {
+          throw new Error("Produkt template kunne ikke downloades.");
+        }
+
+        const productTemplateBlob = await productTemplateResponse.blob();
+
+        videoFolder.file(
+          "B1-Squishy-Product-Template.jpg",
+          productTemplateBlob
+        );
+
+        videoFolder.file(
+          "B2-Squishy-Product-Template.jpg",
+          productTemplateBlob
+        );
+
+        videoFolder.file(
+          "B3-Squishy-Product-Template.jpg",
+          productTemplateBlob
+        );
+
         // Forsiden bruger ét produkt fra hver af de tre grupper.
         const coverProducts = [
           video.groups[0].products[0],
@@ -289,6 +326,19 @@ export default function SquishyGenerator() {
             blob
           );
         }
+
+        const coverResponse = await fetch(templates.cover);
+
+        if (!coverResponse.ok) {
+          throw new Error("Forside template kunne ikke downloades.");
+        }
+
+        const coverBlob = await coverResponse.blob();
+
+        videoFolder.file(
+          "B4-Squishy-Cover-Template.jpg",
+          coverBlob
+        );
       }
 
       if (
