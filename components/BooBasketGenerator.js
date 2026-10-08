@@ -73,8 +73,8 @@ export default function BooBasketGenerator() {
       <div className="clothing-hero">
         <div className="eyebrow">BOO BASKET</div>
         <h1>Create <span>Boo Basket ideas.</span></h1>
-        <p>Each video includes 3 product images with 9 different items in a natural 3 × 3 layout, plus a separate cover. White backgrounds, exact codes below each product, vertical 9:16.</p>
-        <p>Uses active BooBasket products. At least 9 are required; 27 allows all three images to use different products. Carousel order: cover, image 1, image 2, image 3.</p>
+        <p>Each video includes 3 product images with 9 different items in a natural 3 × 3 layout and one basket centered below, plus a separate cover. White backgrounds, exact codes below each product, vertical 9:16.</p>
+        <p>Uses active BooBasket products and BooBasketBasket baskets. At least 9 products and 1 basket are required; 27 allows all three images to use different products. Carousel order: cover, image 1, image 2, image 3.</p>
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY VIDEOS?</div>
           <div className="video-count-grid">
@@ -88,7 +88,7 @@ export default function BooBasketGenerator() {
       {videos.length > 0 && <section className="clothing-results">
         <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your Boo Basket prompts</h2></div><div className="count"><strong>{videos.length * 4}</strong>PROMPTS READY</div></div>
         <button type="button" className="copy-button" onClick={() => downloadZip(videos)} disabled={busy}>{downloading ? "DOWNLOADING..." : "DOWNLOAD ZIP"}</button>
-        <p>Each image folder contains its 9 reference images, exact product codes and prompt. FORSIDE contains the separate cover prompt.</p>
+        <p>Each image folder contains its 10 reference images (9 products + 1 basket), exact product codes and prompt. FORSIDE contains the separate cover prompt.</p>
         <div className="section-label">QUICK COPY</div>
         <div className="clothing-quick-copy-table">
           <div className="clothing-quick-copy-header"><div>VIDEO</div>{PROMPT_COLUMNS.map((number) => <div key={number}>{columnLabel(number)}</div>)}</div>
