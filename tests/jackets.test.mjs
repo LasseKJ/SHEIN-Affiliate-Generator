@@ -35,7 +35,9 @@ test('all video counts preserve four unique Jacket references and five prompts p
         assert.doesNotMatch(prompts[i], /sweater/i);
       });
       assert.match(coverPrompt,/exactly the FOUR uploaded jacket references/);
-      assert.match(coverPrompt,/does NOT contain the word “Autumn”/);
+      assert.match(coverPrompt,/exact word “Jackets”/);
+      assert.ok(coverPrompt.includes("\nAutumn\nJackets\nFrom Shein\n"));
+      assert.doesNotMatch(coverPrompt,/creative main headline|creative jacket headline|Jacket Season|Cozy Jackets|The Jacket Edit|The Layering Edit/);
       assert.match(coverPrompt,/exact phrase “From Shein”/);
       assert.match(coverPrompt,/Do NOT arrange them in a grid/);
     });
