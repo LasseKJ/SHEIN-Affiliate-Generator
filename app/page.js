@@ -8,6 +8,7 @@ import WinterGenerator from "../components/WinterGenerator";
 import PhoneCaseGenerator from "../components/PhoneCaseGenerator";
 import EssentialsGenerator from "../components/EssentialsGenerator";
 import SweaterGenerator from "../components/SweaterGenerator";
+import BooBasketGenerator from "../components/BooBasketGenerator";
 
 export default function Home() {
   const [contentType, setContentType] = useState("squishy");
@@ -34,6 +35,7 @@ export default function Home() {
             <button className={`content-type-button ${contentType === "phoneCases" ? "active" : ""}`} onClick={() => changeContentType("phoneCases")} type="button"><span>PHONE CASES</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "essentials" ? "active" : ""}`} onClick={() => changeContentType("essentials")} type="button"><span>ESSENTIALS</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "sweaters" ? "active" : ""}`} onClick={() => changeContentType("sweaters")} type="button"><span>SWEATERS</span><span className="selector-arrow">→</span></button>
+            <button className={`content-type-button ${contentType === "booBasket" ? "active" : ""}`} onClick={() => changeContentType("booBasket")} type="button"><span>BOO BASKET</span><span className="selector-arrow">→</span></button>
           </div>
         </section>
 
@@ -41,6 +43,7 @@ export default function Home() {
         {contentType === "phoneCases" && <PhoneCaseGenerator />}
         {contentType === "essentials" && <EssentialsGenerator />}
         {contentType === "sweaters" && <SweaterGenerator />}
+        {contentType === "booBasket" && <BooBasketGenerator />}
 
         {contentType === "clothing" && (
           <section className="clothing-selection">

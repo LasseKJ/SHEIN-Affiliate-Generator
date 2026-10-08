@@ -1917,6 +1917,14 @@ footer {
   overflow-x: auto;
 }
 
+.boo-basket-generator .clothing-quick-copy-header,
+.boo-basket-generator .clothing-quick-copy-row,
+.boo-basket-generator .clothing-prompt-header,
+.boo-basket-generator .clothing-prompt-row {
+  grid-template-columns: 90px repeat(4, minmax(0, 1fr));
+  min-width: 760px;
+}
+
 .clothing-quick-copy-header,
 .clothing-quick-copy-row,
 .clothing-prompt-header,
