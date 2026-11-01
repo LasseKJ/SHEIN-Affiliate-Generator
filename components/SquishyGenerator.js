@@ -60,6 +60,37 @@ export default function SquishyGenerator() {
     }
   }
 
+
+  function downloadAllPrompts() {
+    const text = videos.flatMap((video) =>
+      video.prompts.map((prompt, index) =>
+        `${promptLabel(video.videoNumber, index + 1)}\n\n${prompt.trim()}`
+      )
+    ).join("\n\n\n");
+    const blob = new Blob(["\uFEFF", text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `shein-squishy-${videos.length}-videos-prompts.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setMessage(`All ${videos.length * 4} prompts downloaded as TXT.`);
+  }
+
+  function masterPrompt() {
+    const folders = videos.map((video) => `v${video.videoNumber}`).join(", ");
+    const ranges = videos.map((video) => `V${video.videoNumber}-1 til V${video.videoNumber}-4`).join(", ");
+    return `Brug den uploadede TXT-fil med alle prompts og den uploadede ZIP-fil med produktbilleder og templates til at lave alle ${videos.length * 4} billeder: ${ranges}.
+
+Lav ét færdigt billede pr. prompt. Billede 1–3 er produktslides, og billede 4 er cover. For Vn-m skal du bruge filerne med Bm-prefix i mappen VIDEO n og den tilhørende template. Match produkterne efter produktnavn og produktkode i filnavnet, hvis B-nummeret i prompten afviger fra ZIP-filen. B-nummeret i ZIP-filen angiver billedgruppen, ikke produktets placering. På coveret bruges de tre B4-produktbilleder.
+
+Følg hver prompts produktinformation, priser, titel og layout. Brug de vedhæftede produktfotos som grundlag, fjern deres baggrunde, og bevar produkternes form, farver, detaljer og identitet. Bevar templaten og dens dekorative elementer. Fjern pladsholdere og stiplede billedrammer. Lever alle billeder i høj opløsning i præcis 9:16 uden gennemsigtig baggrund.
+
+Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-billeder i hver mappe, navngivet vN-1.png, vN-2.png, vN-3.png og vN-4.png, hvor N er videonummeret. Kontrollér, at alle ${videos.length * 4} billeder er med, og at produktnavne, koder og priser matcher promptene. Lever ZIP-filen som et klikbart downloadlink.`;
+  }
+
   async function downloadProduct(
     product
   ) {
@@ -497,6 +528,17 @@ export default function SquishyGenerator() {
               </strong>
               PROMPTS READY
             </div>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "24px" }}>
+            <button type="button" className="copy-button" disabled={loading}
+              onClick={downloadAllPrompts}>
+              DOWNLOAD ALL PROMPTS (.TXT)
+            </button>
+            <button type="button" className="copy-button" disabled={loading}
+              onClick={() => copyPrompt(masterPrompt(), "Master prompt")}>
+              COPY MASTER PROMPT
+            </button>
           </div>
 
           <div className="section-label">
