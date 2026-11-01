@@ -53,7 +53,7 @@ export default function StockingGenerator() {
 
 ZIP-filen indeholder mapperne ${folders}. Hver VIDEO-mappe har IMAGE 1, IMAGE 2 og IMAGE 3 med tre produktreferencer, PRODUCTS.json og den tilhørende PROMPT.txt. Brug præcis de tre billeder i den pågældende IMAGE-mappe sammen med dens prompt. COVER-mappen indeholder coverprompten; lav coveret uden produktreferencer. Følg karusellens rækkefølge: COVER, IMAGE 1, IMAGE 2, IMAGE 3.
 
-Følg hver prompt nøje for layout, produktnavne, søgekoder, priser og farver. Bevar produkternes identitet og templates; brug kun de uploadede produktbilleder som grundlag. Lav ét vertikalt billede i præcis 9:16 pr. prompt, uden at blande produkter eller oplysninger mellem mapper.
+Følg hver prompt nøje for layout, produktnavne, søgekoder, priser og farver. Brug et roligt, enkelt og rent skandinavisk julelook: varm elfenbensfarvet baggrund, dæmpede grønne og bordeaux detaljer, god luft og diskret typografi. Følg de enkelte prompts for dekoration og layout. Bevar produkternes originale farver og identitet; brug kun de uploadede produktbilleder som grundlag. Lav ét vertikalt billede i præcis 9:16 pr. prompt, uden at blande produkter eller oplysninger mellem mapper.
 
 Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${carousel.videoNumber}`).join(", ")}. Gem fire færdige billeder i hver mappe som vN-1.png (cover), vN-2.png (image 1), vN-3.png (image 2) og vN-4.png (image 3). Kontrollér at alle ${carousels.length * 4} billeder er med, og lever zip-filen som et klikbart downloadlink.`;
   }
@@ -106,7 +106,7 @@ Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${caro
       <div className="clothing-hero">
         <div className="eyebrow">STOCKING STUFFERS</div>
         <h1>Create <span>Stocking Stuffers ideas.</span></h1>
-        <p>Each carousel includes a pink Christmas stocking cover and three catalogue pages with three products each. Squishy-style layout: product photos on the left, names, search codes and prices on the right. Vertical 9:16.</p>
+        <p>Each carousel includes a simple knitted Christmas stocking cover and three clean catalogue pages with three products each. Warm ivory, muted Christmas accents and generous space. Product photos on the left, names, search codes and prices on the right. Vertical 9:16.</p>
         <p>Add at least 9 small gift products to your Google Sheet with Category StockingStuffer and Active YES, including name, code, image URL, price and currency. Carousel order: cover, image 1, image 2, image 3.</p>
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY CAROUSELS?</div>
