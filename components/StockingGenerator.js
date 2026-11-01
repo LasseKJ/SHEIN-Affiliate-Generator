@@ -25,6 +25,39 @@ export default function StockingGenerator() {
     }
   }
 
+
+  function downloadAllPrompts() {
+    const text = carousels.flatMap((carousel) =>
+      carousel.prompts.map((prompt, index) =>
+        `${promptLabel(carousel.videoNumber, index + 1)}\n\n${prompt.trim()}`
+      )
+    ).join("\n\n\n");
+    const blob = new Blob(["\uFEFF", text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `stocking-stuffers-${carousels.length}-carousels-prompts.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setMessage(`All ${carousels.length * 4} prompts downloaded as TXT.`);
+  }
+
+  function masterPrompt() {
+    const folders = carousels.map((carousel) => `VIDEO ${carousel.videoNumber}`).join(", ");
+    const promptIds = carousels.flatMap((carousel) =>
+      [1, 2, 3, 4].map((number) => `V${carousel.videoNumber}-${number}`)
+    ).join(", ");
+    return `Brug den uploadede TXT-fil med alle prompts og ZIP-filen med produktbilleder til at lave alle ${carousels.length * 4} Stocking Stuffers-billeder: ${promptIds}.
+
+ZIP-filen indeholder mapperne ${folders}. Hver VIDEO-mappe har IMAGE 1, IMAGE 2 og IMAGE 3 med tre produktreferencer, PRODUCTS.json og den tilhørende PROMPT.txt. Brug præcis de tre billeder i den pågældende IMAGE-mappe sammen med dens prompt. COVER-mappen indeholder coverprompten; lav coveret uden produktreferencer. Følg karusellens rækkefølge: COVER, IMAGE 1, IMAGE 2, IMAGE 3.
+
+Følg hver prompt nøje for layout, produktnavne, søgekoder, priser og farver. Bevar produkternes identitet og templates; brug kun de uploadede produktbilleder som grundlag. Lav ét vertikalt billede i præcis 9:16 pr. prompt, uden at blande produkter eller oplysninger mellem mapper.
+
+Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${carousel.videoNumber}`).join(", ")}. Gem fire færdige billeder i hver mappe som vN-1.png (cover), vN-2.png (image 1), vN-3.png (image 2) og vN-4.png (image 3). Kontrollér at alle ${carousels.length * 4} billeder er med, og lever zip-filen som et klikbart downloadlink.`;
+  }
+
   async function downloadZip(selectedVideos) {
     setDownloading(true);
     try {
@@ -87,7 +120,11 @@ export default function StockingGenerator() {
 
       {carousels.length > 0 && <section className="clothing-results">
         <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your Stocking Stuffers prompts</h2></div><div className="count"><strong>{carousels.length * 4}</strong>PROMPTS READY</div></div>
-        <button type="button" className="copy-button" onClick={() => downloadZip(carousels)} disabled={busy}>{downloading ? "DOWNLOADING..." : "DOWNLOAD ZIP"}</button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+          <button type="button" className="copy-button" onClick={() => downloadZip(carousels)} disabled={busy}>{downloading ? "DOWNLOADING..." : "DOWNLOAD ZIP"}</button>
+          <button type="button" className="copy-button" onClick={downloadAllPrompts} disabled={busy}>DOWNLOAD ALL PROMPTS (.TXT)</button>
+          <button type="button" className="copy-button" onClick={() => copyPrompt(masterPrompt(), "Master prompt")} disabled={busy}>COPY MASTER PROMPT</button>
+        </div>
         <p>Each image folder contains 3 product references, exact names, codes, prices and a prompt. COVER contains the stocking cover prompt.</p>
         <div className="section-label">QUICK COPY</div>
         <div className="clothing-quick-copy-table">
