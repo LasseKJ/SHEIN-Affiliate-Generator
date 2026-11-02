@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import JSZip from "jszip";
 import { generateStockingVideos } from "../lib/stockingStuffers.js";
-import { createStockingPrompts } from "../lib/stockingPrompts.js";
+import { CHRISTMAS_COVER_THEMES, createStockingPrompts } from "../lib/stockingPrompts.js";
 import { createStockingZip } from "../lib/stockingZip.js";
 
 const products = Array.from({ length: 12 }, (_, i) => ({ name: `Gift ${i}`, code: `00Ab-${i}`, category: "StockingStuffer", active: "YES", imageUrl: `https://example.com/${i}.png`, price: "2.22", currency: "EUR" }));
@@ -11,12 +11,14 @@ test("carousels contain nine distinct valid gifts and English stocking/catalogue
   for (const count of [1, 2, 4, 8]) {
     const videos = generateStockingVideos(products, count);
     assert.equal(videos.length, count);
+    assert.equal(new Set(videos.map(v => v.coverThemeId)).size, count);
+    if (count === 8) assert.deepEqual(videos.map(v => v.coverThemeId).sort(), CHRISTMAS_COVER_THEMES.map(t => t.id).sort());
     for (const video of videos) {
       assert.deepEqual(video.slides.map(slide => slide.length), [3, 3, 3]);
       assert.equal(new Set(video.slides.flat().map(p => p.code)).size, 9);
       const result = createStockingPrompts(video);
       assert.equal(result.prompts.length, 4);
-      assert.match(result.coverPrompt, /Christmas stocking/);
+      assert.ok(result.coverPrompt.includes(CHRISTMAS_COVER_THEMES.find(t => t.id === video.coverThemeId).title));
       video.slides.forEach((slide, i) => slide.forEach(p => {
         assert.ok(result.prompts[i].includes(`Exact search code: ${p.code}`));
         assert.ok(result.prompts[i].includes(`Exact price: ${p.price} | Currency: ${p.currency}`));
@@ -50,4 +52,12 @@ test("ZIP includes three actual references per page and a separate cover", async
   }
   assert.equal(await zip.file("VIDEO 1/COVER/PROMPT.txt").async("string"), videos[0].coverPrompt);
   await assert.rejects(createStockingZip(videos, () => {}, async () => new Response("missing", { status: 404 })));
+});
+
+test("original stocking cover is theme eight and product pages remain theme independent", () => {
+  assert.equal(CHRISTMAS_COVER_THEMES[7].id, "stocking-stuffers");
+  const video = generateStockingVideos(products)[0];
+  const results = CHRISTMAS_COVER_THEMES.map(t => createStockingPrompts({...video, coverThemeId: t.id}));
+  assert.match(results[7].coverPrompt, /ONE simple oatmeal knitted Christmas stocking/);
+  for (const result of results) assert.deepEqual(result.prompts.slice(0,3), results[0].prompts.slice(0,3));
 });

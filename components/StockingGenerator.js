@@ -36,7 +36,7 @@ export default function StockingGenerator() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `stocking-stuffers-${carousels.length}-carousels-prompts.txt`;
+    link.download = `christmas-videos-${carousels.length}-carousels-prompts.txt`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -49,13 +49,13 @@ export default function StockingGenerator() {
     const promptIds = carousels.flatMap((carousel) =>
       [1, 2, 3, 4].map((number) => `V${carousel.videoNumber}-${number}`)
     ).join(", ");
-    return `Brug den uploadede TXT-fil med alle prompts og ZIP-filen med produktbilleder til at lave alle ${carousels.length * 4} Stocking Stuffers-billeder: ${promptIds}.
+    return `Use the uploaded TXT prompts and ZIP product references to create all ${carousels.length * 4} Christmas Videos images: ${promptIds}.
 
-ZIP-filen indeholder mapperne ${folders}. Hver VIDEO-mappe har IMAGE 1, IMAGE 2 og IMAGE 3 med tre produktreferencer, PRODUCTS.json og den tilhørende PROMPT.txt. Brug præcis de tre billeder i den pågældende IMAGE-mappe sammen med dens prompt. COVER-mappen indeholder coverprompten; lav coveret uden produktreferencer. Følg karusellens rækkefølge: COVER, IMAGE 1, IMAGE 2, IMAGE 3.
+The ZIP contains ${folders}. Each VIDEO folder has IMAGE 1, IMAGE 2 and IMAGE 3 with three product references, PRODUCTS.json and PROMPT.txt. Use exactly the references in each image folder with its matching prompt. COVER contains the selected cover theme; create it without product references. Carousel order: COVER, IMAGE 1, IMAGE 2, IMAGE 3.
 
-Følg hver prompt nøje for layout, produktnavne, søgekoder, priser og farver. Brug et roligt, enkelt og rent skandinavisk julelook: varm elfenbensfarvet baggrund, dæmpede grønne og bordeaux detaljer, god luft og diskret typografi. Følg de enkelte prompts for dekoration og layout. Bevar produkternes originale farver og identitet; brug kun de uploadede produktbilleder som grundlag. Lav ét vertikalt billede i præcis 9:16 pr. prompt, uden at blande produkter eller oplysninger mellem mapper.
+Follow every prompt for layout, exact names, codes, prices and colors. Preserve original product identities and colors. Create one vertical 9:16 image per prompt. All printed text must be English. Never mix products or information between folders.
 
-Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${carousel.videoNumber}`).join(", ")}. Gem fire færdige billeder i hver mappe som vN-1.png (cover), vN-2.png (image 1), vN-3.png (image 2) og vN-4.png (image 3). Kontrollér at alle ${carousels.length * 4} billeder er med, og lever zip-filen som et klikbart downloadlink.`;
+Return one ZIP with a vN folder for each video. Save four images per folder as vN-1.png (cover), vN-2.png (image 1), vN-3.png (image 2), vN-4.png (image 3). Verify all ${carousels.length * 4} images are included and provide a clickable ZIP download link.`;
   }
 
   async function downloadZip(selectedVideos) {
@@ -65,13 +65,13 @@ Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${caro
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `stocking-stuffers-${selectedVideos.length}-carousels.zip`;
+      link.download = `christmas-videos-${selectedVideos.length}-carousels.zip`;
       link.style.display = "none";
       document.body.appendChild(link);
       link.click();
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setMessage(`Complete. ${selectedVideos.length} Stocking Stuffers carousel${selectedVideos.length === 1 ? "" : "s"}, with references grouped by image.`);
+      setMessage(`Complete. ${selectedVideos.length} Christmas Videos carousel${selectedVideos.length === 1 ? "" : "s"}, with references grouped by image.`);
     } catch (error) {
       setMessage(`ZIP failed: ${error.message} Your prompts are ready. Use DOWNLOAD ZIP to retry.`);
     } finally {
@@ -90,7 +90,7 @@ Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${caro
         body: JSON.stringify({ videoCount: carouselCount })
       });
       const data = await response.json();
-      if (!response.ok || !data.success) throw new Error(data.error || "Could not generate Stocking Stuffers.");
+      if (!response.ok || !data.success) throw new Error(data.error || "Could not generate Christmas Videos.");
       if (!Array.isArray(data.videos) || data.videos.length !== carouselCount) throw new Error("The selected number of carousels was not generated.");
       setVideos(data.videos);
       await downloadZip(data.videos);
@@ -104,9 +104,9 @@ Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${caro
   return (
     <section className="clothing-generator stocking-stuffers-generator">
       <div className="clothing-hero">
-        <div className="eyebrow">STOCKING STUFFERS</div>
-        <h1>Create <span>Stocking Stuffers ideas.</span></h1>
-        <p>Each carousel includes a simple knitted Christmas stocking cover and three clean catalogue pages with three products each. Warm ivory, muted Christmas accents and generous space. Product photos on the left, names, search codes and prices on the right. Vertical 9:16.</p>
+        <div className="eyebrow">CHRISTMAS VIDEOS</div>
+        <h1>Create <span>Christmas videos.</span></h1>
+        <p>Each carousel includes one of eight randomly selected Christmas cover themes, without repeats within a batch, and three clean catalogue pages with three products each. Warm ivory, muted Christmas accents and generous space. Product photos on the left, names, search codes and prices on the right. Vertical 9:16.</p>
         <p>Add at least 9 small gift products to your Google Sheet with Category StockingStuffer and Active YES, including name, code, image URL, price and currency. Carousel order: cover, image 1, image 2, image 3.</p>
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY CAROUSELS?</div>
@@ -119,13 +119,13 @@ Returner én ny ZIP-fil med undermapperne ${carousels.map((carousel) => `v${caro
       </div>
 
       {carousels.length > 0 && <section className="clothing-results">
-        <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your Stocking Stuffers prompts</h2></div><div className="count"><strong>{carousels.length * 4}</strong>PROMPTS READY</div></div>
+        <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your Christmas Videos prompts</h2></div><div className="count"><strong>{carousels.length * 4}</strong>PROMPTS READY</div></div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
           <button type="button" className="copy-button" onClick={() => downloadZip(carousels)} disabled={busy}>{downloading ? "DOWNLOADING..." : "DOWNLOAD ZIP"}</button>
           <button type="button" className="copy-button" onClick={downloadAllPrompts} disabled={busy}>DOWNLOAD ALL PROMPTS (.TXT)</button>
           <button type="button" className="copy-button" onClick={() => copyPrompt(masterPrompt(), "Master prompt")} disabled={busy}>COPY MASTER PROMPT</button>
         </div>
-        <p>Each image folder contains 3 product references, exact names, codes, prices and a prompt. COVER contains the stocking cover prompt.</p>
+        <p>Each image folder contains 3 product references, exact names, codes, prices and a prompt. COVER contains the selected Christmas cover prompt.</p>
         <div className="section-label">QUICK COPY</div>
         <div className="clothing-quick-copy-table">
           <div className="clothing-quick-copy-header"><div>CAROUSEL</div>{PROMPT_COLUMNS.map((number) => <div key={number}>{columnLabel(number)}</div>)}</div>

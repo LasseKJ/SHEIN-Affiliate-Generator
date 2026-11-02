@@ -32,7 +32,7 @@ export default function Home() {
         <section className="content-selector-section">
           <div className="selector-label">CONTENT TYPE</div>
           <div className="content-selector">
-            <button className={`content-type-button ${contentType === "stocking" ? "active" : ""}`} onClick={() => changeContentType("stocking")} type="button"><span>STOCKING STUFFERS</span><span className="selector-arrow">→</span></button>
+            <button className={`content-type-button ${contentType === "stocking" ? "active" : ""}`} onClick={() => changeContentType("stocking")} type="button"><span>CHRISTMAS VIDEOS</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "squishy" ? "active" : ""}`} onClick={() => changeContentType("squishy")} type="button"><span>SQUISHY POST</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "clothing" ? "active" : ""}`} onClick={() => changeContentType("clothing")} type="button"><span>CLOTHING</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "phoneCases" ? "active" : ""}`} onClick={() => changeContentType("phoneCases")} type="button"><span>PHONE CASES</span><span className="selector-arrow">→</span></button>

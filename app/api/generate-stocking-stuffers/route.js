@@ -17,6 +17,6 @@ export async function POST(request) {
     const videos = generateStockingVideos(products, videoCount).map(video => ({ ...video, ...createStockingPrompts(video) }));
     return NextResponse.json({ success: true, videos, videoCount, productsPerSlide: 3, slidesPerVideo: 4 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error?.message || "Could not generate Stocking Stuffers." }, { status: 500 });
+    return NextResponse.json({ success: false, error: error?.message || "Could not generate Christmas Videos." }, { status: 500 });
   }
 }
