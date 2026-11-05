@@ -466,11 +466,6 @@ export default function AutumnGenerator() {
           <span> Autumn Looks.</span>
         </h1>
 
-        <p>
-          Generate complete Autumn
-          videos with 6 image prompts
-          and 1 cover prompt per video.
-        </p>
 
         <div className="clothing-video-count">
 

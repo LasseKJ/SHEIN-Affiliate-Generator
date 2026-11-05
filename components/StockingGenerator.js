@@ -106,8 +106,6 @@ Return one ZIP with a vN folder for each video. Save four images per folder as v
       <div className="clothing-hero">
         <div className="eyebrow">CHRISTMAS VIDEOS</div>
         <h1>Create <span>Christmas videos.</span></h1>
-        <p>Each carousel includes one of eight randomly selected Christmas cover themes, without repeats within a batch, and three clean catalogue pages with three products each. Warm ivory, muted Christmas accents and generous space. Product photos on the left, names, search codes and prices on the right. Vertical 9:16.</p>
-        <p>Add at least 9 small gift products to your Google Sheet with Category StockingStuffer and Active YES, including name, code, image URL, price and currency. Carousel order: cover, image 1, image 2, image 3.</p>
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY CAROUSELS?</div>
           <div className="video-count-grid">
@@ -125,7 +123,6 @@ Return one ZIP with a vN folder for each video. Save four images per folder as v
           <button type="button" className="copy-button" onClick={downloadAllPrompts} disabled={busy}>DOWNLOAD ALL PROMPTS (.TXT)</button>
           <button type="button" className="copy-button" onClick={() => copyPrompt(masterPrompt(), "Master prompt")} disabled={busy}>COPY MASTER PROMPT</button>
         </div>
-        <p>Each image folder contains 3 product references, exact names, codes, prices and a prompt. COVER contains the selected Christmas cover prompt.</p>
         <div className="section-label">QUICK COPY</div>
         <div className="clothing-quick-copy-table">
           <div className="clothing-quick-copy-header"><div>CAROUSEL</div>{PROMPT_COLUMNS.map((number) => <div key={number}>{columnLabel(number)}</div>)}</div>

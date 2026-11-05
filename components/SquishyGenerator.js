@@ -454,12 +454,6 @@ Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-bill
           <span>Generator</span>
         </h1>
 
-        <p>
-          Create complete Squishy
-          content packages in batches
-          and get all prompts ready
-          for production.
-        </p>
 
         <div className="video-count-selector">
           <div className="selector-label">

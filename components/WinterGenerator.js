@@ -331,11 +331,6 @@ export default function WinterGenerator() {
           <span> Winter Looks.</span>
         </h1>
 
-        <p>
-          Generate complete Winter
-          videos with 6 image prompts
-          per video.
-        </p>
 
         <div className="clothing-video-count">
           <div className="selector-label">

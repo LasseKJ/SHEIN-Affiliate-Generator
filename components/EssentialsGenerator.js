@@ -249,9 +249,6 @@ export default function EssentialsGenerator() {
           <span> Essentials.</span>
         </h1>
 
-        <p>
-          Pick 3 categories automatically. Each category gets its own image with 6 products.
-        </p>
 
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY VIDEOS?</div>
@@ -277,11 +274,6 @@ export default function EssentialsGenerator() {
           PICK 3, AUTOMATIC
         </div>
 
-        <p style={{ marginTop: 12 }}>
-          The generator randomly selects 3 Essentials categories for each video.
-          It prioritizes categories used the least, while keeping random selection
-          between categories with the same usage count.
-        </p>
 
         <div className="clothing-category-grid essentials-category-grid">
           {CATEGORIES.map((category) => (

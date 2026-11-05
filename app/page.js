@@ -56,7 +56,6 @@ export default function Home() {
             <div className="clothing-hero">
               <div className="eyebrow">CLOTHING</div>
               <h1>Choose your<span> season.</span></h1>
-              <p>Select a season to create complete fashion outfits.</p>
             </div>
             <div className="clothing-category-section">
               <div className="clothing-category-label">SEASON</div>

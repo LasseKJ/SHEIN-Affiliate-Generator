@@ -87,7 +87,6 @@ export default function SweaterGenerator() {
       <div className="clothing-hero">
         <div className="eyebrow">SWEATERS</div>
         <h1>Create <span>Autumn Sweaters.</span></h1>
-        <p>Four sweater images and one cover per video. Each sweater is photographed flat on a bed from above.</p>
 
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY VIDEOS?</div>

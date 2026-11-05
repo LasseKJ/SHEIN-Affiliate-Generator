@@ -83,7 +83,6 @@ export default function PhoneCaseGenerator() {
       <div className="clothing-hero">
         <div className="eyebrow">PHONE CASES</div>
         <h1>Create <span>Phone Cases.</span></h1>
-        <p>Choose an iPhone model. Each video uses 24 cases, with 6 cases per image in a 3 row by 2 column layout.</p>
         <div className="clothing-category-section" style={{ padding: 0, marginBottom: 34 }}>
           <div className="clothing-category-label">CHOOSE IPHONE MODEL</div>
           <div className="clothing-category-grid" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>

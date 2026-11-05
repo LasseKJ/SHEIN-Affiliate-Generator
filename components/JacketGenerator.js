@@ -87,7 +87,6 @@ export default function JacketGenerator() {
       <div className="clothing-hero">
         <div className="eyebrow">JACKETS</div>
         <h1>Create <span>Autumn Jackets.</span></h1>
-        <p>Four jacket images and one cover per video. Each jacket is photographed flat on a bed from above.</p>
 
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY VIDEOS?</div>
