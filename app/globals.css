@@ -22,9 +22,9 @@ body {
   background:
     radial-gradient(
       circle at top center,
-      #fff1f6 0%,
+      #f2f2f2 0%,
       #ffffff 38%,
-      #f7f7f8 100%
+      #f7f7f7 100%
     );
 
   color: #111111;
@@ -61,7 +61,7 @@ button {
 
   padding: 8px 0 24px;
 
-  border-bottom: 1px solid #e9e9eb;
+  border-bottom: 1px solid #e9e9e9;
 }
 
 .brand {
@@ -108,10 +108,10 @@ button {
 
   border-radius: 50%;
 
-  background: #e91e63;
+  background: #333333;
 
   box-shadow:
-    0 0 0 4px #fde7ef;
+    0 0 0 4px #e5e5e5;
 }
 
 /* CONTENT SELECTOR */
@@ -130,7 +130,7 @@ button {
 .selector-label {
   margin-bottom: 14px;
 
-  color: #e91e63;
+  color: #333333;
 
   font-size: 10px;
   font-weight: 900;
@@ -165,7 +165,7 @@ button {
     0 18px 0 22px;
 
   border:
-    1px solid #e5e5e7;
+    1px solid #e5e5e5;
 
   border-radius: 14px;
 
@@ -235,7 +235,7 @@ button {
   border-radius: 50%;
 
   background:
-    #f2f2f3;
+    #f2f2f2;
 
   color:
     #111111;
@@ -292,7 +292,7 @@ button {
 .section-label,
 .group-label {
   color:
-    #e91e63;
+    #333333;
 
   font-size:
     10px;
@@ -334,7 +334,7 @@ button {
 .hero h1 span,
 .clothing-hero h1 span {
   color:
-    #e91e63;
+    #333333;
 }
 
 .hero p,
@@ -393,7 +393,7 @@ button {
     54px;
 
   border:
-    1px solid #e5e5e7;
+    1px solid #e5e5e5;
 
   border-radius:
     12px;
@@ -540,7 +540,7 @@ button {
     );
 
   background:
-    #e91e63;
+    #333333;
 }
 
 .generate-button:active {
@@ -629,7 +629,7 @@ button {
     10px 15px;
 
   border:
-    1px solid #eeeeef;
+    1px solid #eeeeee;
 
   border-radius:
     100px;
@@ -773,7 +773,7 @@ button {
 
 .copy-button:hover {
   background:
-    #e91e63;
+    #333333;
 
   transform:
     translateY(-1px);
@@ -897,7 +897,7 @@ button {
     0 10px;
 
   color:
-    #e91e63;
+    #333333;
 
   font-size:
     10px;
@@ -956,7 +956,7 @@ button {
 
 .quick-copy-button:hover {
   background:
-    #e91e63;
+    #333333;
 
   transform:
     translateY(-1px);
@@ -1061,7 +1061,7 @@ button {
     17px 10px;
 
   color:
-    #e91e63;
+    #333333;
 
   font-size:
     10px;
@@ -1081,7 +1081,7 @@ button {
     16px;
 
   border:
-    1px solid #e8e8ea;
+    1px solid #e8e8e8;
 
   border-radius:
     14px;
@@ -1120,7 +1120,7 @@ button {
 
 .squishy-prompt-card-top span {
   color:
-    #e91e63;
+    #333333;
 
   font-size:
     8px;
@@ -1134,7 +1134,7 @@ button {
 
 .squishy-prompt-card-top strong {
   color:
-    #eeeeef;
+    #eeeeee;
 
   font-size:
     25px;
@@ -1171,7 +1171,7 @@ button {
     hidden;
 
   border:
-    1px solid #eeeeef;
+    1px solid #eeeeee;
 
   border-radius:
     11px;
@@ -1246,7 +1246,7 @@ button {
     14px;
 
   color:
-    #e91e63;
+    #333333;
 
   font-size:
     10px;
@@ -1280,7 +1280,7 @@ button {
     62px;
 
   border:
-    1px solid #e5e5e7;
+    1px solid #e5e5e5;
 
   border-radius:
     14px;
@@ -1407,7 +1407,7 @@ button {
     20px;
 
   border:
-    1px solid #e8e8ea;
+    1px solid #e8e8e8;
 
   border-radius:
     18px;
@@ -1512,7 +1512,7 @@ button {
     13px;
 
   border:
-    1px solid #eeeeef;
+    1px solid #eeeeee;
 
   border-radius:
     10px;
@@ -1529,7 +1529,7 @@ button {
     6px;
 
   color:
-    #e91e63;
+    #333333;
 
   font-size:
     8px;
@@ -1647,7 +1647,7 @@ footer {
     22px 0;
 
   border-top:
-    1px solid #e9e9eb;
+    1px solid #e9e9e9;
 
   color:
     #aaaaaa;
@@ -1961,7 +1961,7 @@ footer {
 .clothing-quick-copy-video,
 .clothing-prompt-video-name {
   padding: 0 8px;
-  color: #e91e63;
+  color: #333333;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -1986,7 +1986,7 @@ footer {
 .clothing-prompt-card {
   min-width: 0;
   padding: 14px;
-  border: 1px solid #e8e8ea;
+  border: 1px solid #e8e8e8;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
@@ -2001,14 +2001,14 @@ footer {
 }
 
 .clothing-prompt-card-top span {
-  color: #e91e63;
+  color: #333333;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 0.1em;
 }
 
 .clothing-prompt-card-top strong {
-  color: #eeeeef;
+  color: #eeeeee;
   font-size: 18px;
   font-weight: 950;
   line-height: 1;
@@ -2067,7 +2067,7 @@ footer {
   min-height: 76px;
   padding: 0 18px;
   overflow: hidden;
-  border: 1px solid #e7e7e9;
+  border: 1px solid #e7e7e7;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 5px 18px rgba(0, 0, 0, 0.035);
@@ -2080,7 +2080,7 @@ footer {
   position: absolute;
   right: 12px;
   bottom: 9px;
-  color: #b7b7b9;
+  color: #b7b7b7;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -2089,7 +2089,7 @@ footer {
 
 .essentials-category-button:hover {
   transform: translateY(-3px);
-  border-color: #e91e63;
+  border-color: #333333;
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
 }
 
@@ -2117,7 +2117,7 @@ footer {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #e91e63;
+  background: #333333;
   color: #ffffff;
   font-size: 8px;
   font-weight: 900;
@@ -2133,7 +2133,7 @@ footer {
 }
 
 .essentials-category-section > p::first-letter {
-  color: #e91e63;
+  color: #333333;
 }
 
 @media (max-width: 900px) {
