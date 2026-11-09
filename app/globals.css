@@ -22,12 +22,12 @@ body {
   background:
     radial-gradient(
       circle at top center,
-      #f2f2f2 0%,
+      #dcfce7 0%,
       #ffffff 38%,
-      #f7f7f7 100%
+      #f0fdf4 100%
     );
 
-  color: #111111;
+  color: #166534;
 }
 
 button,
@@ -61,7 +61,7 @@ button {
 
   padding: 8px 0 24px;
 
-  border-bottom: 1px solid #e9e9e9;
+  border-bottom: 1px solid #d1e7d8;
 }
 
 .brand {
@@ -79,7 +79,7 @@ button {
 
   border-radius: 6px;
 
-  background: #111111;
+  background: #166534;
   color: #ffffff;
 
   font-size: 9px;
@@ -92,7 +92,7 @@ button {
   align-items: center;
   gap: 8px;
 
-  color: #777777;
+  color: #52705b;
 
   font-size: 10px;
   font-weight: 800;
@@ -108,10 +108,10 @@ button {
 
   border-radius: 50%;
 
-  background: #333333;
+  background: #15803d;
 
   box-shadow:
-    0 0 0 4px #e5e5e5;
+    0 0 0 4px #bbf7d0;
 }
 
 /* CONTENT SELECTOR */
@@ -130,7 +130,7 @@ button {
 .selector-label {
   margin-bottom: 14px;
 
-  color: #333333;
+  color: #15803d;
 
   font-size: 10px;
   font-weight: 900;
@@ -165,13 +165,13 @@ button {
     0 18px 0 22px;
 
   border:
-    1px solid #e5e5e5;
+    1px solid #bbf7d0;
 
   border-radius: 14px;
 
   background: #ffffff;
 
-  color: #111111;
+  color: #166534;
 
   font-size: 11px;
   font-weight: 900;
@@ -191,7 +191,7 @@ button {
     translateY(-2px);
 
   border-color:
-    #111111;
+    #166534;
 
   box-shadow:
     0 10px 25px
@@ -205,10 +205,10 @@ button {
 
 .content-type-button.active {
   border-color:
-    #111111;
+    #166534;
 
   background:
-    #111111;
+    #166534;
 
   color:
     #ffffff;
@@ -235,10 +235,10 @@ button {
   border-radius: 50%;
 
   background:
-    #f2f2f2;
+    #dcfce7;
 
   color:
-    #111111;
+    #166534;
 
   font-size:
     17px;
@@ -255,7 +255,7 @@ button {
     #ffffff;
 
   color:
-    #111111;
+    #166534;
 }
 
 .content-type-button:hover
@@ -292,7 +292,7 @@ button {
 .section-label,
 .group-label {
   color:
-    #333333;
+    #15803d;
 
   font-size:
     10px;
@@ -334,7 +334,7 @@ button {
 .hero h1 span,
 .clothing-hero h1 span {
   color:
-    #333333;
+    #15803d;
 }
 
 .hero p,
@@ -346,7 +346,7 @@ button {
     25px auto 34px;
 
   color:
-    #737373;
+    #52705b;
 
   font-size:
     15px;
@@ -393,7 +393,7 @@ button {
     54px;
 
   border:
-    1px solid #e5e5e5;
+    1px solid #bbf7d0;
 
   border-radius:
     12px;
@@ -402,7 +402,7 @@ button {
     #ffffff;
 
   color:
-    #111111;
+    #166534;
 
   font-size:
     11px;
@@ -426,7 +426,7 @@ button {
     translateY(-2px);
 
   border-color:
-    #111111;
+    #166534;
 
   box-shadow:
     0 10px 25px
@@ -440,10 +440,10 @@ button {
 
 .video-count-button.selected {
   border-color:
-    #111111;
+    #166534;
 
   background:
-    #111111;
+    #166534;
 
   color:
     #ffffff;
@@ -497,7 +497,7 @@ button {
     12px;
 
   background:
-    #111111;
+    #166534;
 
   color:
     #ffffff;
@@ -540,7 +540,7 @@ button {
     );
 
   background:
-    #333333;
+    #15803d;
 }
 
 .generate-button:active {
@@ -582,7 +582,7 @@ button {
     #ffffff;
 
   color:
-    #111111;
+    #166534;
 
   font-size:
     18px;
@@ -629,7 +629,7 @@ button {
     10px 15px;
 
   border:
-    1px solid #eeeeee;
+    1px solid #dcfce7;
 
   border-radius:
     100px;
@@ -643,7 +643,7 @@ button {
     );
 
   color:
-    #666666;
+    #466650;
 
   font-size:
     11px;
@@ -698,7 +698,7 @@ button {
     8px;
 
   color:
-    #888888;
+    #597562;
 
   font-size:
     9px;
@@ -712,7 +712,7 @@ button {
 
 .count strong {
   color:
-    #111111;
+    #166534;
 
   font-size:
     18px;
@@ -752,7 +752,7 @@ button {
     10px;
 
   background:
-    #111111;
+    #166534;
 
   color:
     #ffffff;
@@ -773,7 +773,7 @@ button {
 
 .copy-button:hover {
   background:
-    #333333;
+    #15803d;
 
   transform:
     translateY(-1px);
@@ -847,7 +847,7 @@ button {
     0 10px;
 
   color:
-    #999999;
+    #597562;
 
   font-size:
     9px;
@@ -897,7 +897,7 @@ button {
     0 10px;
 
   color:
-    #333333;
+    #15803d;
 
   font-size:
     10px;
@@ -935,7 +935,7 @@ button {
     10px;
 
   background:
-    #111111;
+    #166534;
 
   color:
     #ffffff;
@@ -956,7 +956,7 @@ button {
 
 .quick-copy-button:hover {
   background:
-    #333333;
+    #15803d;
 
   transform:
     translateY(-1px);
@@ -1002,7 +1002,7 @@ button {
     0 10px;
 
   color:
-    #999999;
+    #597562;
 
   font-size:
     9px;
@@ -1061,7 +1061,7 @@ button {
     17px 10px;
 
   color:
-    #333333;
+    #15803d;
 
   font-size:
     10px;
@@ -1081,7 +1081,7 @@ button {
     16px;
 
   border:
-    1px solid #e8e8e8;
+    1px solid #d1e7d8;
 
   border-radius:
     14px;
@@ -1120,7 +1120,7 @@ button {
 
 .squishy-prompt-card-top span {
   color:
-    #333333;
+    #15803d;
 
   font-size:
     8px;
@@ -1134,7 +1134,7 @@ button {
 
 .squishy-prompt-card-top strong {
   color:
-    #eeeeee;
+    #dcfce7;
 
   font-size:
     25px;
@@ -1171,13 +1171,13 @@ button {
     hidden;
 
   border:
-    1px solid #eeeeee;
+    1px solid #dcfce7;
 
   border-radius:
     11px;
 
   background:
-    #fafafa;
+    #f0fdf4;
 }
 
 .prompt-wrapper textarea {
@@ -1206,7 +1206,7 @@ button {
     transparent;
 
   color:
-    #555555;
+    #365943;
 
   font-family:
     ui-monospace,
@@ -1246,7 +1246,7 @@ button {
     14px;
 
   color:
-    #333333;
+    #15803d;
 
   font-size:
     10px;
@@ -1280,7 +1280,7 @@ button {
     62px;
 
   border:
-    1px solid #e5e5e5;
+    1px solid #bbf7d0;
 
   border-radius:
     14px;
@@ -1289,7 +1289,7 @@ button {
     #ffffff;
 
   color:
-    #111111;
+    #166534;
 
   font-size:
     11px;
@@ -1313,7 +1313,7 @@ button {
     translateY(-2px);
 
   border-color:
-    #111111;
+    #166534;
 
   box-shadow:
     0 10px 25px
@@ -1327,10 +1327,10 @@ button {
 
 .category-button.selected {
   border-color:
-    #111111;
+    #166534;
 
   background:
-    #111111;
+    #166534;
 
   color:
     #ffffff;
@@ -1407,7 +1407,7 @@ button {
     20px;
 
   border:
-    1px solid #e8e8e8;
+    1px solid #d1e7d8;
 
   border-radius:
     18px;
@@ -1467,7 +1467,7 @@ button {
     7px;
 
   color:
-    #111111;
+    #166534;
 
   font-size:
     20px;
@@ -1512,13 +1512,13 @@ button {
     13px;
 
   border:
-    1px solid #eeeeee;
+    1px solid #dcfce7;
 
   border-radius:
     10px;
 
   background:
-    #fafafa;
+    #f0fdf4;
 }
 
 .clothing-info-grid span {
@@ -1529,7 +1529,7 @@ button {
     6px;
 
   color:
-    #333333;
+    #15803d;
 
   font-size:
     8px;
@@ -1549,7 +1549,7 @@ button {
     hidden;
 
   color:
-    #222222;
+    #183c29;
 
   font-size:
     11px;
@@ -1575,7 +1575,7 @@ button {
     5px;
 
   color:
-    #999999;
+    #597562;
 
   font-size:
     8px;
@@ -1613,7 +1613,7 @@ button {
     0;
 
   color:
-    #111111;
+    #166534;
 
   font-size:
     11px;
@@ -1647,10 +1647,10 @@ footer {
     22px 0;
 
   border-top:
-    1px solid #e9e9e9;
+    1px solid #d1e7d8;
 
   color:
-    #aaaaaa;
+    #597562;
 
   font-size:
     9px;
@@ -1941,7 +1941,7 @@ footer {
 .clothing-prompt-header {
   margin-bottom: 10px;
   padding: 0 8px;
-  color: #999999;
+  color: #597562;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -1961,7 +1961,7 @@ footer {
 .clothing-quick-copy-video,
 .clothing-prompt-video-name {
   padding: 0 8px;
-  color: #333333;
+  color: #15803d;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -1986,7 +1986,7 @@ footer {
 .clothing-prompt-card {
   min-width: 0;
   padding: 14px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid #d1e7d8;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
@@ -2001,14 +2001,14 @@ footer {
 }
 
 .clothing-prompt-card-top span {
-  color: #333333;
+  color: #15803d;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 0.1em;
 }
 
 .clothing-prompt-card-top strong {
-  color: #eeeeee;
+  color: #dcfce7;
   font-size: 18px;
   font-weight: 950;
   line-height: 1;
@@ -2067,7 +2067,7 @@ footer {
   min-height: 76px;
   padding: 0 18px;
   overflow: hidden;
-  border: 1px solid #e7e7e7;
+  border: 1px solid #bbf7d0;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 5px 18px rgba(0, 0, 0, 0.035);
@@ -2080,7 +2080,7 @@ footer {
   position: absolute;
   right: 12px;
   bottom: 9px;
-  color: #b7b7b7;
+  color: #597562;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -2089,13 +2089,13 @@ footer {
 
 .essentials-category-button:hover {
   transform: translateY(-3px);
-  border-color: #333333;
+  border-color: #15803d;
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
 }
 
 .essentials-category-button.selected {
-  border-color: #111111;
-  background: #111111;
+  border-color: #166534;
+  background: #166534;
   color: #ffffff;
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14);
   transform: translateY(-2px);
@@ -2117,7 +2117,7 @@ footer {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #333333;
+  background: #15803d;
   color: #ffffff;
   font-size: 8px;
   font-weight: 900;
@@ -2126,14 +2126,14 @@ footer {
 .essentials-category-section > p {
   margin: 18px 0 0 !important;
   text-align: center;
-  color: #777777;
+  color: #52705b;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.12em;
 }
 
 .essentials-category-section > p::first-letter {
-  color: #333333;
+  color: #15803d;
 }
 
 @media (max-width: 900px) {
@@ -2211,7 +2211,7 @@ footer {
 
 .essentials-prompt-card .prompt-wrapper {
   border-radius: 12px;
-  background: #fafafa;
+  background: #f0fdf4;
 }
 
 .essentials-prompt-card .prompt-wrapper textarea {
