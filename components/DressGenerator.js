@@ -1,119 +1,130 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { createDressPromptFiles, DRESS_VIDEO_COUNTS } from "../lib/dressPrompts";
+import { createDressZip } from "../lib/dressZip";
 
-const ENDPOINT = "/api/generate-dresses";
-
-export default function DressGenerator() {
-  const [products, setProducts] = useState([]);
-  const [code, setCode] = useState("");
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState("");
-  const [result, setResult] = useState(null);
-  const selectedProduct = products.find((product) => product.code === code);
-
-  async function loadProducts() {
-    setLoadingProducts(true);
-    setError("");
-    setCode("");
-    setResult(null);
-    try {
-      const response = await fetch(ENDPOINT);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setProducts(data.products);
-      if (!data.products.length) setError("Der er ingen aktive kjoler med billede og kode i Google Sheets.");
-    } catch (error) {
-      setError(error.message || "Kunne ikke hente kjoler.");
-    } finally {
-      setLoadingProducts(false);
-    }
-  }
-
-  async function generate(event) {
-    event.preventDefault();
-    setGenerating(true);
-    setError("");
-    setResult(null);
-
-    try {
-      const response = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code })
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.error || "Kunne ikke generere kjolebilledet.");
-      }
-
-      setResult({ code, image: await response.blob() });
-    } catch (error) {
-      setError(error.message || "Kunne ikke generere kjolebilledet.");
-    } finally {
-      setGenerating(false);
-    }
-  }
-
-  return (
-    <section className="clothing-generator dress-generator">
-      <div className="clothing-hero">
-        <h1>Dress <span>Generator</span></h1>
-        <form className="dress-controls" onSubmit={generate}>
-          {!products.length && (
-            <button className="generate-button" type="button" onClick={loadProducts} disabled={loadingProducts}>
-              {loadingProducts ? "Henter kjoler…" : "Hent kjoler fra Sheets"}
-            </button>
-          )}
-          {products.length > 0 && (
-            <>
-              <label htmlFor="dress-code">Kjolekode</label>
-              <select id="dress-code" value={code} disabled={generating} onChange={(event) => {
-                setCode(event.target.value);
-                setResult(null);
-                setError("");
-              }}>
-                <option value="">Vælg en kode</option>
-                {products.map((product) => (
-                  <option key={product.code} value={product.code}>{product.code}</option>
-                ))}
-              </select>
-              {selectedProduct && (
-                <img className="dress-reference" src={selectedProduct.imageUrl} alt={`Produktbillede for ${code}`} />
-              )}
-              <button className="generate-button" type="submit" disabled={!selectedProduct || generating}>
-                {generating ? "Genererer billede…" : "Læg kjolen på sengen"}
-              </button>
-            </>
-          )}
-        </form>
-        {generating && <p role="status">Billedet kan tage et par minutter.</p>}
-        {error && <p role="alert">{error}</p>}
-      </div>
-      {result && <DressResult result={result} />}
-    </section>
-  );
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function DressResult({ result }) {
-  const [url, setUrl] = useState("");
+function downloadPrompt(prompt, filename) {
+  download(new Blob(["\uFEFF", prompt], { type: "text/plain;charset=utf-8" }), filename);
+}
 
-  useEffect(() => {
-    const imageUrl = URL.createObjectURL(result.image);
-    setUrl(imageUrl);
-    return () => URL.revokeObjectURL(imageUrl);
-  }, [result]);
+export default function DressGenerator() {
+  const [videoCount, setVideoCount] = useState(1);
+  const [videos, setVideos] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const prompts = videos.length ? createDressPromptFiles(videos) : null;
 
-  if (!url) return null;
+  async function downloadZip(selectedVideos) {
+    const zip = await createDressZip(selectedVideos, setMessage);
+    download(zip, `dresses-${selectedVideos.length}-videos.zip`);
+    setMessage("ZIP-filen er klar.");
+  }
+
+  async function retryZip() {
+    setBusy(true);
+    setError("");
+    try {
+      await downloadZip(videos);
+    } catch (error) {
+      setError(error.message);
+      setMessage("");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function generate() {
+    setBusy(true);
+    setVideos([]);
+    setError("");
+    setMessage("Henter kjoler fra Google Sheets…");
+
+    try {
+      const response = await fetch("/api/generate-dresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoCount })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Kunne ikke forberede videoerne.");
+      setVideos(data.videos);
+      await downloadZip(data.videos);
+    } catch (error) {
+      setError(error.message);
+      setMessage("");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <section className="clothing-results dress-result">
-      <h2>{result.code}</h2>
-      <img src={url} alt={`Kjole ${result.code} lagt på en seng`} />
-      <a className="generate-button" href={url} download={`dress-${result.code.replace(/[^a-zA-Z0-9_-]/g, "-")}.webp`}>
-        Download billede
-      </a>
+    <section className="clothing-generator">
+      <div className="clothing-hero">
+        <h1>Dress <span>Generator</span></h1>
+        <div className="clothing-video-count">
+          <div className="selector-label">ANTAL VIDEOER</div>
+          <div className="video-count-grid">
+            {DRESS_VIDEO_COUNTS.map((count) => (
+              <button
+                key={count}
+                type="button"
+                className={`video-count-button ${videoCount === count ? "selected" : ""}`}
+                aria-pressed={videoCount === count}
+                disabled={busy}
+                onClick={() => setVideoCount(count)}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button className="generate-button" type="button" onClick={generate} disabled={busy} style={{ marginTop: 28 }}>
+          Download {videoCount} {videoCount === 1 ? "video" : "videoer"} som ZIP
+        </button>
+        {message && <div className="message" role="status"><span className="message-dot" />{message}</div>}
+        {error && <div className="message" role="alert">{error}</div>}
+      </div>
+
+      {prompts && (
+        <section className="clothing-results">
+          <div className="results-header"><h2>Prompts til ChatGPT</h2></div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+            <button type="button" className="copy-button" onClick={retryZip} disabled={busy}>Download ZIP igen</button>
+            <button type="button" className="copy-button" onClick={() => downloadPrompt(prompts.master, "MASTER-PROMPT.txt")}>Download masterprompt (.txt)</button>
+            <button type="button" className="copy-button" onClick={() => downloadPrompt(prompts.all, "PROMPTS.txt")}>Download alle billedprompts (.txt)</button>
+          </div>
+          {videos.map(({ videoNumber, images }) => (
+            <div className="clothing-video-count" key={videoNumber}>
+              <h3>Video {videoNumber}</h3>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                {images.map(({ folder, prompt }, index) => (
+                  <button
+                    key={folder}
+                    type="button"
+                    className="copy-button"
+                    onClick={() => downloadPrompt(prompt, `v${videoNumber}-${index + 1}-prompt.txt`)}
+                  >
+                    {folder === "COVER" ? "Forside" : `Billede ${index}`} (.txt)
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
     </section>
   );
 }

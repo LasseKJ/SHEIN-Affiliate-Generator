@@ -2267,37 +2267,3 @@ footer {
     max-height: 240px;
   }
 }
-
-.dress-controls,
-.dress-result {
-  display: grid;
-  justify-items: start;
-  gap: 16px;
-}
-
-.dress-controls {
-  margin-top: 24px;
-}
-
-.dress-controls select {
-  width: min(100%, 320px);
-  padding: 10px 12px;
-  border-radius: 8px;
-  font: inherit;
-}
-
-.dress-reference,
-.dress-result img {
-  display: block;
-  max-width: 100%;
-  border-radius: 12px;
-}
-
-.dress-reference {
-  max-height: 240px;
-  object-fit: contain;
-}
-
-.dress-result img {
-  width: min(100%, 420px);
-}
