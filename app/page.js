@@ -9,6 +9,7 @@ import PhoneCaseGenerator from "../components/PhoneCaseGenerator";
 import EssentialsGenerator from "../components/EssentialsGenerator";
 import JacketGenerator from "../components/JacketGenerator";
 import SweaterGenerator from "../components/SweaterGenerator";
+import DressGenerator from "../components/DressGenerator";
 import BooBasketGenerator from "../components/BooBasketGenerator";
 import StockingGenerator from "../components/StockingGenerator";
 
@@ -38,6 +39,7 @@ export default function Home() {
             <button className={`content-type-button ${contentType === "phoneCases" ? "active" : ""}`} onClick={() => changeContentType("phoneCases")} type="button"><span>PHONE CASES</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "essentials" ? "active" : ""}`} onClick={() => changeContentType("essentials")} type="button"><span>ESSENTIALS</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "sweaters" ? "active" : ""}`} onClick={() => changeContentType("sweaters")} type="button"><span>SWEATERS</span><span className="selector-arrow">→</span></button>
+            <button className={`content-type-button ${contentType === "dresses" ? "active" : ""}`} onClick={() => changeContentType("dresses")} type="button"><span>DRESSES</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "jackets" ? "active" : ""}`} onClick={() => changeContentType("jackets")} type="button"><span>JACKETS</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "booBasket" ? "active" : ""}`} onClick={() => changeContentType("booBasket")} type="button"><span>BOO BASKET</span><span className="selector-arrow">→</span></button>
           </div>
@@ -48,6 +50,7 @@ export default function Home() {
         {contentType === "phoneCases" && <PhoneCaseGenerator />}
         {contentType === "essentials" && <EssentialsGenerator />}
         {contentType === "sweaters" && <SweaterGenerator />}
+        {contentType === "dresses" && <DressGenerator />}
         {contentType === "jackets" && <JacketGenerator />}
         {contentType === "booBasket" && <BooBasketGenerator />}
 
