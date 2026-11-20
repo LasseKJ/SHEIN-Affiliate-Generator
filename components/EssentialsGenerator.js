@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import JSZip from "jszip";
+import ChatGPTExport from "./ChatGPTExport";
+import { createChatGPTZip } from "../lib/chatGPTExport";
 
 const VIDEO_COUNTS = [1, 2, 4, 8];
 const USAGE_STORAGE_KEY = "shein-essentials-category-usage";
@@ -16,54 +17,6 @@ const CATEGORIES = [
   { value: "Essentials-Kitchen", label: "KITCHEN" },
   { value: "Essentials-Bath", label: "BATH" },
 ];
-
-function safeFilePart(value) {
-  return String(value || "product")
-    .trim()
-    .replace(/[^a-zA-Z0-9æøåÆØÅ]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function safeCode(value) {
-  return String(value || "UNKNOWN")
-    .trim()
-    .replace(/[^a-zA-Z0-9]+/g, "");
-}
-
-function createFileName(imageNumber, product, extension) {
-  const name = safeFilePart(product?.name);
-  const code = safeCode(product?.code);
-
-  return `B${imageNumber}-Essentials-${name}-${code}.${extension}`;
-}
-
-async function downloadProduct(product) {
-  if (!product?.imageUrl) {
-    throw new Error(
-      `Produktet ${product?.name || "ukendt"} har ingen billed URL.`
-    );
-  }
-
-  const response = await fetch(product.imageUrl);
-
-  if (!response.ok) {
-    throw new Error(
-      `Kunne ikke hente produktbillede: ${product.name}`
-    );
-  }
-
-  return response.blob();
-}
-
-async function addProduct(folder, imageNumber, product) {
-  const blob = await downloadProduct(product);
-  const extension = "jpg";
-
-  folder.file(
-    createFileName(imageNumber, product, extension),
-    blob
-  );
-}
 
 function categoryLabel(value) {
   const item = CATEGORIES.find(
@@ -172,46 +125,7 @@ export default function EssentialsGenerator() {
         JSON.stringify(nextUsage)
       );
 
-      const zip = new JSZip();
-
-      for (const video of data.videos) {
-        const videoFolder = zip.folder(
-          `VIDEO ${video.videoNumber}`
-        );
-
-        for (let slideIndex = 0; slideIndex < 3; slideIndex++) {
-          const slide = video.slides[slideIndex];
-          const imageNumber = slideIndex + 1;
-
-          if (!slide || !Array.isArray(slide.products)) {
-            throw new Error(
-              `Video ${video.videoNumber} mangler BILLEDE ${imageNumber}.`
-            );
-          }
-
-          setMessage(
-            `Video ${video.videoNumber} of ${data.videos.length}, downloading BILLEDE ${imageNumber}...`
-          );
-
-          for (const product of slide.products) {
-            await addProduct(
-              videoFolder,
-              imageNumber,
-              product
-            );
-          }
-        }
-      }
-
-      setMessage("Creating Essentials ZIP...");
-
-      const zipBlob = await zip.generateAsync({
-        type: "blob",
-        compression: "DEFLATE",
-        compressionOptions: {
-          level: 6
-        }
-      });
+      const zipBlob = await createChatGPTZip("essentials", data.videos, setMessage);
 
       const url = URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
@@ -320,6 +234,8 @@ export default function EssentialsGenerator() {
           {message}
         </div>
       )}
+
+      <ChatGPTExport category="essentials" videos={videos} disabled={loading} />
 
       {videos.length > 0 && (
         <section style={{ marginTop: 40 }}>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import JSZip from "jszip";
+import ChatGPTExport from "./ChatGPTExport";
+import { createChatGPTZip } from "../lib/chatGPTExport";
 
 const VIDEO_COUNTS = [
   1,
@@ -69,29 +70,6 @@ export default function WinterGenerator() {
     }
   }
 
-  async function downloadProduct(
-    product
-  ) {
-    if (!product?.imageUrl) {
-      throw new Error(
-        `Produktet ${product?.name || "ukendt"} har ingen billed URL.`
-      );
-    }
-
-    const response =
-      await fetch(
-        product.imageUrl
-      );
-
-    if (!response.ok) {
-      throw new Error(
-        `Kunne ikke hente produktbillede: ${product.name}`
-      );
-    }
-
-    return response.blob();
-  }
-
   async function generate() {
     setLoading(true);
     setVideos([]);
@@ -152,128 +130,7 @@ export default function WinterGenerator() {
 
       setVideos(data.videos);
 
-      const zip =
-        new JSZip();
-
-      for (
-        const video of data.videos
-      ) {
-        const videoFolder =
-          zip.folder(
-            `VIDEO ${video.videoNumber}`
-          );
-
-        const imageFolders = {};
-
-        [1, 3, 5].forEach(
-          (imageNumber) => {
-            imageFolders[
-              imageNumber
-            ] = videoFolder.folder(
-              `Billede ${imageNumber}`
-            );
-          }
-        );
-
-        for (
-          let outfitIndex = 0;
-          outfitIndex < 3;
-          outfitIndex++
-        ) {
-          const outfit =
-            video.outfits[
-              outfitIndex
-            ];
-
-          const modelImageNumber =
-            outfitIndex * 2 + 1;
-
-          const folder =
-            imageFolders[
-              modelImageNumber
-            ];
-
-          setMessage(
-            `Video ${video.videoNumber} of ${data.videos.length}, downloading outfit ${outfitIndex + 1}...`
-          );
-
-          const products = [
-            {
-              product:
-                outfit.products.shoe,
-              type: "shoe"
-            },
-            {
-              product:
-                outfit.products.top,
-              type: "top"
-            },
-            {
-              product:
-                outfit.products.bottom,
-              type: "bottom"
-            },
-            {
-              product:
-                outfit.products.accessory,
-              type: "accessory"
-            }
-          ];
-
-          for (
-            const item of products
-          ) {
-            const blob =
-              await downloadProduct(
-                item.product
-              );
-
-            const extension =
-              blob.type ===
-              "image/png"
-                ? "png"
-                : "jpg";
-
-            const safeName = String(
-              item.product.name || "product"
-            )
-              .trim()
-              .replace(
-                /[^a-zA-Z0-9æøåÆØÅ]+/g,
-                "-"
-              )
-              .replace(
-                /^-+|-+$/g,
-                "");
-
-            const safeCode = String(
-              item.product.code || "UNKNOWN"
-            )
-              .trim()
-              .replace(
-                /[^a-zA-Z0-9]+/g,
-                "");
-
-            folder.file(
-              `B${modelImageNumber}-Winter-${safeName}-${safeCode}.${extension}`,
-              blob
-            );
-          }
-        }
-      }
-
-      setMessage(
-        "Creating Winter ZIP..."
-      );
-
-      const zipBlob =
-        await zip.generateAsync({
-          type: "blob",
-          compression: "DEFLATE",
-          compressionOptions: {
-            level: 6
-          }
-        });
+      const zipBlob = await createChatGPTZip("winter", data.videos, setMessage);
 
       const url =
         URL.createObjectURL(
@@ -379,6 +236,8 @@ export default function WinterGenerator() {
           </div>
         )}
       </div>
+
+      <ChatGPTExport category="winter" videos={videos} disabled={loading} />
 
       {videos.length > 0 && (
         <section className="clothing-results">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ChatGPTExport from "./ChatGPTExport";
 import { STOCKING_VIDEO_COUNTS } from "../lib/stockingStuffers";
 import { createStockingZip } from "../lib/stockingZip";
 
@@ -25,38 +26,6 @@ export default function StockingGenerator() {
     }
   }
 
-
-  function downloadAllPrompts() {
-    const text = carousels.flatMap((carousel) =>
-      carousel.prompts.map((prompt, index) =>
-        `${promptLabel(carousel.videoNumber, index + 1)}\n\n${prompt.trim()}`
-      )
-    ).join("\n\n\n");
-    const blob = new Blob(["\uFEFF", text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `christmas-videos-${carousels.length}-carousels-prompts.txt`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setMessage(`All ${carousels.length * 4} prompts downloaded as TXT.`);
-  }
-
-  function masterPrompt() {
-    const folders = carousels.map((carousel) => `VIDEO ${carousel.videoNumber}`).join(", ");
-    const promptIds = carousels.flatMap((carousel) =>
-      [1, 2, 3, 4].map((number) => `V${carousel.videoNumber}-${number}`)
-    ).join(", ");
-    return `Use the uploaded TXT prompts and ZIP product references to create all ${carousels.length * 4} Christmas Videos images: ${promptIds}.
-
-The ZIP contains ${folders}. Each VIDEO folder has IMAGE 1, IMAGE 2 and IMAGE 3 with three product references, PRODUCTS.json and PROMPT.txt. Use exactly the references in each image folder with its matching prompt. COVER contains the selected cover theme; create it without product references. Carousel order: COVER, IMAGE 1, IMAGE 2, IMAGE 3.
-
-Follow every prompt for layout, exact names, codes, prices and colors. Preserve original product identities and colors. Create one vertical 9:16 image per prompt. All printed text must be English. Never mix products or information between folders.
-
-Return one ZIP with a vN folder for each video. Save four images per folder as vN-1.png (cover), vN-2.png (image 1), vN-3.png (image 2), vN-4.png (image 3). Verify all ${carousels.length * 4} images are included and provide a clickable ZIP download link.`;
-  }
 
   async function downloadZip(selectedVideos) {
     setDownloading(true);
@@ -116,12 +85,14 @@ Return one ZIP with a vN folder for each video. Save four images per folder as v
         {message && <div className="message" role="status"><span className="message-dot" />{message}</div>}
       </div>
 
+      <ChatGPTExport category="stocking" videos={carousels} disabled={busy} />
+
       {carousels.length > 0 && <section className="clothing-results">
         <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your Christmas Videos prompts</h2></div><div className="count"><strong>{carousels.length * 4}</strong>PROMPTS READY</div></div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
           <button type="button" className="copy-button" onClick={() => downloadZip(carousels)} disabled={busy}>{downloading ? "DOWNLOADING..." : "DOWNLOAD ZIP"}</button>
-          <button type="button" className="copy-button" onClick={downloadAllPrompts} disabled={busy}>DOWNLOAD ALL PROMPTS (.TXT)</button>
-          <button type="button" className="copy-button" onClick={() => copyPrompt(masterPrompt(), "Master prompt")} disabled={busy}>COPY MASTER PROMPT</button>
+
+
         </div>
         <div className="section-label">QUICK COPY</div>
         <div className="clothing-quick-copy-table">

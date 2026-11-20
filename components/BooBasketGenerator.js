@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ChatGPTExport from "./ChatGPTExport";
 import { BOO_BASKET_VIDEO_COUNTS } from "../lib/booBaskets";
 import { createBooBasketZip } from "../lib/booBasketZip";
 
@@ -82,6 +83,8 @@ export default function BooBasketGenerator() {
         <button type="button" className={`generate-button ${busy ? "loading" : ""}`} onClick={generate} disabled={busy} style={{ marginTop: 28 }}><span>{busy ? "GENERATING..." : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}</span><span className="button-arrow">→</span></button>
         {message && <div className="message" role="status"><span className="message-dot" />{message}</div>}
       </div>
+
+      <ChatGPTExport category="boo-basket" videos={videos} disabled={busy} />
 
       {videos.length > 0 && <section className="clothing-results">
         <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your Boo Basket prompts</h2></div><div className="count"><strong>{videos.length * 4}</strong>PROMPTS READY</div></div>

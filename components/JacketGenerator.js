@@ -1,20 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import JSZip from "jszip";
+import ChatGPTExport from "./ChatGPTExport";
+import { createChatGPTZip } from "../lib/chatGPTExport";
 
 const VIDEO_COUNTS = [1, 2, 4, 8];
 const PROMPTS = [1, 2, 3, 4, 5];
-
-function safe(value) {
-  return String(value || "product").trim().replace(/[^a-zA-Z0-9æøåÆØÅ]+/g, "-").replace(/^-+|-+$/g, "");
-}
-
-async function downloadProduct(product) {
-  const response = await fetch(product.imageUrl);
-  if (!response.ok) throw new Error(`Kunne ikke hente produktbillede: ${product.name}`);
-  return response.blob();
-}
 
 export default function JacketGenerator() {
   const [videoCount, setVideoCount] = useState(1);
@@ -46,26 +37,8 @@ export default function JacketGenerator() {
       if (!response.ok || !data.success) throw new Error(data.error || "Der opstod en fejl.");
       setVideos(data.videos);
 
-      const zip = new JSZip();
-      for (const video of data.videos) {
-        const folder = zip.folder(`VIDEO ${video.videoNumber}`);
-        for (let index = 0; index < video.jackets.length; index++) {
-          const product = video.jackets[index];
-          setMessage(`Video ${video.videoNumber} of ${data.videos.length}, downloading jacket ${index + 1}...`);
-          const blob = await downloadProduct(product);
-          const extension = blob.type === "image/png" ? "png" : "jpg";
-          folder.file(`B${index + 1}-Jacket-${safe(product.name)}-${safe(product.code)}.${extension}`, blob);
-        }
-        const cover = folder.folder("FORSIDE");
-        for (let index = 0; index < video.jackets.length; index++) {
-          const product = video.jackets[index];
-          const blob = await downloadProduct(product);
-          const extension = blob.type === "image/png" ? "png" : "jpg";
-          cover.file(`B${index + 1}-Jacket-${safe(product.name)}-${safe(product.code)}.${extension}`, blob);
-        }
-      }
+      const zipBlob = await createChatGPTZip("jackets", data.videos, setMessage);
 
-      const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
       const url = URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
       link.href = url;
@@ -103,6 +76,8 @@ export default function JacketGenerator() {
         </button>
         {message && <div className="message"><span className="message-dot" />{message}</div>}
       </div>
+
+      <ChatGPTExport category="jackets" videos={videos} disabled={loading} />
 
       {videos.length > 0 && (
         <section className="clothing-results">

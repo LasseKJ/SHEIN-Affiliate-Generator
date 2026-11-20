@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import JSZip from "jszip";
+import ChatGPTExport from "./ChatGPTExport";
+import { createChatGPTZip } from "../lib/chatGPTExport";
 
 const VIDEO_COUNTS = [
   1,
@@ -79,107 +80,6 @@ export default function AutumnGenerator() {
     }
   }
 
-  async function downloadProduct(
-    product
-  ) {
-    if (!product?.imageUrl) {
-      throw new Error(
-        `Produktet ${product?.name || "ukendt"} har ingen billed URL.`
-      );
-    }
-
-    const response =
-      await fetch(
-        product.imageUrl
-      );
-
-    if (!response.ok) {
-      throw new Error(
-        `Kunne ikke hente produktbillede: ${product.name}`
-      );
-    }
-
-    return response.blob();
-  }
-
-  function createSafeFilePart(
-    value
-  ) {
-    return String(
-      value || "product"
-    )
-      .trim()
-      .replace(
-        /[^a-zA-Z0-9æøåÆØÅ]+/g,
-        "-"
-      )
-      .replace(
-        /^-+|-+$/g,
-        "");
-  }
-
-  function createSafeCode(
-    value
-  ) {
-    return String(
-      value || "UNKNOWN"
-    )
-      .trim()
-      .replace(
-        /[^a-zA-Z0-9]+/g,
-        "");
-  }
-
-  function createProductFilename(
-    prefix,
-    type,
-    product,
-    extension
-  ) {
-    const productName =
-      createSafeFilePart(
-        product?.name
-      );
-
-    const productCode =
-      createSafeCode(
-        product?.code
-      );
-
-    return `${prefix}-Autumn-${productName}-${productCode}.${extension}`;
-  }
-
-  async function addProductToZip(
-    folder,
-    prefix,
-    type,
-    product
-  ) {
-    const blob =
-      await downloadProduct(
-        product
-      );
-
-    const extension =
-      blob.type ===
-      "image/png"
-        ? "png"
-        : "jpg";
-
-    const fileName =
-      createProductFilename(
-        prefix,
-        type,
-        product,
-        extension
-      );
-
-    folder.file(
-      fileName,
-      blob
-    );
-  }
-
   async function generate() {
     setLoading(true);
     setVideos([]);
@@ -247,160 +147,7 @@ export default function AutumnGenerator() {
         data.videos
       );
 
-      const zip =
-        new JSZip();
-
-      for (
-        const video of data.videos
-      ) {
-        const videoFolder =
-          zip.folder(
-            `VIDEO ${video.videoNumber}`
-          );
-
-        /*
-          ALLE 12 produktbilleder
-          fra de 3 outfits ligger
-          direkte i VIDEO mappen.
-
-          B1 = outfit 1
-          B3 = outfit 2
-          B5 = outfit 3
-
-          Flat lay billederne
-          bruger samme outfit produkter
-          fordi de er references til
-          samme outfit.
-        */
-
-        for (
-          let outfitIndex = 0;
-          outfitIndex < 3;
-          outfitIndex++
-        ) {
-          const outfit =
-            video.outfits[
-              outfitIndex
-            ];
-
-          const modelImageNumber =
-            outfitIndex * 2 + 1;
-
-          setMessage(
-            `Video ${video.videoNumber} of ${data.videos.length}, downloading outfit ${outfitIndex + 1}...`
-          );
-
-          const products = [
-            {
-              product:
-                outfit.products.shoe,
-              type: "Shoe"
-            },
-            {
-              product:
-                outfit.products.top,
-              type: "Top"
-            },
-            {
-              product:
-                outfit.products.bottom,
-              type: "Bottom"
-            },
-            {
-              product:
-                outfit.products.accessory,
-              type: "Accessory"
-            }
-          ];
-
-          for (
-            const item of products
-          ) {
-            await addProductToZip(
-              videoFolder,
-              `B${modelImageNumber}`,
-              item.type,
-              item.product
-            );
-          }
-        }
-
-        /*
-          FORSIDE
-
-          Forsiden bruger 9 produkter:
-
-          Outfit 1:
-          Top
-          Bottom
-          Accessory
-
-          Outfit 2:
-          Top
-          Bottom
-          Accessory
-
-          Outfit 3:
-          Top
-          Bottom
-          Accessory
-        */
-
-        const coverFolder =
-          videoFolder.folder(
-            "FORSIDE"
-          );
-
-        const coverProducts =
-          video.coverProducts ||
-          [];
-
-        for (
-          let index = 0;
-          index <
-          coverProducts.length;
-          index++
-        ) {
-          const product =
-            coverProducts[index];
-
-          const type =
-            product.category ===
-            "AutumnTop"
-              ? "Top"
-              : product.category ===
-                "AutumnBottom"
-              ? "Bottom"
-              : "Accessory";
-
-          setMessage(
-            `Video ${video.videoNumber} of ${data.videos.length}, downloading cover product ${index + 1} of 9...`
-          );
-
-          await addProductToZip(
-            coverFolder,
-            `B${index + 1}`,
-            type,
-            product
-          );
-        }
-      }
-
-      setMessage(
-        "Creating Autumn ZIP..."
-      );
-
-      const zipBlob =
-        await zip.generateAsync({
-          type: "blob",
-
-          compression:
-            "DEFLATE",
-
-          compressionOptions: {
-            level: 6
-          }
-        });
+      const zipBlob = await createChatGPTZip("autumn", data.videos, setMessage);
 
       const url =
         URL.createObjectURL(
@@ -530,6 +277,8 @@ export default function AutumnGenerator() {
         )}
 
       </div>
+
+      <ChatGPTExport category="autumn" videos={videos} disabled={loading} />
 
       {videos.length > 0 && (
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ChatGPTExport from "./ChatGPTExport";
 import { createDressPromptFiles, DRESS_VIDEO_COUNTS } from "../lib/dressPrompts";
 import { createDressZip } from "../lib/dressZip";
 
@@ -31,19 +32,6 @@ export default function DressGenerator() {
     const zip = await createDressZip(selectedVideos, setMessage);
     download(zip, `dresses-${selectedVideos.length}-videos.zip`);
     setMessage("ZIP-filen er klar.");
-  }
-
-  async function retryZip() {
-    setBusy(true);
-    setError("");
-    try {
-      await downloadZip(videos);
-    } catch (error) {
-      setError(error.message);
-      setMessage("");
-    } finally {
-      setBusy(false);
-    }
   }
 
   async function generate() {
@@ -98,14 +86,12 @@ export default function DressGenerator() {
         {error && <div className="message" role="alert">{error}</div>}
       </div>
 
+      <ChatGPTExport category="dresses" videos={videos} disabled={busy} />
+
       {prompts && (
         <section className="clothing-results">
           <div className="results-header"><h2>Prompts til ChatGPT</h2></div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <button type="button" className="copy-button" onClick={retryZip} disabled={busy}>Download ZIP igen</button>
-            <button type="button" className="copy-button" onClick={() => downloadPrompt(prompts.master, "MASTER-PROMPT.txt")}>Download masterprompt (.txt)</button>
-            <button type="button" className="copy-button" onClick={() => downloadPrompt(prompts.all, "PROMPTS.txt")}>Download alle billedprompts (.txt)</button>
-          </div>
+
           {videos.map(({ videoNumber, images }) => (
             <div className="clothing-video-count" key={videoNumber}>
               <h3>Video {videoNumber}</h3>

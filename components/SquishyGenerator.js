@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import JSZip from "jszip";
+import ChatGPTExport from "./ChatGPTExport";
+import { createChatGPTZip } from "../lib/chatGPTExport";
 
 const VIDEO_COUNTS = [
   1,
@@ -11,6 +12,7 @@ const VIDEO_COUNTS = [
 ];
 
 export default function SquishyGenerator() {
+  const [exportTemplates, setExportTemplates] = useState({});
   const [message, setMessage] =
     useState("");
 
@@ -60,59 +62,6 @@ export default function SquishyGenerator() {
     }
   }
 
-
-  function downloadAllPrompts() {
-    const text = videos.flatMap((video) =>
-      video.prompts.map((prompt, index) =>
-        `${promptLabel(video.videoNumber, index + 1)}\n\n${prompt.trim()}`
-      )
-    ).join("\n\n\n");
-    const blob = new Blob(["\uFEFF", text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `shein-squishy-${videos.length}-videos-prompts.txt`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setMessage(`All ${videos.length * 4} prompts downloaded as TXT.`);
-  }
-
-  function masterPrompt() {
-    const folders = videos.map((video) => `v${video.videoNumber}`).join(", ");
-    const ranges = videos.map((video) => `V${video.videoNumber}-1 til V${video.videoNumber}-4`).join(", ");
-    return `Brug den uploadede TXT-fil med alle prompts og den uploadede ZIP-fil med produktbilleder og templates til at lave alle ${videos.length * 4} billeder: ${ranges}.
-
-Lav ét færdigt billede pr. prompt. Billede 1–3 er produktslides, og billede 4 er cover. For Vn-m skal du bruge filerne med Bm-prefix i mappen VIDEO n og den tilhørende template. Match produkterne efter produktnavn og produktkode i filnavnet, hvis B-nummeret i prompten afviger fra ZIP-filen. B-nummeret i ZIP-filen angiver billedgruppen, ikke produktets placering. På coveret bruges de tre B4-produktbilleder.
-
-Følg hver prompts produktinformation, priser, titel og layout. Brug de vedhæftede produktfotos som grundlag, fjern deres baggrunde, og bevar produkternes form, farver, detaljer og identitet. Bevar templaten og dens dekorative elementer. Fjern pladsholdere og stiplede billedrammer. Lever alle billeder i høj opløsning i præcis 9:16 uden gennemsigtig baggrund.
-
-Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-billeder i hver mappe, navngivet vN-1.png, vN-2.png, vN-3.png og vN-4.png, hvor N er videonummeret. Kontrollér, at alle ${videos.length * 4} billeder er med, og at produktnavne, koder og priser matcher promptene. Lever ZIP-filen som et klikbart downloadlink.`;
-  }
-
-  async function downloadProduct(
-    product
-  ) {
-    if (!product?.imageUrl) {
-      throw new Error(
-        `Produktet ${product?.name || "ukendt"} har ingen billed URL.`
-      );
-    }
-
-    const response =
-      await fetch(
-        product.imageUrl
-      );
-
-    if (!response.ok) {
-      throw new Error(
-        `Kunne ikke hente produktbillede: ${product.name}`
-      );
-    }
-
-    return response.blob();
-  }
 
   async function generate() {
     setLoading(true);
@@ -172,6 +121,7 @@ Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-bill
       }
 
       const templates = data.templates;
+      setExportTemplates(templates);
 
       if (!templates?.cover) {
         throw new Error("Forside template kunne ikke findes.");
@@ -183,216 +133,7 @@ Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-bill
 
       setVideos(data.videos);
 
-      const zip =
-        new JSZip();
-
-      let downloadedProducts = 0;
-
-      for (
-        const video of data.videos
-      ) {
-        // Alle filer for én video ligger direkte i samme mappe.
-        // Mapperne 01, 02, 03 og 04 bruges ikke længere.
-        const videoFolder =
-          zip.folder(
-            `VIDEO ${video.videoNumber}`
-          );
-
-        for (
-          const group of video.groups
-        ) {
-          const imageNumber =
-            String(group.number).padStart(2, "0");
-
-          for (
-            let index = 0;
-            index < group.products.length;
-            index++
-          ) {
-            const product =
-              group.products[index];
-
-            const blob =
-              await downloadProduct(
-                product
-              );
-
-            const extension =
-              blob.type ===
-              "image/png"
-                ? "png"
-                : "jpg";
-
-            // Produktnavnet gøres sikkert til et filnavn.
-            const productName = String(
-              product.name ||
-              product["Product Name"] ||
-              "product"
-            )
-              .trim()
-              .replace(
-                /[^a-zA-Z0-9æøåÆØÅ]+/g,
-                "-"
-              )
-              .replace(
-                /^-+|-+$/g,
-                ""
-              );
-
-            // Produktkoden bruges også direkte i filnavnet.
-            const productCode = String(
-              product.code ||
-              product["Product Code"] ||
-              "UNKNOWN"
-            )
-              .trim()
-              .replace(
-                /[^a-zA-Z0-9]+/g,
-                ""
-              );
-
-            // Eksempel:
-            // V1-01-Product-1-Banana-HDK23D.jpg
-            //
-            // V1 = Video 1
-            // 01 = Billede 1
-            // Product-1 = Produkt nummer 1
-            // Banana = Produktnavn
-            // HDK23D = Produktkode
-            const fileName =
-              `B${Number(group.number)}-Squishy-${productName}-${productCode}.${extension}`;
-
-            videoFolder.file(
-              fileName,
-              blob
-            );
-
-            downloadedProducts++;
-          }
-        }
-
-        setMessage(
-          `Video ${video.videoNumber} of ${data.videos.length}, downloading templates...`
-        );
-
-        const productTemplateResponse = await fetch(templates.image);
-
-        if (!productTemplateResponse.ok) {
-          throw new Error("Produkt template kunne ikke downloades.");
-        }
-
-        const productTemplateBlob = await productTemplateResponse.blob();
-
-        videoFolder.file(
-          "B1-Squishy-Product-Template.jpg",
-          productTemplateBlob
-        );
-
-        videoFolder.file(
-          "B2-Squishy-Product-Template.jpg",
-          productTemplateBlob
-        );
-
-        videoFolder.file(
-          "B3-Squishy-Product-Template.jpg",
-          productTemplateBlob
-        );
-
-        // Forsiden bruger ét produkt fra hver af de tre grupper.
-        const coverProducts = [
-          video.groups[0].products[0],
-          video.groups[1].products[0],
-          video.groups[2].products[0]
-        ];
-
-        for (
-          let index = 0;
-          index < coverProducts.length;
-          index++
-        ) {
-          const product =
-            coverProducts[index];
-
-          const blob =
-            await downloadProduct(
-              product
-            );
-
-          const extension =
-            blob.type ===
-            "image/png"
-              ? "png"
-              : "jpg";
-
-          const productName = String(
-            product.name ||
-            product["Product Name"] ||
-            "product"
-          )
-            .trim()
-            .replace(
-              /[^a-zA-Z0-9æøåÆØÅ]+/g,
-              "-"
-            )
-            .replace(
-              /^-+|-+$/g,
-              ""
-            );
-
-          const productCode = String(
-            product.code ||
-            product["Product Code"] ||
-            "UNKNOWN"
-          )
-            .trim()
-            .replace(
-              /[^a-zA-Z0-9]+/g,
-              ""
-            );
-
-          // Eksempel:
-          // V1-04-Product-1-Banana-HDK23D.jpg
-          videoFolder.file(
-            `B4-Squishy-${productName}-${productCode}.${extension}`,
-            blob
-          );
-        }
-
-        const coverResponse = await fetch(templates.cover);
-
-        if (!coverResponse.ok) {
-          throw new Error("Forside template kunne ikke downloades.");
-        }
-
-        const coverBlob = await coverResponse.blob();
-
-        videoFolder.file(
-          "B4-Squishy-Cover-Template.jpg",
-          coverBlob
-        );
-      }
-
-      if (
-        downloadedProducts !==
-        data.videos.length * 9
-      ) {
-        throw new Error(
-          `Kun ${downloadedProducts} af ${data.videos.length * 9} produktbilleder blev hentet.`
-        );
-      }
-
-      setMessage(
-        "Preparing ZIP..."
-      );
-
-      const zipBlob =
-        await zip.generateAsync({
-          type: "blob",
-          compression: "DEFLATE",
-          compressionOptions: {
-            level: 6
-          }
-        });
+      const zipBlob = await createChatGPTZip("squishy", data.videos, setMessage, templates);
 
       const url =
         URL.createObjectURL(
@@ -503,6 +244,8 @@ Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-bill
         )}
       </section>
 
+      <ChatGPTExport category="squishy" videos={videos} disabled={loading} templates={exportTemplates} />
+
       {videos.length > 0 && (
         <section className="results">
           <div className="results-header">
@@ -524,16 +267,7 @@ Returner én ny ZIP-fil med undermapperne ${folders}. Gem fire færdige PNG-bill
             </div>
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "24px" }}>
-            <button type="button" className="copy-button" disabled={loading}
-              onClick={downloadAllPrompts}>
-              DOWNLOAD ALL PROMPTS (.TXT)
-            </button>
-            <button type="button" className="copy-button" disabled={loading}
-              onClick={() => copyPrompt(masterPrompt(), "Master prompt")}>
-              COPY MASTER PROMPT
-            </button>
-          </div>
+
 
           <div className="section-label">
             QUICK COPY

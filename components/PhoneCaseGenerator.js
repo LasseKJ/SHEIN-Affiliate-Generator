@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import JSZip from "jszip";
+import ChatGPTExport from "./ChatGPTExport";
+import { createChatGPTZip } from "../lib/chatGPTExport";
 
 const VIDEO_COUNTS = [1, 2, 4, 8];
 const PROMPT_COLUMNS = [1, 2, 3, 4, 5];
@@ -13,23 +14,7 @@ const PHONE_MODELS = [
 
 function promptLabel(videoNumber, promptNumber) { return `PROMPT V${videoNumber}-${promptNumber}`; }
 function getPrompt(video, promptNumber) { return video?.prompts?.[promptNumber - 1] || ""; }
-function safeFilePart(value) { return String(value || "product").trim().replace(/[^a-zA-Z0-9æøåÆØÅ]+/g, "-").replace(/^-+|-+$/g, ""); }
-function safeCode(value) { return String(value || "UNKNOWN").trim().replace(/[^a-zA-Z0-9]+/g, ""); }
-function createFileName(imageNumber, product, extension) { return `B${imageNumber}-PhoneCase-${safeFilePart(product?.name)}-${safeCode(product?.code)}.${extension}`; }
-
-async function downloadProduct(product) {
-  if (!product?.imageUrl) throw new Error(`Produktet ${product?.name || "ukendt"} har ingen billed URL.`);
-  const response = await fetch(product.imageUrl);
-  if (!response.ok) throw new Error(`Kunne ikke hente produktbillede: ${product.name}`);
-  return response.blob();
-}
-
-async function addProduct(folder, imageNumber, product) {
-  const blob = await downloadProduct(product);
-  const extension = blob.type === "image/png" ? "png" : "jpg";
-  folder.file(createFileName(imageNumber, product, extension), blob);
-}
-
+function safeFilePart(value) { return String(value || "product").trim().replace(/[^a-zA-Z0-9Ã¦Ã¸Ã¥Ã†Ã˜Ã…]+/g, "-").replace(/^-+|-+$/g, ""); }
 export default function PhoneCaseGenerator() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -54,20 +39,8 @@ export default function PhoneCaseGenerator() {
       if (!Array.isArray(data.videos) || data.videos.length !== videoCount) throw new Error("Der blev ikke oprettet det valgte antal videoer.");
 
       setVideos(data.videos);
-      const zip = new JSZip();
-      for (const video of data.videos) {
-        const videoFolder = zip.folder(`VIDEO ${video.videoNumber}`);
-        for (let slideIndex = 0; slideIndex < 4; slideIndex++) {
-          const slide = video.slides[slideIndex];
-          const imageNumber = slideIndex + 1;
-          setMessage(`Video ${video.videoNumber} of ${data.videos.length}, downloading BILLEDE ${imageNumber}...`);
-          for (const product of slide) await addProduct(videoFolder, imageNumber, product);
-        }
-        videoFolder.folder("FORSIDE");
-      }
+      const zipBlob = await createChatGPTZip("phone-cases", data.videos, setMessage);
 
-      setMessage("Creating Phone Cases ZIP...");
-      const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
       const url = URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
       link.href = url; link.download = `phone-cases-${safeFilePart(phoneModel)}-${videoCount}-videos.zip`; link.style.display = "none";
@@ -93,21 +66,23 @@ export default function PhoneCaseGenerator() {
           <div className="selector-label">HOW MANY VIDEOS?</div>
           <div className="video-count-grid">{VIDEO_COUNTS.map((count) => <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} onClick={() => setVideoCount(count)} disabled={loading}>{count}</button>)}</div>
         </div>
-        <button className={`generate-button ${loading ? "loading" : ""}`} onClick={generate} disabled={loading || !phoneModel} style={{ marginTop: 28 }}><span>{loading ? "GENERATING..." : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}</span><span className="button-arrow">→</span></button>
+        <button className={`generate-button ${loading ? "loading" : ""}`} onClick={generate} disabled={loading || !phoneModel} style={{ marginTop: 28 }}><span>{loading ? "GENERATING..." : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}</span><span className="button-arrow">â†’</span></button>
         {message && <div className="message"><span className="message-dot" />{message}</div>}
       </div>
+
+      <ChatGPTExport category="phone-cases" videos={videos} disabled={loading} />
 
       {videos.length > 0 && <section className="clothing-results">
         <div className="results-header"><div><div className="section-label">GENERATED CONTENT</div><h2>Your {phoneModel} prompts</h2></div><div className="count"><strong>{videos.length * 5}</strong>PROMPTS READY</div></div>
         <div className="section-label">QUICK COPY</div>
         <div className="clothing-quick-copy-table">
           <div className="clothing-quick-copy-header"><div>VIDEO</div>{PROMPT_COLUMNS.map((number) => <div key={number}>{number < 5 ? `BILLEDE ${number}` : "FORSIDE"}</div>)}</div>
-          {videos.map((video) => <div className="clothing-quick-copy-row" key={video.videoNumber}><div className="clothing-quick-copy-video">VIDEO {video.videoNumber}</div>{PROMPT_COLUMNS.map((number) => { const label = promptLabel(video.videoNumber, number); return <button key={number} className="quick-copy-button" onClick={() => copyPrompt(getPrompt(video, number), label)}><span>{label}</span><span className="copy-icon">⧉</span></button>; })}</div>)}
+          {videos.map((video) => <div className="clothing-quick-copy-row" key={video.videoNumber}><div className="clothing-quick-copy-video">VIDEO {video.videoNumber}</div>{PROMPT_COLUMNS.map((number) => { const label = promptLabel(video.videoNumber, number); return <button key={number} className="quick-copy-button" onClick={() => copyPrompt(getPrompt(video, number), label)}><span>{label}</span><span className="copy-icon">â§‰</span></button>; })}</div>)}
         </div>
         <div className="section-label">PROMPTS</div>
         <div className="clothing-prompt-table">
           <div className="clothing-prompt-header"><div>VIDEO</div>{PROMPT_COLUMNS.map((number) => <div key={number}>{number < 5 ? `BILLEDE ${number}` : "FORSIDE"}</div>)}</div>
-          {videos.map((video) => <div className="clothing-prompt-row" key={video.videoNumber}><div className="clothing-prompt-video-name">VIDEO {video.videoNumber}</div>{PROMPT_COLUMNS.map((number) => { const label = promptLabel(video.videoNumber, number); const prompt = getPrompt(video, number); return <article className="clothing-prompt-card" key={number}><div className="clothing-prompt-card-top"><span>{number < 5 ? `BILLEDE ${number}` : "FORSIDE"}</span><strong>V{video.videoNumber}-{number}</strong></div><button className="copy-button" onClick={() => copyPrompt(prompt, label)}><span>{label}</span><span className="copy-icon">⧉</span></button><div className="prompt-wrapper"><textarea value={prompt} readOnly /></div></article>; })}</div>)}
+          {videos.map((video) => <div className="clothing-prompt-row" key={video.videoNumber}><div className="clothing-prompt-video-name">VIDEO {video.videoNumber}</div>{PROMPT_COLUMNS.map((number) => { const label = promptLabel(video.videoNumber, number); const prompt = getPrompt(video, number); return <article className="clothing-prompt-card" key={number}><div className="clothing-prompt-card-top"><span>{number < 5 ? `BILLEDE ${number}` : "FORSIDE"}</span><strong>V{video.videoNumber}-{number}</strong></div><button className="copy-button" onClick={() => copyPrompt(prompt, label)}><span>{label}</span><span className="copy-icon">â§‰</span></button><div className="prompt-wrapper"><textarea value={prompt} readOnly /></div></article>; })}</div>)}
         </div>
       </section>}
     </section>
