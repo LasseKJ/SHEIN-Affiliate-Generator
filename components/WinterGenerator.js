@@ -11,14 +11,8 @@ const VIDEO_COUNTS = [
   8
 ];
 
-const IMAGE_NUMBERS = [
-  1,
-  2,
-  3,
-  4,
-  5,
-  6
-];
+const IMAGE_NUMBERS = [1, 2, 3, 4, 5];
+const promptColumnLabel = number => ["FORSIDE", "OUTFIT 1", "KODER 1", "OUTFIT 2", "KODER 2"][number - 1];
 
 export default function WinterGenerator() {
   const [loading, setLoading] =
@@ -254,7 +248,7 @@ export default function WinterGenerator() {
 
             <div className="count">
               <strong>
-                {videos.length * 6}
+                {videos.length * 5}
               </strong>
               PROMPTS READY
             </div>
@@ -270,7 +264,7 @@ export default function WinterGenerator() {
               {IMAGE_NUMBERS.map(
                 (imageNumber) => (
                   <div key={imageNumber}>
-                    BILLEDE {imageNumber}
+                    {promptColumnLabel(imageNumber)}
                   </div>
                 )
               )}
@@ -332,7 +326,7 @@ export default function WinterGenerator() {
               {IMAGE_NUMBERS.map(
                 (imageNumber) => (
                   <div key={imageNumber}>
-                    BILLEDE {imageNumber}
+                    {promptColumnLabel(imageNumber)}
                   </div>
                 )
               )}
@@ -368,7 +362,7 @@ export default function WinterGenerator() {
                       >
                         <div className="clothing-prompt-card-top">
                           <span>
-                            BILLEDE {imageNumber}
+                            {promptColumnLabel(imageNumber)}
                           </span>
 
                           <strong>

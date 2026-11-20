@@ -20,15 +20,8 @@ const IMAGE_NUMBERS = [
   6
 ];
 
-const PROMPT_COLUMNS = [
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7
-];
+const PROMPT_COLUMNS = [1, 2, 3, 4, 5];
+const promptColumnLabel = number => ["FORSIDE", "OUTFIT 1", "KODER 1", "OUTFIT 2", "KODER 2"][number - 1];
 
 export default function AutumnGenerator() {
   const [loading, setLoading] =
@@ -301,7 +294,7 @@ export default function AutumnGenerator() {
             <div className="count">
 
               <strong>
-                {videos.length * 7}
+                {videos.length * 5}
               </strong>
 
               PROMPTS READY
@@ -329,9 +322,7 @@ export default function AutumnGenerator() {
                       promptNumber
                     }
                   >
-                    {promptNumber <= 6
-                      ? `BILLEDE ${promptNumber}`
-                      : "FORSIDE"}
+                    {promptColumnLabel(promptNumber)}
                   </div>
                 )
               )}
@@ -423,9 +414,7 @@ export default function AutumnGenerator() {
                       promptNumber
                     }
                   >
-                    {promptNumber <= 6
-                      ? `BILLEDE ${promptNumber}`
-                      : "FORSIDE"}
+                    {promptColumnLabel(promptNumber)}
                   </div>
                 )
               )}
@@ -477,9 +466,7 @@ export default function AutumnGenerator() {
                           <div className="clothing-prompt-card-top">
 
                             <span>
-                              {promptNumber <= 6
-                                ? `BILLEDE ${promptNumber}`
-                                : "FORSIDE"}
+                              {promptColumnLabel(promptNumber)}
                             </span>
 
                             <strong>
