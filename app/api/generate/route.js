@@ -51,21 +51,6 @@ export async function POST(
       `Selecting ${totalProducts} Squishy products for ${videoCount} videos...`
     );
 
-    const products =
-      await getProducts(
-        totalProducts
-      );
-
-    if (
-      !products ||
-      products.length !==
-        totalProducts
-    ) {
-      throw new Error(
-        `Der blev ikke valgt præcis ${totalProducts} produkter.`
-      );
-    }
-
     const templates = {
       cover:
         process.env
@@ -100,14 +85,12 @@ export async function POST(
       videoCount;
       videoIndex++
     ) {
-      const start =
-        videoIndex * 9;
+      // Select independently: products may recur across videos, never within one.
+      const videoProducts = await getProducts(9);
 
-      const videoProducts =
-        products.slice(
-          start,
-          start + 9
-        );
+      if (!videoProducts || videoProducts.length !== 9) {
+        throw new Error("Der blev ikke valgt præcis 9 produkter til videoen.");
+      }
 
       const prompts =
         createPromptSet(
