@@ -12,6 +12,7 @@ import SweaterGenerator from "../components/SweaterGenerator";
 import DressGenerator from "../components/DressGenerator";
 import BooBasketGenerator from "../components/BooBasketGenerator";
 import StockingGenerator from "../components/StockingGenerator";
+import ChristmasWishListGenerator from "../components/ChristmasWishListGenerator";
 
 export default function Home() {
   const [contentType, setContentType] = useState("squishy");
@@ -34,6 +35,7 @@ export default function Home() {
           <div className="selector-label">CONTENT TYPE</div>
           <div className="content-selector">
             <button className={`content-type-button ${contentType === "stocking" ? "active" : ""}`} onClick={() => changeContentType("stocking")} type="button"><span>CHRISTMAS VIDEOS</span><span className="selector-arrow">→</span></button>
+            <button className={`content-type-button ${contentType === "christmasWishList" ? "active" : ""}`} onClick={() => changeContentType("christmasWishList")} type="button"><span>CHRISTMAS WISH LIST</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "squishy" ? "active" : ""}`} onClick={() => changeContentType("squishy")} type="button"><span>SQUISHY POST</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "clothing" ? "active" : ""}`} onClick={() => changeContentType("clothing")} type="button"><span>CLOTHING</span><span className="selector-arrow">→</span></button>
             <button className={`content-type-button ${contentType === "phoneCases" ? "active" : ""}`} onClick={() => changeContentType("phoneCases")} type="button"><span>PHONE CASES</span><span className="selector-arrow">→</span></button>
@@ -47,6 +49,7 @@ export default function Home() {
 
         {contentType === "squishy" && <SquishyGenerator />}
         {contentType === "stocking" && <StockingGenerator />}
+        {contentType === "christmasWishList" && <ChristmasWishListGenerator />}
         {contentType === "phoneCases" && <PhoneCaseGenerator />}
         {contentType === "essentials" && <EssentialsGenerator />}
         {contentType === "sweaters" && <SweaterGenerator />}
