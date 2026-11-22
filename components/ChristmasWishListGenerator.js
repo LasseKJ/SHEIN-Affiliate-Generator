@@ -56,7 +56,7 @@ export default function ChristmasWishListGenerator() {
           <div className="selector-label">HOW MANY WISH LISTS?</div>
           <div className="video-count-grid">
             {CHRISTMAS_WISHLIST_VIDEO_COUNTS.map(count => (
-              <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} aria-pressed={videoCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count}</button>
+              <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} aria-pressed={videoCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count === 7 ? "Week" : count}</button>
             ))}
           </div>
         </div>

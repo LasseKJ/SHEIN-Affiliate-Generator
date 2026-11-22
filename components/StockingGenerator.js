@@ -78,7 +78,7 @@ export default function StockingGenerator() {
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY CAROUSELS?</div>
           <div className="video-count-grid">
-            {STOCKING_VIDEO_COUNTS.map((count) => <button key={count} type="button" className={`video-count-button ${carouselCount === count ? "selected" : ""}`} aria-pressed={carouselCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count}</button>)}
+            {STOCKING_VIDEO_COUNTS.map((count) => <button key={count} type="button" className={`video-count-button ${carouselCount === count ? "selected" : ""}`} aria-pressed={carouselCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count === 7 ? "Week" : count}</button>)}
           </div>
         </div>
         <button type="button" className={`generate-button ${busy ? "loading" : ""}`} onClick={generate} disabled={busy} style={{ marginTop: 28 }}><span>{busy ? "GENERATING..." : `GENERATE ${carouselCount} CAROUSEL${carouselCount === 1 ? "" : "S"}`}</span><span className="button-arrow">→</span></button>

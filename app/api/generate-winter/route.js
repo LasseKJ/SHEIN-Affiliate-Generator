@@ -4,7 +4,7 @@ import { createWinterPrompts, createWinterCoverPrompt } from "../../../lib/winte
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-const ALLOWED_VIDEO_COUNTS = [1, 2, 4, 8];
+const ALLOWED_VIDEO_COUNTS = [1, 2, 4, 7, 8];
 
 function serializeProduct(product) {
   return {
@@ -24,7 +24,7 @@ export async function POST(request) {
     const category = body?.category || "";
     const videoCount = Number(body?.videoCount || 1);
     if (category !== "Winter") throw new Error("There is only Winter support in this route.");
-    if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) throw new Error("Choose 1, 2, 4 or 8 videos.");
+    if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) throw new Error("Choose 1, 2, 4, 7 (Week) or 8 videos.");
 
     const videos = await generateWinterVideos(videoCount);
     const results = videos.map(video => {

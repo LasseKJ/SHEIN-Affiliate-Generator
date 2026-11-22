@@ -6,7 +6,7 @@ import { createEssentialsPrompts } from "../../../lib/essentialsPrompts";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const ALLOWED_VIDEO_COUNTS = [1, 2, 4, 8];
+const ALLOWED_VIDEO_COUNTS = [1, 2, 4, 7, 8];
 
 function serializeProduct(product) {
   return {
@@ -30,7 +30,7 @@ export async function POST(request) {
 
     if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) {
       throw new Error(
-        "Antallet af videoer skal være 1, 2, 4 eller 8."
+        "Antallet af videoer skal være 1, 2, 4, 7 (Week) eller 8."
       );
     }
 

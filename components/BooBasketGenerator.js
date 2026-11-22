@@ -77,7 +77,7 @@ export default function BooBasketGenerator() {
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY VIDEOS?</div>
           <div className="video-count-grid">
-            {BOO_BASKET_VIDEO_COUNTS.map((count) => <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} aria-pressed={videoCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count}</button>)}
+            {BOO_BASKET_VIDEO_COUNTS.map((count) => <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} aria-pressed={videoCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count === 7 ? "Week" : count}</button>)}
           </div>
         </div>
         <button type="button" className={`generate-button ${busy ? "loading" : ""}`} onClick={generate} disabled={busy} style={{ marginTop: 28 }}><span>{busy ? "GENERATING..." : `GENERATE ${videoCount} VIDEO${videoCount === 1 ? "" : "S"}`}</span><span className="button-arrow">→</span></button>

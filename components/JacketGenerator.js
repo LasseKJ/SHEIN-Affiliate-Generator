@@ -4,7 +4,7 @@ import { useState } from "react";
 import ChatGPTExport from "./ChatGPTExport";
 import { createChatGPTZip } from "../lib/chatGPTExport";
 
-const VIDEO_COUNTS = [1, 2, 4, 8];
+const VIDEO_COUNTS = [1, 2, 4, 7, 8];
 const PROMPTS = [1, 2, 3, 4, 5];
 
 export default function JacketGenerator() {
@@ -65,7 +65,7 @@ export default function JacketGenerator() {
           <div className="selector-label">HOW MANY VIDEOS?</div>
           <div className="video-count-grid">
             {VIDEO_COUNTS.map((count) => (
-              <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} onClick={() => setVideoCount(count)} disabled={loading}>{count}</button>
+              <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} onClick={() => setVideoCount(count)} disabled={loading}>{count === 7 ? "Week" : count}</button>
             ))}
           </div>
         </div>

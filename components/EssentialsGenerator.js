@@ -4,7 +4,7 @@ import { useState } from "react";
 import ChatGPTExport from "./ChatGPTExport";
 import { createChatGPTZip } from "../lib/chatGPTExport";
 
-const VIDEO_COUNTS = [1, 2, 4, 8];
+const VIDEO_COUNTS = [1, 2, 4, 7, 8];
 const USAGE_STORAGE_KEY = "shein-essentials-category-usage";
 
 const CATEGORIES = [
@@ -176,7 +176,7 @@ export default function EssentialsGenerator() {
                 onClick={() => setVideoCount(count)}
                 disabled={loading}
               >
-                {count}
+                {count === 7 ? "Week" : count}
               </button>
             ))}
           </div>

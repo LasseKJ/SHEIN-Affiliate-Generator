@@ -19,6 +19,7 @@ const ALLOWED_VIDEO_COUNTS = [
   1,
   2,
   4,
+  7,
   8,
   16
 ];
@@ -41,7 +42,7 @@ export async function POST(
       )
     ) {
       throw new Error(
-        "Antallet af videoer skal være 1, 2, 4, 8 eller 16."
+        "Antallet af videoer skal være 1, 2, 4, 7 (Week), 8 eller 16."
       );
     }
 

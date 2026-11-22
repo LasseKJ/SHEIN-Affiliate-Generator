@@ -8,6 +8,7 @@ const VIDEO_COUNTS = [
   1,
   2,
   4,
+  7,
   8
 ];
 
@@ -200,7 +201,7 @@ export default function WinterGenerator() {
                   }
                   disabled={loading}
                 >
-                  {count}
+                  {count === 7 ? "Week" : count}
                 </button>
               )
             )}

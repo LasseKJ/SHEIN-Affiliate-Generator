@@ -74,7 +74,7 @@ export default function DressGenerator() {
                 disabled={busy}
                 onClick={() => setVideoCount(count)}
               >
-                {count}
+                {count === 7 ? "Week" : count}
               </button>
             ))}
           </div>

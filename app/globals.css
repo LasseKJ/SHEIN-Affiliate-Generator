@@ -376,8 +376,7 @@ button {
     grid;
 
   grid-template-columns:
-    repeat(
-      4,
+    repeat(5,
       minmax(
         0,
         1fr
@@ -1841,8 +1840,7 @@ footer {
 ) {
   .video-count-grid {
     grid-template-columns:
-      repeat(
-        2,
+      repeat(3,
         minmax(
           0,
           1fr

@@ -15,7 +15,7 @@ export async function POST(request) {
   }
   const videoCount = body?.videoCount ?? 1;
   if (!BOO_BASKET_VIDEO_COUNTS.includes(videoCount)) {
-    return NextResponse.json({ success: false, error: "Antallet af videoer skal være 1, 2, 4 eller 8." }, { status: 400 });
+    return NextResponse.json({ success: false, error: "Antallet af videoer skal være 1, 2, 4, 7 (Week) eller 8." }, { status: 400 });
   }
 
   try {

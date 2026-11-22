@@ -11,7 +11,7 @@ export async function POST(request) {
   try { body = await request.json(); }
   catch { return NextResponse.json({ success: false, error: "Invalid JSON." }, { status: 400 }); }
   const videoCount = body?.videoCount ?? 1;
-  if (!STOCKING_VIDEO_COUNTS.includes(videoCount)) return NextResponse.json({ success: false, error: "Choose 1, 2, 4 or 8 carousels." }, { status: 400 });
+  if (!STOCKING_VIDEO_COUNTS.includes(videoCount)) return NextResponse.json({ success: false, error: "Choose 1, 2, 4, 7 (Week) or 8 carousels." }, { status: 400 });
   try {
     const products = await getStockingStufferProducts();
     const videos = generateStockingVideos(products, videoCount).map(video => ({ ...video, ...createStockingPrompts(video) }));

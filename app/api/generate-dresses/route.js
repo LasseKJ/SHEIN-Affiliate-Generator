@@ -9,7 +9,7 @@ export async function POST(request) {
   const body = await request.json().catch(() => null);
   const videoCount = body?.videoCount;
   if (!DRESS_VIDEO_COUNTS.includes(videoCount)) {
-    return NextResponse.json({ error: "Vælg 1, 2, 4 eller 8 videoer." }, { status: 400 });
+    return NextResponse.json({ error: "Vælg 1, 2, 4, 7 (Week) eller 8 videoer." }, { status: 400 });
   }
 
   try {

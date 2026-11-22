@@ -8,6 +8,7 @@ const VIDEO_COUNTS = [
   1,
   2,
   4,
+  7,
   8,
   16
 ];
@@ -214,7 +215,7 @@ export default function SquishyGenerator() {
                   }
                   disabled={loading}
                 >
-                  {count}
+                  {count === 7 ? "Week" : count}
                 </button>
               )
             )}
