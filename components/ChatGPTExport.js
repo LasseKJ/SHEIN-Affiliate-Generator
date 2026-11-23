@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createChatGPTPromptFiles, createChatGPTZip } from "../lib/chatGPTExport";
+import TikTokCaptions from "./TikTokCaptions";
 
 export function downloadExport(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -34,7 +35,9 @@ export default function ChatGPTExport({ category, videos, templates, disabled = 
     try { await navigator.clipboard.writeText(master); setMessage("Masterprompt kopieret."); }
     catch { setMessage("Kunne ikke kopiere. Download masterprompten som TXT."); }
   }
-  return <section className="clothing-results" aria-label="ChatGPT eksport">
+  return <>
+    <TikTokCaptions category={category} videos={videos} disabled={disabled || busy} />
+    <section className="clothing-results" aria-label="ChatGPT eksport">
     <h2>Klar til ChatGPT</h2>
     <p>Upload ZIP-filen og alle prompts i samme chat. Indsæt masterprompten for at få alle {entries.length} billeder samlet i en ny ZIP.</p>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
@@ -44,5 +47,5 @@ export default function ChatGPTExport({ category, videos, templates, disabled = 
       <button type="button" className="copy-button" onClick={() => textFile(all, "PROMPTS.txt")}>Download alle prompts (.txt)</button>
     </div>
     {message && <p role="status">{message}</p>}
-  </section>;
+  </section></>;
 }
