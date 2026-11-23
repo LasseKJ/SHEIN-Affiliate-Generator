@@ -10,7 +10,8 @@ const VIDEO_COUNTS = [
   4,
   7,
   8,
-  16
+  16,
+  32
 ];
 
 export default function SquishyGenerator() {
