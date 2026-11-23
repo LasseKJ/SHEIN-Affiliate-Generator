@@ -8,7 +8,7 @@ import { createBooBasketZip } from "../lib/booBasketZip.js";
 import { createStockingZip } from "../lib/stockingZip.js";
 
 for (const category of Object.keys(CAPTION_PROFILES)) {
-  test(`${category}: correct counts, English Shein titles, fixed prefix and five unique hashtags`, () => {
+  test(`${category}: correct counts, English Shein titles, fixed prefix and bounded captions`, () => {
     for (const count of [0, 1, 2, 4, 7, 8, 16, 32]) {
       const videos = Array.from({ length: count }, (_, i) => ({ videoNumber: i + 1 }));
       const captions = createTikTokCaptions(category, videos);
@@ -21,8 +21,10 @@ for (const category of Object.keys(CAPTION_PROFILES)) {
         assert.match(caption.title, /Shein/);
         assert.ok(caption.description.startsWith(CAPTION_PREFIX));
         const tags = caption.description.match(/#\w+/g);
-        assert.equal(tags.length, 5);
-        assert.equal(new Set(tags).size, 5);
+        assert.ok(caption.title.length <= 29);
+        assert.ok(caption.description.length <= 70);
+        assert.ok(tags.length >= 2);
+        assert.equal(new Set(tags).size, tags.length);
         assert.ok(tags.every(tag => ["Shein", "SheinFinds", ...CAPTION_PROFILES[category].tags].includes(tag.slice(1))));
       }
     }
@@ -37,7 +39,7 @@ test("Essentials captions match the actual selected categories", () => {
   }
   const mixed = createTikTokCaptions("essentials", Array.from({length:16}, () => ({ categories: ["Essentials-Hair", "Essentials-Kitchen", "Essentials-Bath"] })));
   assert.equal(new Set(mixed.map(item => item.description)).size, 16);
-  assert.ok(mixed[0].title.includes("Hair + Kitchen + Bath"));
+  assert.ok(mixed.every(item => item.title.length <= 29 && item.description.length <= 70));
 });
 
 test("ZIP captions and TXT formatting match the website including video numbering", () => {
@@ -68,6 +70,13 @@ test("all ZIP download paths include the same video captions shown on the page",
     const captions = createTikTokCaptions(category, videos);
     const zip = await JSZip.loadAsync(await (await build(videos)).arrayBuffer());
     assert.equal(await zip.file("TIKTOK-CAPTIONS.txt").async("string"), formatTikTokCaptions(captions));
+    if (category === "squishy") {
+      const master = await zip.file("MASTER-PROMPT.txt").async("string");
+      assert.match(master, /Title må højst være 29 tegn/);
+      assert.match(master, /Text må højst være 70 tegn i alt inklusive mellemrum, tegn og hashtags/);
+      assert.match(master, /Tæl længden af de endelige CSV feltværdier før levering/);
+      assert.doesNotMatch(master, /præcis fem hashtags/);
+    }
     for (const caption of captions) assert.equal(await zip.file(`VIDEO ${caption.videoNumber}/TIKTOK.txt`).async("string"), `${caption.title}\n${caption.description}`);
   }
 });
