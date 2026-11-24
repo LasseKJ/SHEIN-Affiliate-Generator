@@ -22,7 +22,7 @@ export default function TikTokCaptions({ category, videos, disabled = false }) {
   }
   return <section className="tiktok-captions" aria-label="TikTok titles and descriptions">
     <h2>TikTok titles &amp; descriptions</h2>
-    <p>{captions.length} unique titles and descriptions · titles max. 29 characters · descriptions max. 70 including hashtags</p>
+    <p>{captions.length} unique titles and descriptions · each description starts with the required code and has exactly 5 hashtags</p>
     <div className="tiktok-caption-actions">
       <button type="button" className="copy-button" disabled={disabled} onClick={() => copy(all, "All captions")}>Copy all captions</button>
       <button type="button" className="copy-button" disabled={disabled} onClick={download}>Download captions (.txt)</button>
