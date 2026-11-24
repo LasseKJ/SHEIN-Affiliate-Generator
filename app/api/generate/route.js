@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { VIDEO_COUNT_OPTIONS } from "../../../lib/videoCount.js";
 
 import {
   getProducts
@@ -15,15 +16,7 @@ export const dynamic =
 export const runtime =
   "nodejs";
 
-const ALLOWED_VIDEO_COUNTS = [
-  1,
-  2,
-  4,
-  7,
-  8,
-  16,
-  32
-];
+const ALLOWED_VIDEO_COUNTS = VIDEO_COUNT_OPTIONS;
 
 export async function POST(
   request
@@ -43,7 +36,7 @@ export async function POST(
       )
     ) {
       throw new Error(
-        "Antallet af videoer skal være 1, 2, 4, 7 (Week), 8, 16 eller 32."
+        "Antallet af videoer skal være mellem 1 og 50."
       );
     }
 

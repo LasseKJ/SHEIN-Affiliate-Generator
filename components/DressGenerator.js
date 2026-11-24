@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import VideoCountSelect from "./VideoCountSelect";
 import ChatGPTExport from "./ChatGPTExport";
-import { createDressPromptFiles, DRESS_VIDEO_COUNTS } from "../lib/dressPrompts";
+import { createDressPromptFiles } from "../lib/dressPrompts";
 import { createDressZip } from "../lib/dressZip";
 
 function download(blob, filename) {
@@ -64,20 +65,7 @@ export default function DressGenerator() {
         <h1>Dress <span>Generator</span></h1>
         <div className="clothing-video-count">
           <div className="selector-label">ANTAL VIDEOER</div>
-          <div className="video-count-grid">
-            {DRESS_VIDEO_COUNTS.map((count) => (
-              <button
-                key={count}
-                type="button"
-                className={`video-count-button ${videoCount === count ? "selected" : ""}`}
-                aria-pressed={videoCount === count}
-                disabled={busy}
-                onClick={() => setVideoCount(count)}
-              >
-                {count === 7 ? "Week" : count}
-              </button>
-            ))}
-          </div>
+          <VideoCountSelect value={videoCount} onChange={setVideoCount} disabled={busy} />
         </div>
         <button className="generate-button" type="button" onClick={generate} disabled={busy} style={{ marginTop: 28 }}>
           Download {videoCount} {videoCount === 1 ? "video" : "videoer"} som ZIP
