@@ -18,7 +18,12 @@ for (const category of Object.keys(CAPTION_PROFILES)) {
       assert.deepEqual(createTikTokCaptions(category, videos), captions, "rerenders and downloads must agree");
       for (const [index, caption] of captions.entries()) {
         assert.equal(caption.videoNumber, index + 1);
-        assert.match(caption.title, /Shein/);
+        if (category === "squishy") {
+          assert.ok(caption.title.startsWith("Squishies from shein "));
+          assert.match(caption.title, /\p{Extended_Pictographic}/u);
+        } else {
+          assert.match(caption.title, /Shein/);
+        }
         assert.ok(caption.description.startsWith(CAPTION_PREFIX));
         const tags = caption.description.match(/#\w+/g);
         assert.ok(caption.title.length <= 29);

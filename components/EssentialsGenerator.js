@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import VideoCountSelect from "./VideoCountSelect";
 import ChatGPTExport from "./ChatGPTExport";
 import { createChatGPTZip } from "../lib/chatGPTExport";
 
-const VIDEO_COUNTS = [1, 2, 4, 7, 8];
 const USAGE_STORAGE_KEY = "shein-essentials-category-usage";
 
 const CATEGORIES = [
@@ -167,19 +167,7 @@ export default function EssentialsGenerator() {
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY VIDEOS?</div>
 
-          <div className="video-count-grid">
-            {VIDEO_COUNTS.map((count) => (
-              <button
-                key={count}
-                type="button"
-                className={`video-count-button ${videoCount === count ? "selected" : ""}`}
-                onClick={() => setVideoCount(count)}
-                disabled={loading}
-              >
-                {count === 7 ? "Week" : count}
-              </button>
-            ))}
-          </div>
+          <VideoCountSelect value={videoCount} onChange={setVideoCount} disabled={loading} />
         </div>
       </div>
 

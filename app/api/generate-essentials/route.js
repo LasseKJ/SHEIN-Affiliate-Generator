@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { VIDEO_COUNT_OPTIONS } from "../../../lib/videoCount.js";
 
 import { generateEssentialsVideos } from "../../../lib/essentials";
 import { createEssentialsPrompts } from "../../../lib/essentialsPrompts";
@@ -6,7 +7,7 @@ import { createEssentialsPrompts } from "../../../lib/essentialsPrompts";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const ALLOWED_VIDEO_COUNTS = [1, 2, 4, 7, 8];
+const ALLOWED_VIDEO_COUNTS = VIDEO_COUNT_OPTIONS;
 
 function serializeProduct(product) {
   return {
@@ -30,7 +31,7 @@ export async function POST(request) {
 
     if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) {
       throw new Error(
-        "Antallet af videoer skal være 1, 2, 4, 7 (Week) eller 8."
+        "Antallet af videoer skal være 1–50."
       );
     }
 

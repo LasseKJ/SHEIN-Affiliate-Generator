@@ -1,16 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import VideoCountSelect from "./VideoCountSelect";
 import ChatGPTExport from "./ChatGPTExport";
 import { createChatGPTZip } from "../lib/chatGPTExport";
 
-const VIDEO_COUNTS = [
-  1,
-  2,
-  4,
-  7,
-  8
-];
 
 const IMAGE_NUMBERS = [1, 2, 3, 4, 5];
 const promptColumnLabel = number => ["FORSIDE", "OUTFIT 1", "KODER 1", "OUTFIT 2", "KODER 2"][number - 1];
@@ -189,23 +183,7 @@ export default function WinterGenerator() {
             HOW MANY VIDEOS?
           </div>
 
-          <div className="video-count-grid">
-            {VIDEO_COUNTS.map(
-              (count) => (
-                <button
-                  key={count}
-                  type="button"
-                  className={`video-count-button ${videoCount === count ? "selected" : ""}`}
-                  onClick={() =>
-                    setVideoCount(count)
-                  }
-                  disabled={loading}
-                >
-                  {count === 7 ? "Week" : count}
-                </button>
-              )
-            )}
-          </div>
+          <VideoCountSelect value={videoCount} onChange={setVideoCount} disabled={loading} />
         </div>
 
         <button

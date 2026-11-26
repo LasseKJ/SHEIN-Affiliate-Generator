@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { VIDEO_COUNT_OPTIONS } from "../../../lib/videoCount.js";
 import { generateAutumnVideos } from "../../../lib/clothingOutfits";
 import { createAutumnPrompts, createAutumnCoverPrompt } from "../../../lib/clothingPrompts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-const ALLOWED_VIDEO_COUNTS = [1, 2, 4, 7, 8];
+const ALLOWED_VIDEO_COUNTS = VIDEO_COUNT_OPTIONS;
 
 function serializeProduct(product) {
   return {
@@ -24,7 +25,7 @@ export async function POST(request) {
     const category = body?.category || "";
     const videoCount = Number(body?.videoCount || 1);
     if (category !== "Autumn") throw new Error("There is only Autumn support in this route.");
-    if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) throw new Error("Choose 1, 2, 4, 7 (Week) or 8 videos.");
+    if (!ALLOWED_VIDEO_COUNTS.includes(videoCount)) throw new Error("Choose between 1 and 50 videos.");
 
     const videos = await generateAutumnVideos(videoCount);
     const results = videos.map(video => {

@@ -465,6 +465,28 @@ button {
     0.55;
 }
 
+.video-count-select {
+  width: min(100%, 320px);
+  height: 54px;
+  padding: 0 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #166534;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.video-count-select:focus-visible {
+  outline: 3px solid #86efac;
+  outline-offset: 2px;
+}
+
+.video-count-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 /* GENERATE */
 
 .generate-button {

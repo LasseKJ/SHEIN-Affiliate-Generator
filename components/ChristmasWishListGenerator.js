@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import VideoCountSelect from "./VideoCountSelect";
 import ChatGPTExport from "./ChatGPTExport";
-import { CHRISTMAS_WISHLIST_VIDEO_COUNTS } from "../lib/christmasWishList";
 
 const IMAGE_COLUMNS = [0, 1, 2, 3];
 const columnLabel = number => number === 0 ? "COVER" : `IMAGE ${number}`;
@@ -54,11 +54,7 @@ export default function ChristmasWishListGenerator() {
         <h1>Create <span>Christmas Wish Lists.</span></h1>
         <div className="clothing-video-count">
           <div className="selector-label">HOW MANY WISH LISTS?</div>
-          <div className="video-count-grid">
-            {CHRISTMAS_WISHLIST_VIDEO_COUNTS.map(count => (
-              <button key={count} type="button" className={`video-count-button ${videoCount === count ? "selected" : ""}`} aria-pressed={videoCount === count} onClick={() => setVideoCount(count)} disabled={busy}>{count === 7 ? "Week" : count}</button>
-            ))}
-          </div>
+          <VideoCountSelect value={videoCount} onChange={setVideoCount} disabled={busy} />
         </div>
         <button type="button" className={`generate-button ${busy ? "loading" : ""}`} onClick={generate} disabled={busy} style={{ marginTop: 28 }}>
           <span>{busy ? "GENERATING..." : `GENERATE ${videoCount} WISH LIST${videoCount === 1 ? "" : "S"}`}</span><span className="button-arrow">→</span>

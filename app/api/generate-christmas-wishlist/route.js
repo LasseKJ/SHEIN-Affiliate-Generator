@@ -12,7 +12,7 @@ export async function POST(request) {
   catch { return NextResponse.json({ success: false, error: "Invalid JSON." }, { status: 400 }); }
   const videoCount = Number(body?.videoCount ?? 1);
   if (!CHRISTMAS_WISHLIST_VIDEO_COUNTS.includes(videoCount)) {
-    return NextResponse.json({ success: false, error: "Choose 1, 2, 4, 7 (Week) or 8 wish lists." }, { status: 400 });
+    return NextResponse.json({ success: false, error: "Choose between 1 and 50 wish lists." }, { status: 400 });
   }
   try {
     const products = await getChristmasWishListProducts();
